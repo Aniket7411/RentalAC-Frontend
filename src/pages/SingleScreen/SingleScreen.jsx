@@ -354,7 +354,7 @@ function SingleScreen() {
         <div className="top-section  flex flex-col justify-between">
           <div className="p-4 mt-10">
             <p className="text-xs">For Renters</p>
-            <h1 className="italic text-xl">
+            <h1 className="italic text-xl font-bold">
               {" "}
               Find the Perfect AC <br /> for Your Comfort <br /> Today
             </h1>
@@ -372,7 +372,7 @@ function SingleScreen() {
           </div>
           <div className="flex justify-end">
             <img
-              className="h-[200px] w-[150px] "
+              className="h-[250px] w-[250px] "
               src="acbanner.jfif"
               alt="man"
             />
@@ -380,8 +380,8 @@ function SingleScreen() {
         </div>
         <div className="top-section bg-[#2563EB] text-white flex flex-col justify-between">
           <div className="p-4 mt-5">
-            <p className="text-xs">For Service</p>
-            <h1 className="italic text-xl">
+            <p className="text-sm">For Service</p>
+            <h1 className="italic text-xl font-bold">
               {" "}
               Get Your AC <br /> Repaired & Serviced <br /> Today
             </h1>

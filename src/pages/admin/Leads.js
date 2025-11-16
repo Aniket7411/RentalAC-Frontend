@@ -212,7 +212,7 @@ const Leads = () => {
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setFilter('all')}
-                className={`w-auto px-4 py-2 rounded-lg transition ${filter === 'all'
+                className={`w-auto px-3 py-1 rounded-lg transition ${filter === 'all'
                     ? 'bg-primary-blue text-white'
                     : 'bg-gray-100 text-text-dark hover:bg-gray-200'
                   }`}
@@ -221,7 +221,7 @@ const Leads = () => {
               </button>
               <button
                 onClick={() => setFilter('New')}
-                className={`w-auto px-4 py-2 rounded-lg transition ${filter === 'New'
+                className={`w-auto px-3 py-1 rounded-lg transition ${filter === 'New'
                     ? 'bg-primary-blue text-white'
                     : 'bg-gray-100 text-text-dark hover:bg-gray-200'
                   }`}
@@ -230,7 +230,7 @@ const Leads = () => {
               </button>
               <button
                 onClick={() => setFilter('Contacted')}
-                className={`w-auto px-4 py-2 rounded-lg transition ${filter === 'Contacted'
+                className={`w-auto px-3 py-1 rounded-lg transition ${filter === 'Contacted'
                     ? 'bg-primary-blue text-white'
                     : 'bg-gray-100 text-text-dark hover:bg-gray-200'
                   }`}
@@ -239,7 +239,7 @@ const Leads = () => {
               </button>
               <button
                 onClick={() => setFilter('In-Progress')}
-                className={`w-auto px-4 py-2 rounded-lg transition ${filter === 'In-Progress'
+                className={`w-auto px-3 py-1 rounded-lg transition ${filter === 'In-Progress'
                     ? 'bg-primary-blue text-white'
                     : 'bg-gray-100 text-text-dark hover:bg-gray-200'
                   }`}
@@ -248,7 +248,7 @@ const Leads = () => {
               </button>
               <button
                 onClick={() => setFilter('Resolved')}
-                className={`w-auto px-4 py-2 rounded-lg transition ${filter === 'Resolved'
+                className={`w-auto px-3 py-1 rounded-lg transition ${filter === 'Resolved'
                     ? 'bg-primary-blue text-white'
                     : 'bg-gray-100 text-text-dark hover:bg-gray-200'
                   }`}
@@ -257,7 +257,7 @@ const Leads = () => {
               </button>
               <button
                 onClick={() => setFilter('Rejected')}
-                className={`w-auto px-4 py-2 rounded-lg transition ${filter === 'Rejected'
+                className={`w-auto px-3 py-1 rounded-lg transition ${filter === 'Rejected'
                     ? 'bg-primary-blue text-white'
                     : 'bg-gray-100 text-text-dark hover:bg-gray-200'
                   }`}
@@ -273,7 +273,7 @@ const Leads = () => {
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setFilter('all')}
-                className={`w-auto px-4 py-2 rounded-lg transition ${filter === 'all'
+                className={`w-auto px-3 py-1 rounded-lg transition ${filter === 'all'
                     ? 'bg-primary-blue text-white'
                     : 'bg-gray-100 text-text-dark hover:bg-gray-200'
                   }`}
@@ -282,7 +282,7 @@ const Leads = () => {
               </button>
               <button
                 onClick={() => setFilter('Pending')}
-                className={`w-auto px-4 py-2 rounded-lg transition ${filter === 'Pending'
+                className={`w-auto px-3 py-1 rounded-lg transition ${filter === 'Pending'
                     ? 'bg-primary-blue text-white'
                     : 'bg-gray-100 text-text-dark hover:bg-gray-200'
                   }`}
@@ -291,7 +291,7 @@ const Leads = () => {
               </button>
               <button
                 onClick={() => setFilter('Contacted')}
-                className={`w-auto px-4 py-2 rounded-lg transition ${filter === 'Contacted'
+                className={`w-auto px-3 py-1 rounded-lg transition ${filter === 'Contacted'
                     ? 'bg-primary-blue text-white'
                     : 'bg-gray-100 text-text-dark hover:bg-gray-200'
                   }`}
@@ -300,7 +300,7 @@ const Leads = () => {
               </button>
               <button
                 onClick={() => setFilter('Completed')}
-                className={`w-auto px-4 py-2 rounded-lg transition ${filter === 'Completed'
+                className={`w-auto px-3 py-1 rounded-lg transition ${filter === 'Completed'
                     ? 'bg-primary-blue text-white'
                     : 'bg-gray-100 text-text-dark hover:bg-gray-200'
                   }`}
@@ -394,7 +394,7 @@ const Leads = () => {
                             value={lead.status}
                             onChange={(e) => handleServiceStatusUpdate(leadId, e.target.value)}
                             disabled={updatingStatus === leadId}
-                            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue disabled:opacity-50"
+                            className="px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue disabled:opacity-50"
                           >
                             <option value="New">New</option>
                             <option value="Contacted">Contacted</option>
@@ -410,7 +410,7 @@ const Leads = () => {
                           )}
                           <a
                             href={`tel:${phone}`}
-                            className="flex items-center justify-center space-x-2 px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition"
+                            className="flex items-center justify-center space-x-2 px-3 py-1 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition"
                           >
                             <Phone className="w-4 h-4" />
                             <span>Call Now</span>
@@ -551,7 +551,7 @@ const Leads = () => {
                               </h3>
                               <p className="text-text-light">{request.email}</p>
                             </div>
-                            <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                            <span className="px-3 py-1 rounded-md  text-sm font-semibold bg-blue-100 text-blue-800">
                               Vendor Request
                             </span>
                           </div>
@@ -573,13 +573,13 @@ const Leads = () => {
                         </div>
 
                         <div className="flex flex-col space-y-2 md:w-48">
-                          <a
+                          {/* <a
                             href={`mailto:${request.email}`}
                             className="flex items-center justify-center space-x-2 px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition"
                           >
                             <Mail className="w-4 h-4" />
                             <span>Email Vendor</span>
-                          </a>
+                          </a> */}
                           <a
                             href={`tel:${request.phone}`}
                             className="flex items-center justify-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"

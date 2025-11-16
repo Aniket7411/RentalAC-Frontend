@@ -64,13 +64,19 @@ const Header = () => {
           </nav>
 
           {/* Mobile Menu Button - Always on the right */}
-          <button
-            className="md:hidden text-text-dark flex-shrink-0 ml-auto p-2 rounded-md border border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Hamburger className="w-6 h-6" />}
-          </button>
+
+          {mobileMenuOpen ? (
+            <X
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="w-6 h-6"
+            />
+          ) : (
+            <Hamburger
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="w-6 h-6 md:hidden"
+            />
+          )}
+
         </div>
 
         {/* Mobile Navigation */}

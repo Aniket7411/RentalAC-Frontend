@@ -166,10 +166,10 @@ const ACDetail = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <button
           onClick={() => navigate('/browse')}
-          className="flex items-center space-x-2 text-text-light hover:text-primary-blue mb-6"
+          className="flex items-center space-x-2 text-text-light hover:text-primary-blue mb-4 w-auto"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span>Back to Browse</span>
+          <span className='w-auto'>Back to Browse</span>
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
@@ -189,26 +189,27 @@ const ACDetail = () => {
                   <>
                     <button
                       onClick={prevImage}
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition"
+                      aria-label="Previous image"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-10 h-10 rounded-full text-white bg-white/20 backdrop-blur-md border border-white/30 shadow-lg transition transform hover:bg-white/30 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                     >
-                      <ChevronLeft className="w-6 h-6" />
+                      <ChevronLeft className="w-5 h-5 text-[#000]" />
                     </button>
                     <button
                       onClick={nextImage}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition"
+                      aria-label="Next image"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-10 h-10 rounded-full text-white bg-white/20 backdrop-blur-md border border-white/30 shadow-lg transition transform hover:bg-white/30 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                     >
-                      <ChevronRight className="w-6 h-6" />
+                      <ChevronRight className="w-5 h-5 text-[#000]" />
                     </button>
                     <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
                       {ac.images.map((_, index) => (
                         <button
                           key={index}
                           onClick={() => setCurrentImageIndex(index)}
-                          className={`w-2 h-2 rounded-full transition ${
-                            index === currentImageIndex
-                              ? 'bg-white w-8'
-                              : 'bg-white bg-opacity-50'
-                          }`}
+                          className={`w-2 h-2 rounded-full transition ${index === currentImageIndex
+                            ? 'bg-white w-8'
+                            : 'bg-white bg-opacity-50'
+                            }`}
                         />
                       ))}
                     </div>
@@ -235,13 +236,12 @@ const ACDetail = () => {
               </div>
               {ac.status && (
                 <span
-                  className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    ac.status === 'Available'
-                      ? 'bg-green-100 text-green-800'
-                      : ac.status === 'Rented Out'
+                  className={`px-3 py-1 rounded-full text-sm font-semibold ${ac.status === 'Available'
+                    ? 'bg-green-100 text-green-800'
+                    : ac.status === 'Rented Out'
                       ? 'bg-red-100 text-red-800'
                       : 'bg-yellow-100 text-yellow-800'
-                  }`}
+                    }`}
                 >
                   {ac.status}
                 </span>
@@ -268,11 +268,10 @@ const ACDetail = () => {
                   <button
                     key={duration}
                     onClick={() => setSelectedDuration(duration)}
-                    className={`px-4 py-2 rounded-lg transition ${
-                      selectedDuration === duration
-                        ? 'bg-primary-blue text-white'
-                        : 'bg-gray-100 text-text-dark hover:bg-gray-200'
-                    }`}
+                    className={`px-3 py-1 rounded-lg transition ${selectedDuration === duration
+                      ? 'bg-primary-blue text-white'
+                      : 'bg-gray-100 text-text-dark hover:bg-gray-200'
+                      }`}
                   >
                     {duration.charAt(0).toUpperCase() + duration.slice(1)}
                   </button>
@@ -290,7 +289,7 @@ const ACDetail = () => {
             {ac.status === 'Available' && (
               <button
                 onClick={() => setShowInquiryForm(true)}
-                className="w-full bg-primary-blue text-white py-3 rounded-lg hover:bg-primary-blue-light transition font-semibold"
+                className="w-full bg-primary-blue text-white py-1 rounded-lg hover:bg-primary-blue-light transition font-semibold"
               >
                 Inquire About Rental
               </button>

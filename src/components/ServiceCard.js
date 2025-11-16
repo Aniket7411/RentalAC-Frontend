@@ -85,7 +85,7 @@ const ServiceCard = ({ service, onAddClick, onView }) => {
           {/* Add Button */}
           <button
             onClick={() => onAddClick(service)}
-            className="inline-flex items-center bg-yellow-100 hover:bg-yellow-200 text-gray-900 border border-purple-500 px-4 py-2 rounded-md font-semibold transition-colors duration-200 w-auto whitespace-normal"
+            className="inline-flex items-center bg-primary-blue hover:bg-primary-blue-light text-white border border-primary-blue px-4 py-2 rounded-md font-semibold transition-colors duration-200 w-auto whitespace-normal"
           >
             Add
           </button>

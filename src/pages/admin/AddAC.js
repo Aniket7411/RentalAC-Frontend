@@ -71,13 +71,13 @@ const AddAC = () => {
     // Remove from previews and file list
     const newPreviews = imagePreviews.filter((_, i) => i !== index);
     const newImages = formData.images.filter((_, i) => i !== index);
-    
+
     setImagePreviews(newPreviews);
     setFormData({
       ...formData,
       images: newImages,
     });
-    
+
     // Note: uploadedImageUrls are separate and won't be removed here
     // They are only removed when user clicks remove on uploaded images
   };
@@ -98,7 +98,7 @@ const AddAC = () => {
 
     try {
       const urls = await uploadMultipleFilesToCloudinary(formData.images);
-      
+
       if (urls.length === 0) {
         setError('Failed to upload images. Please try again.');
         return;
@@ -165,7 +165,7 @@ const AddAC = () => {
       };
 
       const response = await apiService.addAC(acData);
-      
+
       if (response.success) {
         showSuccess('AC added successfully!');
         setTimeout(() => {
@@ -399,9 +399,8 @@ const AddAC = () => {
                 />
                 <label
                   htmlFor="image-upload"
-                  className={`cursor-pointer flex flex-col items-center justify-center ${
-                    formData.images.length >= 5 || uploadingImages ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                  className={`cursor-pointer flex flex-col items-center justify-center ${formData.images.length >= 5 || uploadingImages ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                 >
                   <Upload className="w-12 h-12 text-text-light mb-2" />
                   <p className="text-text-light">Click to select images</p>
@@ -490,14 +489,14 @@ const AddAC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/admin/dashboard')}
-                className="flex-1 px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                className="flex-1 px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading || (formData.images.length > 0 && uploadedImageUrls.length === 0)}
-                className="flex-1 px-6 py-3 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-3 py-1 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Adding AC...' : 'Add AC Listing'}
               </button>

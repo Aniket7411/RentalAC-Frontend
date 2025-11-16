@@ -28,19 +28,19 @@ const AdminLogin = () => {
     setLoading(true);
 
     const result = await login(formData.email, formData.password);
-    
+
     if (result.success) {
       navigate('/admin/dashboard');
     } else {
       setError(result.message || 'Login failed. Please check your credentials.');
     }
-    
+
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-background-light flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-background-light flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-6">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-text-dark">
             Admin Login
@@ -49,14 +49,14 @@ const AdminLogin = () => {
             Sign in to access the admin dashboard
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-4 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center space-x-2">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-1 rounded-lg flex items-center space-x-2">
               <AlertCircle className="w-5 h-5" />
               <span>{error}</span>
             </div>
           )}
-          
+
           <div className="rounded-md shadow-sm space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-text-dark mb-1">
@@ -77,7 +77,7 @@ const AdminLogin = () => {
                 />
               </div>
             </div>
-            
+
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-text-dark mb-1">
                 Password
@@ -96,7 +96,7 @@ const AdminLogin = () => {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-blue hover:bg-primary-blue-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-blue disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-1 px-3 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-blue hover:bg-primary-blue-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-blue disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
