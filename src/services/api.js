@@ -1,0 +1,462 @@
+import axios from 'axios';
+import { uploadMultipleFilesToCloudinary } from '../utils/cloudinary';
+
+// Configure base URL - Update this with your backend URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+// Create axios instance with default config
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add token to requests if available
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Handle response errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Unauthorized - clear auth and let route guards handle redirect
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
+    return Promise.reject(error);
+  }
+);
+
+// API Service Functions
+export const apiService = {
+  // Admin Authentication
+  adminLogin: async (email, password) => {
+    try {
+      const response = await api.post('/admin/login', { email, password });
+      return {
+        success: true,
+        token: response.data.token,
+        user: response.data.user,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Login failed',
+      };
+    }
+  },
+
+  // ACs - Public endpoints
+  getACs: async (filters = {}) => {
+    try {
+      const response = await api.get('/acs', { params: filters });
+      return {
+        success: true,
+        data: response.data.data || response.data,
+        total: response.data.total,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch ACs',
+        data: [],
+      };
+    }
+  },
+
+  getACById: async (id) => {
+    try {
+      const response = await api.get(`/acs/${id}`);
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'AC not found',
+        data: null,
+      };
+    }
+  },
+
+  // Rental Inquiry - Public endpoint
+  createRentalInquiry: async (acId, inquiryData) => {
+    try {
+      // Include AC ID in the request body to ensure backend has it
+      const dataToSend = {
+        ...inquiryData,
+        acId: acId, // Explicitly include AC ID
+      };
+      const response = await api.post(`/acs/${acId}/inquiry`, dataToSend);
+      return {
+        success: true,
+        message: response.data.message || 'Rental inquiry submitted successfully',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to submit inquiry',
+      };
+    }
+  },
+
+  // Intentionally not implementing POST /service-requests here.
+  // The app uses /service-bookings for user service flows. Add this when the UI needs it.
+
+  // Lead Capture - Public endpoint
+  createLead: async (leadData) => {
+    try {
+      const response = await api.post('/leads', leadData);
+      return {
+        success: true,
+        message: response.data.message || 'Thank you! We will contact you soon.',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to submit lead',
+      };
+    }
+  },
+
+  // Contact Form - Public endpoint
+  submitContactForm: async (formData) => {
+    try {
+      const response = await api.post('/contact', formData);
+      return {
+        success: true,
+        message: response.data.message || 'Message sent successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to send message',
+      };
+    }
+  },
+
+  // Vendor Listing Request - Public endpoint
+  submitVendorListingRequest: async (vendorData) => {
+    try {
+      const response = await api.post('/vendor-listing-request', vendorData);
+      return {
+        success: true,
+        message: response.data.message || 'Request submitted successfully. We will contact you soon.',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to submit request',
+      };
+    }
+  },
+
+  // Admin - AC Management
+  getAdminACs: async () => {
+    try {
+      const response = await api.get('/admin/acs');
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch ACs',
+        data: [],
+      };
+    }
+  },
+
+  addAC: async (acData) => {
+    try {
+      // Images are already uploaded to Cloudinary by the component
+      // Just send the URLs to backend
+      const dataToSend = {
+        brand: acData.brand,
+        model: acData.model,
+        capacity: acData.capacity,
+        type: acData.type,
+        description: acData.description,
+        location: acData.location,
+        status: acData.status,
+        price: acData.price,
+        images: acData.images || [], // Already URLs from Cloudinary
+      };
+
+      const response = await api.post('/admin/acs', dataToSend);
+      return {
+        success: true,
+        message: response.data.message || 'AC added successfully',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to add AC',
+      };
+    }
+  },
+
+  updateAC: async (id, acData) => {
+    try {
+      // Check if acData.images contains File objects (new files to upload)
+      // vs URL strings (existing images to preserve)
+      const hasNewFiles = acData.images &&
+        Array.isArray(acData.images) &&
+        acData.images.length > 0 &&
+        acData.images[0] instanceof File;
+
+      let imageUrls = [];
+
+      // Only upload to Cloudinary if we have new File objects
+      if (hasNewFiles) {
+        const uploadedUrls = await uploadMultipleFilesToCloudinary(acData.images);
+        if (uploadedUrls.length === 0) {
+          return {
+            success: false,
+            message: 'Failed to upload images. Please try again.',
+          };
+        }
+        // Combine existing images with newly uploaded ones
+        imageUrls = [...(acData.existingImages || []), ...uploadedUrls];
+      } else if (acData.images && Array.isArray(acData.images) && acData.images.length > 0) {
+        // If images is an array of URLs (strings), use them directly
+        imageUrls = acData.images;
+      } else if (acData.existingImages && Array.isArray(acData.existingImages)) {
+        // If we have existing images to preserve, use them
+        imageUrls = acData.existingImages;
+      }
+
+      // Send data with image URLs to backend
+      // Only send fields that are provided (for partial updates)
+      const dataToSend = {};
+
+      if (acData.brand !== undefined) dataToSend.brand = acData.brand;
+      if (acData.model !== undefined) dataToSend.model = acData.model;
+      if (acData.capacity !== undefined) dataToSend.capacity = acData.capacity;
+      if (acData.type !== undefined) dataToSend.type = acData.type;
+      if (acData.description !== undefined) dataToSend.description = acData.description;
+      if (acData.location !== undefined) dataToSend.location = acData.location;
+      if (acData.status !== undefined) dataToSend.status = acData.status;
+      if (acData.price !== undefined) dataToSend.price = acData.price;
+
+      // Only include images if we explicitly have images to send
+      // If images is undefined, don't send it (backend will preserve existing)
+      if (acData.images !== undefined) {
+        // If images is explicitly set (even if empty array), send it
+        dataToSend.images = imageUrls;
+      }
+      // If images is undefined, don't include it in dataToSend (backend preserves existing)
+
+      const response = await api.patch(`/admin/acs/${id}`, dataToSend);
+      return {
+        success: true,
+        message: response.data.message || 'AC updated successfully',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to update AC',
+      };
+    }
+  },
+
+  deleteAC: async (id) => {
+    try {
+      const response = await api.delete(`/admin/acs/${id}`);
+      return {
+        success: true,
+        message: response.data.message || 'AC deleted successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to delete AC',
+      };
+    }
+  },
+
+  // Admin - Service Leads
+  getServiceLeads: async () => {
+    try {
+      const response = await api.get('/admin/service-bookings');
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch leads',
+        data: [],
+      };
+    }
+  },
+
+  updateLeadStatus: async (leadId, status) => {
+    try {
+      const response = await api.patch(`/admin/service-bookings/${leadId}`, { status });
+      return {
+        success: true,
+        message: response.data.message || 'Lead status updated',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to update lead status',
+      };
+    }
+  },
+
+  // Admin - Rental Inquiries
+  getRentalInquiries: async () => {
+    try {
+      const response = await api.get('/admin/rental-inquiries');
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch inquiries',
+        data: [],
+      };
+    }
+  },
+
+  updateInquiryStatus: async (inquiryId, status) => {
+    try {
+      const response = await api.patch(`/admin/rental-inquiries/${inquiryId}`, { status });
+      return {
+        success: true,
+        message: response.data.message || 'Inquiry status updated',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to update inquiry status',
+      };
+    }
+  },
+
+  // Admin - Vendor Requests
+  getVendorRequests: async () => {
+    try {
+      const response = await api.get('/admin/vendor-requests');
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch vendor requests',
+        data: [],
+      };
+    }
+  },
+
+  // Services - Public endpoints
+  getServices: async () => {
+    try {
+      const response = await api.get('/services');
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch services',
+        data: [],
+      };
+    }
+  },
+
+  // Service Booking - Public endpoint
+  createServiceBooking: async (bookingData) => {
+    try {
+      const response = await api.post('/service-bookings', bookingData);
+      return {
+        success: true,
+        message: response.data.message || 'Service booking submitted successfully',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to submit booking',
+      };
+    }
+  },
+
+  // Admin - Service Management
+  addService: async (serviceData) => {
+    try {
+      const response = await api.post('/admin/services', serviceData);
+      return {
+        success: true,
+        message: response.data.message || 'Service added successfully',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to add service',
+      };
+    }
+  },
+
+  updateService: async (id, serviceData) => {
+    try {
+      const response = await api.patch(`/admin/services/${id}`, serviceData);
+      return {
+        success: true,
+        message: response.data.message || 'Service updated successfully',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to update service',
+      };
+    }
+  },
+
+  deleteService: async (id) => {
+    try {
+      const response = await api.delete(`/admin/services/${id}`);
+      return {
+        success: true,
+        message: response.data.message || 'Service deleted successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to delete service',
+      };
+    }
+  },
+};
+
+export default api;
