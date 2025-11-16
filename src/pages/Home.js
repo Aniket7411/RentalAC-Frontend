@@ -34,6 +34,8 @@ const Home = () => {
     loadData();
   }, []);
 
+
+  console.log("services");
   const handleServiceAdd = (service) => {
     setSelectedService(service);
     setShowBookingModal(true);
