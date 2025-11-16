@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, User, Wrench, Plus, List, Users } from 'lucide-react';
-import { FaHamburger } from 'react-icons/fa';
-import { FiX } from 'react-icons/fi';
+import { Hamburger, X, LogOut, User, Wrench, Plus, List, Users } from 'lucide-react';
 
 const Header = () => {
   const { user, logout, isAdmin } = useAuth();
@@ -21,12 +19,8 @@ const Header = () => {
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link
-            to="/"
-            className="flex items-center space-x-2 flex-shrink-0"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            <div className="text-xl sm:text-2xl font-bold text-primary-blue">CoolRentals</div>
+          <Link to="/" className="flex items-center space-x-2 flex-shrink-0">
+            <div className="text-2xl font-bold text-primary-blue">CoolRentals</div>
           </Link>
 
           {/* Desktop Navigation */}
@@ -69,49 +63,37 @@ const Header = () => {
             ) : null}
           </nav>
 
-          {/* Mobile Menu Button - Properly positioned on the right */}
-        
+          {/* Mobile Menu Button - Always on the right */}
+          <button
+            className="md:hidden text-text-dark flex-shrink-0 ml-auto p-2 rounded-md border border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Hamburger className="w-6 h-6" />}
+          </button>
         </div>
 
-        {/* Mobile Navigation - Improved styling */}
+        {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden absolute top-16 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
-            <nav className="flex flex-col py-2">
+          <div className="md:hidden py-4 border-t bg-white">
+            <nav className="flex flex-col space-y-2">
               {!user ? (
                 <>
-                  <MobileNavLink to="/" onClick={() => setMobileMenuOpen(false)}>Home</MobileNavLink>
-                  <MobileNavLink to="/browse" onClick={() => setMobileMenuOpen(false)}>Browse ACs</MobileNavLink>
-                  <MobileNavLink to="/about" onClick={() => setMobileMenuOpen(false)}>About</MobileNavLink>
-                  <MobileNavLink to="/contact" onClick={() => setMobileMenuOpen(false)}>Contact</MobileNavLink>
-                  <MobileNavLink to="/service-request" onClick={() => setMobileMenuOpen(false)}>Service Request</MobileNavLink>
-                  <MobileNavLink to="/admin/login" onClick={() => setMobileMenuOpen(false)} className="text-primary-blue font-semibold">
-                    Admin Login
-                  </MobileNavLink>
+                  <Link to="/" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">Home</Link>
+                  <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">Browse ACs</Link>
+                  <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">About</Link>
+                  <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">Contact</Link>
+                  <Link to="/service-request" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">Service Request</Link>
+                  <Link to="/admin/login" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded text-primary-blue">Admin Login</Link>
                 </>
               ) : isAdmin ? (
                 <>
-                  <MobileNavLink to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)} icon={<User className="w-4 h-4" />}>
-                    Dashboard
-                  </MobileNavLink>
-                  <MobileNavLink to="/admin/add-ac" onClick={() => setMobileMenuOpen(false)} icon={<Plus className="w-4 h-4" />}>
-                    Add AC
-                  </MobileNavLink>
-                  <MobileNavLink to="/admin/manage-acs" onClick={() => setMobileMenuOpen(false)} icon={<List className="w-4 h-4" />}>
-                    Manage ACs
-                  </MobileNavLink>
-                  <MobileNavLink to="/admin/leads" onClick={() => setMobileMenuOpen(false)} icon={<Users className="w-4 h-4" />}>
-                    Leads
-                  </MobileNavLink>
-                  <MobileNavLink to="/admin/manage-services" onClick={() => setMobileMenuOpen(false)} icon={<Wrench className="w-4 h-4" />}>
-                    Services
-                  </MobileNavLink>
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center space-x-2 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors border-t border-gray-100"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>Logout</span>
-                  </button>
+                  <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">Dashboard</Link>
+                  <Link to="/admin/add-ac" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">Add AC</Link>
+                  <Link to="/admin/manage-acs" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">Manage ACs</Link>
+                  <Link to="/admin/leads" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">Leads</Link>
+                  <Link to="/admin/manage-services" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">Services</Link>
+                  <button onClick={handleLogout} className="text-red-600 text-left">Logout</button>
                 </>
               ) : null}
             </nav>
@@ -121,17 +103,5 @@ const Header = () => {
     </header>
   );
 };
-
-// Mobile Navigation Link Component for better reusability
-const MobileNavLink = ({ to, onClick, children, icon, className = "" }) => (
-  <Link
-    to={to}
-    onClick={onClick}
-    className={`flex items-center space-x-2 px-4 py-3 text-text-dark hover:bg-gray-50 transition-colors border-b border-gray-100 ${className}`}
-  >
-    {icon}
-    <span>{children}</span>
-  </Link>
-);
 
 export default Header;
