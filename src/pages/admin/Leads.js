@@ -17,8 +17,10 @@ const Leads = () => {
   const [updatingStatus, setUpdatingStatus] = useState(null);
   const { toasts, removeToast, success, error: showError } = useToast();
 
+  // Load all data when component mounts
   useEffect(() => {
     loadAllData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadAllData = async () => {
@@ -146,6 +148,87 @@ const Leads = () => {
     return rentalInquiries.filter(inquiry => inquiry.status === filter);
   };
 
+  const downloadAsCsv = (rows, sheetName) => {
+    if (!rows.length) return;
+
+    const headers = Object.keys(rows[0]);
+    const escape = (value) =>
+      `"${String(value ?? '')
+        .replace(/"/g, '""')
+        .replace(/\n/g, ' ')
+        .trim()}"`;
+
+    const csvLines = [
+      headers.join(','),
+      ...rows.map((row) => headers.map((h) => escape(row[h])).join(',')),
+    ];
+
+    const blob = new Blob([csvLines.join('\n')], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${sheetName}_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const exportToExcel = () => {
+    let data = [];
+    let sheetName = '';
+
+    if (activeTab === 'service') {
+      const leads = getFilteredServiceLeads();
+      sheetName = 'Service_Leads';
+      data = leads.map((lead, idx) => ({
+        SNo: idx + 1,
+        Name: lead.name || 'Anonymous',
+        Phone: lead.phone || lead.contactNumber || '',
+        Service: (lead.serviceId && (lead.serviceId.title || lead.serviceId.name)) || lead.serviceTitle || '',
+        PreferredDate: lead.preferredDate || '',
+        PreferredTime: lead.preferredTime || '',
+        Address: lead.address || '',
+        Status: lead.status || '',
+        CreatedAt: formatDate(lead.createdAt),
+      }));
+    } else if (activeTab === 'rental') {
+      const inquiries = getFilteredRentalInquiries();
+      sheetName = 'Rental_Inquiries';
+      data = inquiries.map((inq, idx) => ({
+        SNo: idx + 1,
+        Name: inq.name || '',
+        Phone: inq.phone || '',
+        Brand: inq.acDetails?.brand || '',
+        Model: inq.acDetails?.model || '',
+        Message: inq.message || '',
+        Status: inq.status || '',
+        CreatedAt: formatDate(inq.createdAt),
+      }));
+    } else if (activeTab === 'vendor') {
+      const vendors = vendorRequests;
+      sheetName = 'Vendor_Requests';
+      data = vendors.map((req, idx) => ({
+        SNo: idx + 1,
+        Name: req.name || '',
+        Phone: req.phone || '',
+        Email: req.email || '',
+        Message: req.message || '',
+        CreatedAt: formatDate(req.createdAt),
+      }));
+    }
+
+    if (!data.length) {
+      showError('No records to export for the selected tab.');
+      return;
+    }
+
+    // Export as CSV which opens cleanly in Excel
+    downloadAsCsv(data, sheetName);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -161,7 +244,15 @@ const Leads = () => {
     <div className="min-h-screen bg-background-light py-8">
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-text-dark mb-6">All Leads & Requests</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+          <h1 className="text-3xl font-bold text-text-dark">All Leads & Requests</h1>
+          <button
+            onClick={exportToExcel}
+            className="inline-flex items-center w-auto bg-green-500 text-[#fff] justify-center px-3 py-1 text-sm font-medium rounded-lg border border-gray-300  hover:bg-gray-50 hover:text-[#000]"
+          >
+            Download Excel
+          </button>
+        </div>
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center space-x-2 mb-6">
