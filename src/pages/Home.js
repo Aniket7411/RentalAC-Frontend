@@ -23,18 +23,20 @@ const Home = () => {
       ]);
 
       if (acsResponse.success) {
-        setFeaturedACs(acsResponse.data.slice(0, 6));
+        const acs = Array.isArray(acsResponse.data) ? acsResponse.data : (Array.isArray(acsResponse.data?.data) ? acsResponse.data.data : []);
+        setFeaturedACs(acs.slice(0, 6));
       }
 
       if (servicesResponse.success) {
-        setServices(servicesResponse.data.slice(0, 3) || []);
+        const svcs = Array.isArray(servicesResponse.data) ? servicesResponse.data : (Array.isArray(servicesResponse.data?.data) ? servicesResponse.data.data : []);
+        setServices(svcs.slice(0, 3));
       }
       setLoadingServices(false);
     };
     loadData();
   }, []);
 
-  
+
   const handleServiceAdd = (service) => {
     setSelectedService(service);
     setShowBookingModal(true);
