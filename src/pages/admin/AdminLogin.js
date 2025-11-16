@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import PasswordInput from '../../components/PasswordInput';
@@ -11,8 +11,15 @@ const AdminLogin = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
+
+  // If already authenticated as admin, redirect away from login
+  useEffect(() => {
+    if (isAuthenticated && isAdmin) {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, isAdmin, navigate]);
 
   const handleChange = (e) => {
     setFormData({

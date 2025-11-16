@@ -344,6 +344,9 @@ const Leads = () => {
                               <p className="text-text-light">
                                 {serviceTitle}
                               </p>
+                              <p className="text-xs text-text-light mt-1">
+                                Created: {formatDate(lead.createdAt)}
+                              </p>
                             </div>
                             <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getServiceStatusColor(lead.status)}`}>
                               {lead.status}
@@ -366,7 +369,7 @@ const Leads = () => {
                             <div className="flex items-center space-x-2 text-text-light">
                               <Calendar className="w-4 h-4" />
                               <span className="text-sm">
-                                {scheduledDate || scheduledTime ? `${scheduledDate} ${scheduledTime}`.trim() : formatDate(lead.createdAt)}
+                                {scheduledDate || scheduledTime ? `${scheduledDate} ${scheduledTime}`.trim() : 'Not scheduled'}
                               </span>
                             </div>
                           </div>

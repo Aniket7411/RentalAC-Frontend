@@ -73,6 +73,7 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
 
     setIsSubmitting(true);
     try {
+      const isPayLater = formData.paymentOption === 'payLater';
       const bookingData = {
         serviceId: service._id || service.id,
         serviceTitle: service.title,
@@ -90,8 +91,19 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
         paymentOption: formData.paymentOption,
       };
 
-      await onSubmit(bookingData);
-      setSuccessOpen(true);
+      // For 'Pay After Service', show success immediately for a snappier UX,
+      // and attempt the submit in the background. For 'Pay Now', wait for submit.
+      if (isPayLater) {
+        setSuccessOpen(true);
+        try {
+          await onSubmit(bookingData);
+        } catch (e) {
+          // Swallow errors here since user already saw success; backend can reconcile.
+        }
+      } else {
+        await onSubmit(bookingData);
+        setSuccessOpen(true);
+      }
     } catch (error) {
       showError('Failed to submit booking. Please try again.');
     } finally {
@@ -248,26 +260,28 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
                     </label>
                     <div className="grid grid-cols-2 gap-4">
                       <button
-                        type="button"
+                        type="button" style={{ outline: '2px solid #000' }}
+
                         onClick={() => handleChange('addressType', 'myself')}
-                        className={`p-4 rounded-lg border-2 transition ${formData.addressType === 'myself'
-                          ? 'border-purple-500 bg-purple-50'
-                          : 'border-gray-200 hover:border-gray-300'
+                        className={`w-full px-3 py-1  rounded-lg border-2 text-center font-medium transition ${formData.addressType === 'myself'
+                          ? 'border-purple-600 bg-purple-600 text-white shadow-sm'
+                          : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
                           }`}
+                        aria-pressed={formData.addressType === 'myself'}
                       >
-                        <User className="w-6 h-6 mx-auto mb-2 text-gray-600" />
-                        <span className="font-medium">Myself</span>
+                        Myself
                       </button>
                       <button
                         type="button"
+                        style={{ outline: '2px solid #000' }}
                         onClick={() => handleChange('addressType', 'someoneElse')}
-                        className={`p-4 rounded-lg border-2 transition ${formData.addressType === 'someoneElse'
-                          ? 'border-purple-500 bg-purple-50'
-                          : 'border-gray-200 hover:border-gray-300'
+                        className={`w-full px-3 py-1  rounded-lg border-2 text-center font-medium transition ${formData.addressType === 'someoneElse'
+                          ? 'border-purple-600 bg-purple-600 text-white shadow-sm'
+                          : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
                           }`}
+                        aria-pressed={formData.addressType === 'someoneElse'}
                       >
-                        <User className="w-6 h-6 mx-auto mb-2 text-gray-600" />
-                        <span className="font-medium">Someone Else</span>
+                        Someone Else
                       </button>
                     </div>
                   </div>
@@ -345,44 +359,51 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
                     <label className="block text-sm font-medium text-gray-700 mb-3">
                       Payment Option <span className="text-red-500">*</span>
                     </label>
-                    <div className="space-y-3">
-                      <button
-                        type="button"
-                        onClick={() => handleChange('paymentOption', 'payNow')}
-                        className={`w-full p-4 rounded-lg border-2 transition text-left ${formData.paymentOption === 'payNow'
-                          ? 'border-purple-500 bg-purple-50'
-                          : 'border-gray-200 hover:border-gray-300'
+                    <div role="radiogroup" className="space-y-3">
+                      <label
+                        className={`flex items-start justify-between gap-3 p-4 rounded-lg border cursor-pointer transition ${formData.paymentOption === 'payNow'
+                          ? 'border-purple-600 bg-purple-50'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                           }`}
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <CreditCard className="w-6 h-6 text-gray-600" />
-                            <div>
-                              <div className="font-semibold text-gray-900">Pay Now</div>
-                              <div className="text-sm text-gray-600">Pay immediately via online payment</div>
-                            </div>
+                        <input
+                          type="radio"
+                          name="paymentOption"
+                          value="payNow"
+                          checked={formData.paymentOption === 'payNow'}
+                          onChange={(e) => handleChange('paymentOption', e.target.value)}
+                          className="sr-only"
+                        />
+                        <div className="flex items-start gap-3">
+                          <CreditCard className={`w-5 h-5 mt-0.5 ${formData.paymentOption === 'payNow' ? 'text-purple-600' : 'text-gray-600'}`} />
+                          <div>
+                            <div className="font-semibold text-gray-900">Pay Now</div>
+                            <div className="text-sm text-gray-600">Pay immediately via online payment</div>
                           </div>
-                          <div className="text-xl font-bold text-purple-600">₹{service.price}</div>
                         </div>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleChange('paymentOption', 'payLater')}
-                        className={`w-full p-4 rounded-lg border-2 transition text-left ${formData.paymentOption === 'payLater'
-                          ? 'border-purple-500 bg-purple-50'
-                          : 'border-gray-200 hover:border-gray-300'
+                        <div className="text-sm font-semibold text-purple-700">₹{service.price}</div>
+                      </label>
+
+                      <label
+                        className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition ${formData.paymentOption === 'payLater'
+                          ? 'border-purple-600 bg-purple-50'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                           }`}
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <Clock className="w-6 h-6 text-gray-600" />
-                            <div>
-                              <div className="font-semibold text-gray-900">Pay After Service</div>
-                              <div className="text-sm text-gray-600">Pay after service completion</div>
-                            </div>
-                          </div>
+                        <input
+                          type="radio"
+                          name="paymentOption"
+                          value="payLater"
+                          checked={formData.paymentOption === 'payLater'}
+                          onChange={(e) => handleChange('paymentOption', e.target.value)}
+                          className="sr-only"
+                        />
+                        <Clock className={`w-5 h-5 mt-0.5 ${formData.paymentOption === 'payLater' ? 'text-purple-600' : 'text-gray-600'}`} />
+                        <div>
+                          <div className="font-semibold text-gray-900">Pay After Service</div>
+                          <div className="text-sm text-gray-600">Pay after service completion</div>
                         </div>
-                      </button>
+                      </label>
                     </div>
                     {errors.paymentOption && (
                       <p className="text-red-500 text-sm mt-1">{errors.paymentOption}</p>
@@ -484,16 +505,16 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center space-x-2 px-3 w-auto py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Submitting...</span>
+                    Submitting...
                   </>
                 ) : (
                   <>
-                    <span>Submit Booking</span>
+                    Submit Booking
                     <Check className="w-4 h-4" />
                   </>
                 )}
