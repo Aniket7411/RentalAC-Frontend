@@ -159,6 +159,11 @@ const ACDetail = () => {
 
   const price = ac.price?.[selectedDuration] || 0;
   const hasImages = ac.images && ac.images.length > 0;
+  
+  // Filter out current AC from related ACs
+  const relatedACs = ac.relatedACs?.filter(
+    (relatedAC) => (relatedAC._id || relatedAC.id) !== (ac._id || ac.id)
+  ) || [];
 
   return (
     <div className="min-h-screen bg-background-light py-8">
@@ -435,6 +440,81 @@ const ACDetail = () => {
                 </form>
               )}
             </motion.div>
+          </div>
+        )}
+
+        {/* Related ACs Section */}
+        {relatedACs.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold text-text-dark mb-6">Related ACs</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {relatedACs.map((relatedAC) => {
+                const relatedACId = relatedAC._id || relatedAC.id;
+                const relatedPrice = relatedAC.price?.[selectedDuration] || relatedAC.price?.monthly || 0;
+                const relatedImage = relatedAC.images?.[0] || 'https://via.placeholder.com/400x300?text=AC+Image';
+                
+                return (
+                  <motion.div
+                    key={relatedACId}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    whileHover={{ y: -4 }}
+                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                  >
+                    <Link to={`/ac/${relatedACId}`} className="block">
+                      <div className="relative h-48 bg-gray-200">
+                        <img
+                          src={relatedImage}
+                          alt={`${relatedAC.brand} ${relatedAC.model}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.src = 'https://via.placeholder.com/400x300?text=AC+Image';
+                          }}
+                        />
+                        {relatedAC.status && (
+                          <span
+                            className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-semibold ${
+                              relatedAC.status === 'Available'
+                                ? 'bg-green-100 text-green-800'
+                                : relatedAC.status === 'Rented Out'
+                                ? 'bg-red-100 text-red-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}
+                          >
+                            {relatedAC.status}
+                          </span>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-lg font-semibold text-text-dark mb-1">
+                          {relatedAC.brand} {relatedAC.model}
+                        </h3>
+                        <p className="text-sm text-text-light mb-2">
+                          {relatedAC.capacity} • {relatedAC.type}
+                        </p>
+                        <div className="flex items-center text-text-light text-sm mb-3">
+                          <MapPin className="w-4 h-4 mr-1" />
+                          <span>{relatedAC.location}</span>
+                        </div>
+                        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                          <div>
+                            <span className="text-2xl font-bold text-primary-blue">
+                              ₹{relatedPrice.toLocaleString()}
+                            </span>
+                            <span className="text-sm text-text-light ml-1">
+                              /{selectedDuration === 'monthly' ? 'mo' : selectedDuration === 'quarterly' ? 'qtr' : 'yr'}
+                            </span>
+                          </div>
+                          <span className="text-primary-blue text-sm font-medium hover:underline">
+                            View Details →
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
