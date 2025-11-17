@@ -155,11 +155,13 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
           {/* Header */}
           <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
             <h2 className="text-2xl font-bold text-gray-900">Book Service</h2>
+
+            
             <button
               onClick={handleClose}
-              className="text-gray-400 hover:text-gray-600 transition"
+              className="text-gray-400 bg-[#c5362c] text-white px-3 py-1 rounded-lg hover:text-gray-600 transition"
             >
-              <X className="w-6 h-6" />
+              Close
             </button>
           </div>
 
