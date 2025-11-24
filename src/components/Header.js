@@ -86,7 +86,7 @@ const Header = () => {
             {mobileMenuOpen ? (
               <X className="w-5 h-5" />
             ) : (
-              <AlignJustify className="w-5 h-5" />
+              <AlignJustify className="w-7 h-7" />
             )}
           </button>
 
