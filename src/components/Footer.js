@@ -9,7 +9,21 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">CoolRentals & Services</h3>
+            <Link to="/" className="flex items-center space-x-3 flex-shrink-0 group">
+              <img
+                src="/ashlogo.png"
+                alt="ASH Enterprise logo"
+                className="h-10 w-10 md:h-12 md:w-24 object-contain rounded-md mb-2 drop-shadow-sm flex-shrink-0"
+                style={{ maxWidth: '100%', height: 'auto' }}
+                onError={(e) => {
+                  console.error('Logo image not found at /ashlogo.png');
+                  e.target.style.display = 'none';
+                }}
+              />
+              {/* <div className="text-xl md:text-2xl lg:text-3xl font-bold text-neutral-900 group-hover:text-sky-500 transition-colors whitespace-nowrap">
+              ASH Enterprise
+            </div> */}
+            </Link>
             <p className="text-gray-300 text-sm leading-relaxed mb-4">
               Your Comfort, Our Priority - Rent & Repair
             </p>
@@ -56,10 +70,10 @@ const Footer = () => {
                 <Link to="/browse" className="hover:text-primary-blue-light transition">AC Rentals</Link>
               </li>
               <li>
-                <Link to="/user/service-request" className="hover:text-primary-blue-light transition">AC Repair</Link>
+                <Link to="/service-request" className="hover:text-primary-blue-light transition">AC Repair</Link>
               </li>
               <li>
-                <Link to="/user/service-request" className="hover:text-primary-blue-light transition">AC Maintenance</Link>
+                <Link to="/service-request" className="hover:text-primary-blue-light transition">AC Maintenance</Link>
               </li>
             </ul>
           </div>
@@ -85,7 +99,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-gray-700/50 mt-10 pt-8 text-center text-sm text-gray-400">
-          <p>&copy; {new Date().getFullYear()} CoolRentals & Services. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} ASH Enterprise. All rights reserved.</p>
         </div>
       </div>
     </footer>

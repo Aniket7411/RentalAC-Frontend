@@ -6,15 +6,15 @@ const ListOrParagraph = ({ label, value }) => {
   if (!value || (Array.isArray(value) && value.length === 0)) return null;
   return (
     <div>
-      <h4 className="text-lg font-semibold text-gray-900 mb-2">{label}</h4>
+      <h4 className="text-lg font-semibold text-neutral-900 mb-2">{label}</h4>
       {Array.isArray(value) ? (
-        <ul className="list-disc list-inside text-gray-700 space-y-1">
+        <ul className="list-disc list-inside text-slate-500 space-y-1">
           {value.map((item, idx) => (
             <li key={idx}>{item}</li>
           ))}
         </ul>
       ) : (
-        <p className="text-gray-600 whitespace-pre-line">{value}</p>
+        <p className="text-slate-500 whitespace-pre-line">{value}</p>
       )}
     </div>
   );
@@ -32,8 +32,8 @@ const ServiceDetailsModal = ({ service, isOpen, onClose, onAdd }) => {
           className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
         >
           <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-900">{service.title}</h2>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <h2 className="text-2xl font-bold text-neutral-900">{service.title}</h2>
+            <button onClick={onClose} className="text-slate-500 hover:text-neutral-900">
               <X className="w-6 h-6" />
             </button>
           </div>
@@ -48,21 +48,21 @@ const ServiceDetailsModal = ({ service, isOpen, onClose, onAdd }) => {
             </div>
 
             {service.badge && (
-              <span className="inline-block bg-purple-100 text-purple-700 text-sm font-semibold px-3 py-1 rounded-full">
+              <span className="inline-block bg-sky-100 text-sky-700 text-sm font-semibold px-3 py-1 rounded-full">
                 {service.badge}
               </span>
             )}
 
             <div className="flex items-baseline space-x-2">
-              <span className="text-4xl font-bold text-purple-600">₹{service.price}</span>
+              <span className="text-4xl font-bold text-sky-500">₹{service.price}</span>
               {service.originalPrice && (
-                <span className="text-xl text-gray-400 line-through">₹{service.originalPrice}</span>
+                <span className="text-xl text-slate-500 line-through">₹{service.originalPrice}</span>
               )}
             </div>
 
             <div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
-              <p className="text-gray-600">{service.description}</p>
+              <h4 className="text-lg font-semibold text-neutral-900 mb-2">Description</h4>
+              <p className="text-slate-500">{service.description}</p>
             </div>
 
             <ListOrParagraph label="Process" value={service.process} />
@@ -70,8 +70,8 @@ const ServiceDetailsModal = ({ service, isOpen, onClose, onAdd }) => {
             <ListOrParagraph label="Key Features" value={service.keyFeatures} />
             {service.recommendedFrequency && (
               <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-2">Recommended Frequency</h4>
-                <p className="text-gray-600">{service.recommendedFrequency}</p>
+                <h4 className="text-lg font-semibold text-neutral-900 mb-2">Recommended Frequency</h4>
+                <p className="text-slate-500">{service.recommendedFrequency}</p>
               </div>
             )}
           </div>
@@ -79,7 +79,7 @@ const ServiceDetailsModal = ({ service, isOpen, onClose, onAdd }) => {
           <div className="sticky bottom-0 bg-white border-t px-6 py-4 flex items-center justify-end">
             <button
               onClick={() => onAdd(service)}
-              className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+              className="flex items-center space-x-2 px-6 py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-700 transition"
             >
               <span>Add</span>
               <Check className="w-4 h-4" />

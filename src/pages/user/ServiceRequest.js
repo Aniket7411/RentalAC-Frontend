@@ -63,14 +63,14 @@ const ServiceRequest = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background-light">
-        <Loader2 className="w-8 h-8 animate-spin text-primary-blue" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Loader2 className="w-8 h-8 animate-spin text-sky-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-purple-50 py-12">
+    <div className="min-h-screen bg-slate-50 py-12">
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -78,12 +78,12 @@ const ServiceRequest = () => {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4"
+            className="inline-flex items-center justify-center w-16 h-16 bg-sky-500 rounded-full mb-4"
           >
-            <Wrench className="w-8 h-8 text-purple-600" />
+            <Wrench className="w-8 h-8 text-white" />
           </motion.div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">AC Repair & Maintenance Services</h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
+          <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 mb-4">AC Repair & Maintenance Services</h1>
+          <p className="text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto">
             Choose from our premium service packages. Book your preferred service and get professional AC repair and maintenance.
           </p>
         </div>
@@ -94,11 +94,11 @@ const ServiceRequest = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8 md:mb-12 lg:hidden"
         >
-          <div className="relative rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-purple-100 to-purple-200">
+          <div className="relative rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-sky-500 to-sky-600">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.4),transparent_40%),radial-gradient(circle_at_80%_0,rgba(255,255,255,0.35),transparent_35%)]" />
             <video
               src="/ac.mov"
-              className="w-full h-[280px] sm:h-[360px] md:h-[420px] object-cover mix-blend-multiply"
+              className="w-full h-[280px] sm:h-[360px] md:h-[420px] object-cover "
               autoPlay
               muted
               loop
@@ -117,7 +117,7 @@ const ServiceRequest = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Video for large screens */}
           <div className="hidden lg:block lg:col-span-5">
-            <div className="relative rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-purple-100 to-purple-200">
+            <div className="relative rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-sky-500 to-sky-600">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.4),transparent_40%),radial-gradient(circle_at_80%_0,rgba(255,255,255,0.35),transparent_35%)]" />
               <video
                 src="/ac.mov"
@@ -157,9 +157,9 @@ const ServiceRequest = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <Wrench className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg">No services available at the moment</p>
-                <p className="text-gray-400 mt-2">Please check back later</p>
+                <Wrench className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+                <p className="text-slate-500 text-lg">No services available at the moment</p>
+                <p className="text-slate-500 mt-2">Please check back later</p>
               </div>
             )}
           </div>

@@ -13,7 +13,7 @@ const About = () => {
           className="text-center mb-16"
         >
           <h1 className="text-4xl md:text-5xl font-bold text-text-dark mb-4">
-            About CoolRentals & Services
+            About ASH Enterprise
           </h1>
           <p className="text-xl text-text-light max-w-3xl mx-auto">
             Your Comfort, Our Priority - Rent & Repair

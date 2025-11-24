@@ -141,8 +141,8 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
         {isSubmitting && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
             <div className="bg-white rounded-xl shadow p-4 flex items-center space-x-3">
-              <Loader2 className="w-5 h-5 animate-spin text-purple-600" />
-              <span className="text-gray-700">Submitting your booking...</span>
+              <Loader2 className="w-5 h-5 animate-spin text-sky-500" />
+              <span className="text-neutral-900">Submitting your booking...</span>
             </div>
           </div>
         )}
@@ -154,7 +154,7 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
         >
           {/* Header */}
           <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
-            <h2 className="text-2xl font-bold text-gray-900">Book Service</h2>
+            <h2 className="text-2xl font-bold text-neutral-900">Book Service</h2>
 
             
             <button
@@ -173,19 +173,19 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
                   <div className="flex flex-col items-center flex-1">
                     <div
                       className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${step >= s
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-gray-200 text-gray-500'
+                        ? 'bg-sky-500 text-white'
+                        : 'bg-gray-200 text-slate-500'
                         }`}
                     >
                       {step > s ? <Check className="w-5 h-5" /> : s}
                     </div>
-                    <span className="text-xs mt-1 text-gray-600">
+                    <span className="text-xs mt-1 text-slate-500">
                       {s === 1 ? 'Date & Time' : s === 2 ? 'Address' : s === 3 ? 'Payment' : 'Review'}
                     </span>
                   </div>
                   {s < 4 && (
                     <div
-                      className={`flex-1 h-1 mx-2 ${step > s ? 'bg-purple-600' : 'bg-gray-200'
+                      className={`flex-1 h-1 mx-2 ${step > s ? 'bg-sky-500' : 'bg-gray-200'
                         }`}
                     />
                   )}
@@ -207,24 +207,24 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
                   className="space-y-6"
                 >
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-neutral-900 mb-2">
                       Select Date <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
-                      <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                      <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-5 h-5" />
                       <input
                         type="date"
                         min={getMinDate()}
                         value={formData.date}
                         onChange={(e) => handleChange('date', e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                       />
                     </div>
                     {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-neutral-900 mb-2">
                       Select Time <span className="text-red-500">*</span>
                     </label>
                     <div className="grid grid-cols-3 gap-3">
@@ -234,7 +234,7 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
                           type="button"
                           onClick={() => handleChange('time', slot)}
                           className={`py-2 px-4 rounded-lg border-2 transition ${formData.time === slot
-                            ? 'border-purple-500 bg-purple-50 text-purple-700'
+                            ? 'border-sky-500 bg-sky-50 text-sky-700'
                             : 'border-gray-200 hover:border-gray-300'
                             }`}
                         >
@@ -257,7 +257,7 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
                   className="space-y-6"
                 >
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                    <label className="block text-sm font-medium text-neutral-900 mb-3">
                       Service For <span className="text-red-500">*</span>
                     </label>
                     <div className="grid grid-cols-2 gap-4">
@@ -266,8 +266,8 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
 
                         onClick={() => handleChange('addressType', 'myself')}
                         className={`w-full px-3 py-1  rounded-lg border-2 text-center font-medium transition ${formData.addressType === 'myself'
-                          ? 'border-purple-600 bg-purple-600 text-white shadow-sm'
-                          : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                          ? 'border-sky-500 bg-sky-500 text-white shadow-sm'
+                          : 'border-gray-200 text-neutral-900 hover:border-gray-300 hover:bg-gray-50'
                           }`}
                         aria-pressed={formData.addressType === 'myself'}
                       >
@@ -278,8 +278,8 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
                         style={{ outline: '2px solid #000' }}
                         onClick={() => handleChange('addressType', 'someoneElse')}
                         className={`w-full px-3 py-1  rounded-lg border-2 text-center font-medium transition ${formData.addressType === 'someoneElse'
-                          ? 'border-purple-600 bg-purple-600 text-white shadow-sm'
-                          : 'border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                          ? 'border-sky-500 bg-sky-500 text-white shadow-sm'
+                          : 'border-gray-200 text-neutral-900 hover:border-gray-300 hover:bg-gray-50'
                           }`}
                         aria-pressed={formData.addressType === 'someoneElse'}
                       >
@@ -289,24 +289,24 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-neutral-900 mb-2">
                       Address <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
-                      <MapPin className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
+                      <MapPin className="absolute left-3 top-3 text-slate-500 w-5 h-5" />
                       <textarea
                         value={formData.address}
                         onChange={(e) => handleChange('address', e.target.value)}
                         rows="4"
                         placeholder="Enter complete address"
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                       />
                     </div>
                     {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-neutral-900 mb-2">
                       {formData.addressType === 'someoneElse' ? 'Contact Name' : 'Your Name'} <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -314,7 +314,7 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
                       value={formData.contactName}
                       onChange={(e) => handleChange('contactName', e.target.value)}
                       placeholder={formData.addressType === 'someoneElse' ? 'Enter contact person name' : 'Enter your name'}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                     />
                     {errors.contactName && (
                       <p className="text-red-500 text-sm mt-1">{errors.contactName}</p>
@@ -322,11 +322,11 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-neutral-900 mb-2">
                       {formData.addressType === 'someoneElse' ? 'Contact Phone' : 'Phone'} <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
-                      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600 text-sm font-medium">
+                      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 text-sm font-medium">
                         +91
                       </div>
                       <input
@@ -338,7 +338,7 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
                         }}
                         maxLength={15}
                         placeholder="10-digit phone number"
-                        className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                       />
                     </div>
                     {errors.contactPhone && (
@@ -358,13 +358,13 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
                   className="space-y-6"
                 >
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                    <label className="block text-sm font-medium text-neutral-900 mb-3">
                       Payment Option <span className="text-red-500">*</span>
                     </label>
                     <div role="radiogroup" className="space-y-3">
                       <label
                         className={`flex items-start justify-between gap-3 p-4 rounded-lg border cursor-pointer transition ${formData.paymentOption === 'payNow'
-                          ? 'border-purple-600 bg-purple-50'
+                          ? 'border-sky-500 bg-sky-50'
                           : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                           }`}
                       >
@@ -377,18 +377,18 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
                           className="sr-only"
                         />
                         <div className="flex items-start gap-3">
-                          <CreditCard className={`w-5 h-5 mt-0.5 ${formData.paymentOption === 'payNow' ? 'text-purple-600' : 'text-gray-600'}`} />
+                          <CreditCard className={`w-5 h-5 mt-0.5 ${formData.paymentOption === 'payNow' ? 'text-sky-500' : 'text-slate-500'}`} />
                           <div>
-                            <div className="font-semibold text-gray-900">Pay Now</div>
-                            <div className="text-sm text-gray-600">Pay immediately via online payment</div>
+                            <div className="font-semibold text-neutral-900">Pay Now</div>
+                            <div className="text-sm text-slate-500">Pay immediately via online payment</div>
                           </div>
                         </div>
-                        <div className="text-sm font-semibold text-purple-700">₹{service.price}</div>
+                        <div className="text-sm font-semibold text-sky-700">₹{service.price}</div>
                       </label>
 
                       <label
                         className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition ${formData.paymentOption === 'payLater'
-                          ? 'border-purple-600 bg-purple-50'
+                          ? 'border-sky-500 bg-sky-50'
                           : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                           }`}
                       >
@@ -400,10 +400,10 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
                           onChange={(e) => handleChange('paymentOption', e.target.value)}
                           className="sr-only"
                         />
-                        <Clock className={`w-5 h-5 mt-0.5 ${formData.paymentOption === 'payLater' ? 'text-purple-600' : 'text-gray-600'}`} />
+                        <Clock className={`w-5 h-5 mt-0.5 ${formData.paymentOption === 'payLater' ? 'text-sky-500' : 'text-slate-500'}`} />
                         <div>
-                          <div className="font-semibold text-gray-900">Pay After Service</div>
-                          <div className="text-sm text-gray-600">Pay after service completion</div>
+                          <div className="font-semibold text-neutral-900">Pay After Service</div>
+                          <div className="text-sm text-slate-500">Pay after service completion</div>
                         </div>
                       </label>
                     </div>
@@ -425,10 +425,10 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
                 >
                   <div className="bg-gray-50 rounded-lg p-6 space-y-4">
                     <div className="flex items-center justify-between pb-4 border-b">
-                      <h3 className="text-lg font-semibold text-gray-900">Service Details</h3>
+                      <h3 className="text-lg font-semibold text-neutral-900">Service Details</h3>
                       <button
                         onClick={() => setStep(1)}
-                        className="text-purple-600 hover:text-purple-700 flex items-center space-x-1 text-sm"
+                        className="text-sky-500 hover:text-sky-700 flex items-center space-x-1 text-sm"
                       >
                         <Edit2 className="w-4 h-4" />
                         <span>Edit</span>
@@ -437,42 +437,42 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
 
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-gray-600">Service:</span>
-                        <p className="font-medium text-gray-900">{service.title}</p>
+                        <span className="text-slate-500">Service:</span>
+                        <p className="font-medium text-neutral-900">{service.title}</p>
                       </div>
                       <div>
-                        <span className="text-gray-600">Price:</span>
-                        <p className="font-medium text-gray-900">₹{service.price}</p>
+                        <span className="text-slate-500">Price:</span>
+                        <p className="font-medium text-neutral-900">₹{service.price}</p>
                       </div>
                       <div>
-                        <span className="text-gray-600">Date:</span>
-                        <p className="font-medium text-gray-900">{formData.date}</p>
+                        <span className="text-slate-500">Date:</span>
+                        <p className="font-medium text-neutral-900">{formData.date}</p>
                       </div>
                       <div>
-                        <span className="text-gray-600">Time:</span>
-                        <p className="font-medium text-gray-900">{formData.time}</p>
+                        <span className="text-slate-500">Time:</span>
+                        <p className="font-medium text-neutral-900">{formData.time}</p>
                       </div>
                       <div className="col-span-2">
-                        <span className="text-gray-600">Address:</span>
-                        <p className="font-medium text-gray-900">{formData.address}</p>
+                        <span className="text-slate-500">Address:</span>
+                        <p className="font-medium text-neutral-900">{formData.address}</p>
                       </div>
                       {formData.addressType === 'someoneElse' && (
                         <>
                           <div>
-                            <span className="text-gray-600">Contact Name:</span>
-                            <p className="font-medium text-gray-900">{formData.contactName}</p>
+                            <span className="text-slate-500">Contact Name:</span>
+                            <p className="font-medium text-neutral-900">{formData.contactName}</p>
                           </div>
                           <div>
-                            <span className="text-gray-600">Contact Phone:</span>
-                            <p className="font-medium text-gray-900">
+                            <span className="text-slate-500">Contact Phone:</span>
+                            <p className="font-medium text-neutral-900">
                               {getFormattedPhone(formData.contactPhone)}
                             </p>
                           </div>
                         </>
                       )}
                       <div>
-                        <span className="text-gray-600">Payment:</span>
-                        <p className="font-medium text-gray-900">
+                        <span className="text-slate-500">Payment:</span>
+                        <p className="font-medium text-neutral-900">
                           {formData.paymentOption === 'payNow' ? 'Pay Now' : 'Pay After Service'}
                         </p>
                       </div>
@@ -498,7 +498,7 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
             {step < 4 ? (
               <button
                 onClick={handleNext}
-                className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+                className="flex items-center space-x-2 px-6 py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-700 transition"
               >
                 <span>Next</span>
                 <ArrowRight className="w-4 h-4" />
@@ -507,7 +507,7 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="flex items-center space-x-2 px-3 w-auto py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center space-x-2 px-3 w-auto py-1 bg-sky-500 text-white rounded-lg hover:bg-sky-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <>

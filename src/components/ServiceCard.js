@@ -28,7 +28,7 @@ const ServiceCard = ({ service, onAddClick, onView }) => {
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
-      className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 border-gray-200 hover:border-primary-blue/30 hover:-translate-y-2 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-blue/40"
+      className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 border-gray-200 hover:border-sky-500/30 hover:-translate-y-2 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-500/40"
     >
       {/* Image on top */}
       <div
@@ -54,7 +54,7 @@ const ServiceCard = ({ service, onAddClick, onView }) => {
       <div className="p-4 md:p-5">
           {/* Badge */}
           {service.badge && (
-            <div className="inline-flex items-center space-x-1.5 bg-gradient-to-r from-purple-100 to-purple-50 text-purple-700 px-3 py-1.5 rounded-full text-xs font-semibold mb-4 shadow-sm">
+            <div className="inline-flex items-center space-x-1.5 bg-gradient-to-r from-sky-100 to-sky-50 text-sky-700 px-3 py-1.5 rounded-full text-xs font-semibold mb-4 shadow-sm">
               {badgeIcons[service.badge] && badgeIcons[service.badge]}
               <span>{service.badge}</span>
             </div>
@@ -62,18 +62,18 @@ const ServiceCard = ({ service, onAddClick, onView }) => {
 
           {/* Title */}
           <h3
-            className="text-lg sm:text-xl font-bold text-gray-900 mb-2 hover:text-purple-700"
+            className="text-lg sm:text-xl font-bold text-neutral-900 mb-2 hover:text-sky-700"
           >
             {service.title}
           </h3>
 
           {/* Description */}
-          <p className="text-gray-600 mb-3 text-sm sm:text-base line-clamp-2">{service.description}</p>
+          <p className="text-slate-500 mb-3 text-sm sm:text-base line-clamp-2">{service.description}</p>
 
           {/* Quick Features/Benefits preview */}
           {(features.length > 0 || benefits.length > 0) && (
             <div className="mb-4">
-              <ul className="list-disc list-inside text-xs sm:text-sm text-gray-600 space-y-1">
+              <ul className="list-disc list-inside text-xs sm:text-sm text-slate-500 space-y-1">
                 {(features.slice(0, 2)).map((f, i) => (
                   <li key={`f-${i}`}>{f}</li>
                 ))}
@@ -86,16 +86,16 @@ const ServiceCard = ({ service, onAddClick, onView }) => {
 
           {/* Price */}
           <div className="flex items-baseline space-x-2 mb-4 pb-3 border-b border-gray-100">
-            <span className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-purple-700 bg-clip-text text-transparent">₹{service.price}</span>
+            <span className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-sky-500 to-sky-600 bg-clip-text text-transparent">₹{service.price}</span>
             {service.originalPrice && (
-              <span className="text-base md:text-lg text-gray-400 line-through">₹{service.originalPrice}</span>
+              <span className="text-base md:text-lg text-slate-500 line-through">₹{service.originalPrice}</span>
             )}
           </div>
 
           {/* Add Button */}
           <button
             onClick={handleBookClick}
-            className="w-full inline-flex items-center justify-center bg-gradient-to-r from-primary-blue to-primary-blue-light hover:from-primary-blue-light hover:to-primary-blue text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
+            className="w-full inline-flex items-center justify-center bg-sky-500 hover:bg-sky-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
           >
             Book Service
           </button>
