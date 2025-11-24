@@ -23,7 +23,7 @@ const Header = () => {
             <img
               src="/ashlogo.png"
               alt="ASH Enterprise logo"
-              className="h-14 w-16 md:h-14 rounded-md md:w-24 object-contain  flex-shrink-0"
+              className="h-16 w-20 md:h-14 rounded-md md:w-24 object-contain  flex-shrink-0"
               style={{ maxWidth: '100%', height: 'auto' }}
               onError={(e) => {
                 console.error('Logo image not found at /ashlogo.png');
