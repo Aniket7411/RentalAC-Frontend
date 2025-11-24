@@ -121,7 +121,7 @@ const ServiceRequest = () => {
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.4),transparent_40%),radial-gradient(circle_at_80%_0,rgba(255,255,255,0.35),transparent_35%)]" />
               <video
                 src="/ac.mov"
-                className="w-full h-[520px] object-cover mix-blend-multiply"
+                className="w-full h-[520px] object-cover "
                 autoPlay
                 muted
                 loop
