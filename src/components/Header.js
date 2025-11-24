@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Hamburger, X, LogOut, User, Wrench, Plus, List, Users } from 'lucide-react';
+import { AlignJustify, X, LogOut, User, Wrench, Plus, List, Users } from 'lucide-react';
 
 const Header = () => {
   const { user, logout, isAdmin } = useAuth();
@@ -67,17 +67,18 @@ const Header = () => {
 
           {/* Mobile Menu Button - Always on the right */}
 
-          {mobileMenuOpen ? (
-            <X
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="w-6 h-6"
-            />
-          ) : (
-            <Hamburger
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="w-6 h-6 md:hidden"
-            />
-          )}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-gray-200 text-text-dark hover:text-primary-blue hover:border-primary-blue transition-colors"
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <AlignJustify className="w-5 h-5" />
+            )}
+          </button>
 
         </div>
 
