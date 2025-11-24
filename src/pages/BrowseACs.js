@@ -121,9 +121,12 @@ const BrowseACs = () => {
   const brands = ['LG', 'Samsung', 'Daikin', 'Voltas', 'Hitachi', 'Blue Star', 'Carrier', 'Other'];
 
   return (
-    <div className="min-h-screen bg-background-light py-8">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 md:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-text-dark mb-6">Browse ACs</h1>
+        <div className="mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold text-text-dark mb-3">Browse ACs</h1>
+          <p className="text-lg text-text-light">Find the perfect AC for your comfort</p>
+        </div>
 
         {/* Error Message */}
         {error && (
@@ -134,20 +137,20 @@ const BrowseACs = () => {
         )}
 
         {/* Search and Filter Toggle */}
-        <div className="mb-6 flex flex-col sm:flex-row gap-4">
+        <div className="mb-8 flex flex-col sm:flex-row gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-light w-5 h-5" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-text-light w-5 h-5" />
             <input
               type="text"
               placeholder="Search by brand, model, location, or description..."
               value={filters.search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+              className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent shadow-sm hover:shadow-md transition-all bg-white"
             />
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+            className="flex items-center justify-center space-x-2 px-6 py-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all shadow-sm hover:shadow-md font-medium"
           >
             <Filter className="w-5 h-5" />
             <span>Filters</span>
@@ -157,7 +160,7 @@ const BrowseACs = () => {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Filter Sidebar */}
           <div className={`lg:w-64 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-            <div className="bg-white p-6 rounded-lg shadow-md sticky top-24">
+            <div className="bg-white p-6 rounded-2xl shadow-lg sticky top-24 border border-gray-100">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold text-text-dark">Filters</h2>
                 <button
@@ -177,7 +180,7 @@ const BrowseACs = () => {
                   <select
                     value={filters.duration}
                     onChange={(e) => handleFilterChange('duration', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-blue shadow-sm"
                   >
                     <option value="monthly">Monthly</option>
                     <option value="quarterly">Quarterly</option>
@@ -193,7 +196,7 @@ const BrowseACs = () => {
                   <select
                     value={filters.capacity}
                     onChange={(e) => handleFilterChange('capacity', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-blue shadow-sm"
                   >
                     <option value="">All</option>
                     {capacities.map((cap) => (
@@ -212,7 +215,7 @@ const BrowseACs = () => {
                   <select
                     value={filters.type}
                     onChange={(e) => handleFilterChange('type', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-blue shadow-sm"
                   >
                     <option value="">All</option>
                     {types.map((type) => (
@@ -231,7 +234,7 @@ const BrowseACs = () => {
                   <select
                     value={filters.brand}
                     onChange={(e) => handleFilterChange('brand', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-blue shadow-sm"
                   >
                     <option value="">All</option>
                     {brands.map((brand) => (
@@ -252,7 +255,7 @@ const BrowseACs = () => {
                     placeholder="Enter location"
                     value={filters.location}
                     onChange={(e) => handleFilterChange('location', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-blue shadow-sm"
                   />
                 </div>
 
@@ -267,14 +270,14 @@ const BrowseACs = () => {
                       placeholder="Min"
                       value={filters.minPrice}
                       onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-blue shadow-sm"
                     />
                     <input
                       type="number"
                       placeholder="Max"
                       value={filters.maxPrice}
                       onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-blue shadow-sm"
                     />
                   </div>
                 </div>
@@ -289,17 +292,17 @@ const BrowseACs = () => {
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-blue"></div>
               </div>
             ) : acs.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                 {acs.map((ac) => (
                   <ACCard key={ac._id || ac.id} ac={ac} />
                 ))}
               </div>
             ) : (
-              <div className="bg-white p-12 rounded-lg shadow-md text-center">
+              <div className="bg-white p-12 rounded-2xl shadow-lg text-center border border-gray-100">
                 <p className="text-text-light text-lg mb-4">No ACs found matching your criteria.</p>
                 <button
                   onClick={clearFilters}
-                  className="text-primary-blue hover:text-primary-blue-light"
+                  className="px-6 py-3 bg-primary-blue text-white rounded-xl hover:bg-primary-blue-light transition-all font-semibold shadow-md hover:shadow-lg"
                 >
                   Clear filters
                 </button>

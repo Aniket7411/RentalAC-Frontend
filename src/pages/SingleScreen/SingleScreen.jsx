@@ -36,24 +36,24 @@ function SingleScreen() {
     if (cursorPercent <= 40) {
       setLeftWidth(65);
       setRightWidth(35);
-      setLeftScale(1.4);
-      setRightScale(1);
-      setLeftImageHeight("65%");
-      setRightImageHeight("38%");
+      setLeftScale(1.15);
+      setRightScale(0.9);
+      setLeftImageHeight("60%");
+      setRightImageHeight("35%");
     } else if (cursorPercent >= 72) {
       setLeftWidth(35);
       setRightWidth(65);
-      setLeftScale(1);
-      setRightScale(1.4);
-      setLeftImageHeight("38%");
-      setRightImageHeight("77%");
+      setLeftScale(0.9);
+      setRightScale(1.15);
+      setLeftImageHeight("35%");
+      setRightImageHeight("70%");
     } else {
       setLeftWidth(50);
       setRightWidth(50);
-      setLeftScale(1.1);
-      setRightScale(1.1);
-      setLeftImageHeight("65%");
-      setRightImageHeight("65%");
+      setLeftScale(1);
+      setRightScale(1);
+      setLeftImageHeight("60%");
+      setRightImageHeight("60%");
     }
   };
 
@@ -61,9 +61,9 @@ function SingleScreen() {
   const handleMouseMoveLeft = () => {
     setLeftWidth(90);
     setRightWidth(10);
-    setLeftScale(1.6);
-    setRightScale(1);
-    setLeftImageHeight("85%");
+    setLeftScale(1.2);
+    setRightScale(0.8);
+    setLeftImageHeight("70%");
     setIsLeftButtonVisible(true);
     setIsRightContentVisible(false); // Hide right content with sliding effect
     setIsMouseMoveEnabled(false);
@@ -75,10 +75,10 @@ function SingleScreen() {
   const handleMouseMoveRight = () => {
     setLeftWidth(10);
     setRightWidth(90);
-    setLeftScale(1);
-    setRightScale(1.3);
-    setLeftImageHeight("38%");
-    setRightImageHeight("75%");
+    setLeftScale(0.8);
+    setRightScale(1.2);
+    setLeftImageHeight("35%");
+    setRightImageHeight("70%");
     setIsRightButtonVisible(true);
     setIsLeftButtonVisible(false);
     setIsRightContentVisible(true);
@@ -144,15 +144,18 @@ function SingleScreen() {
                     transform: `scale(${leftScale})`,
                     transformOrigin: "top left",
                     transition: "all 1.2s ease",
-                    marginTop: "5rem",
-                    paddingLeft: "3rem",
+                    marginTop: "3rem",
+                    paddingLeft: "2rem",
+                    paddingRight: "1rem",
+                    maxWidth: "100%",
+                    overflow: "hidden",
                     zIndex: "10",
                   }}
                 >
                   {(isLeftButtonVisible || isRightButtonVisible) && (
                     <div
                       style={{
-                        fontSize: "10px",
+                        fontSize: "14px",
                         fontWeight: "600",
                         cursor: "pointer",
                         display: 'flex',
@@ -160,6 +163,7 @@ function SingleScreen() {
                         marginBottom: '1rem',
                       }}
                       onClick={handleBackClick}
+                      className="text-text-dark hover:text-primary-blue transition-colors duration-300"
                     >
                       <img src="/arrowBackBlack.svg" width={22} height={10} className="me-3" alt="" />
                       Back
@@ -168,27 +172,30 @@ function SingleScreen() {
                   <div>
                     <h2
                       style={{
-                        fontSize: "12px",
+                        fontSize: "14px",
                         fontWeight: "600",
                         marginLeft: "6px",
+                        letterSpacing: "0.5px",
+                        textTransform: "uppercase",
                       }}
+                      className="text-primary-blue"
                     >
                       For Renters
                     </h2>
                     <h2
-                      style={{ fontSize: "36px", fontWeight: "900" }}
+                      style={{ fontSize: "clamp(20px, 4vw, 28px)", fontWeight: "800", lineHeight: "1.2" }}
                       className="italic"
                     >
-                      Find the Perfect AC <br /> for Your Comfort <br />{" "}
+                      Find the Perfect AC for  <br />  Your Comfort <br />{" "}
                       Today
                     </h2>
-                    <p style={{ fontSize: "12px", fontWeight: "400" }}>
+                    <p style={{ fontSize: "clamp(12px, 1.5vw, 14px)", fontWeight: "400", lineHeight: "1.5", marginTop: "0.75rem" }}>
                       Browse through our wide selection of ACs, <br />
-                      choose your preferred model, and enjoy cool comfort.
+                      choose your preferred model, <br /> and enjoy cool comfort.
                     </p>
                   </div>
                   <Link to="/browse">
-                    <button className="left-button bg-primary-blue text-white w-[120px]">
+                    <button className="left-button bg-gradient-to-r from-primary-blue to-primary-blue-light text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm mt-4">
                       Browse ACs
                     </button>
                   </Link>
@@ -197,11 +204,13 @@ function SingleScreen() {
                   style={{
                     position: "absolute",
                     bottom: 0,
-                    right: "2rem",
+                    right: "1rem",
                     height: leftImageHeight,
                     transform: `scale(${leftScale})`,
                     transformOrigin: "top right",
                     transition: "all 1.2s ease",
+                    maxWidth: "50%",
+                    overflow: "hidden",
                   }}
                 >
                   <img
@@ -226,11 +235,16 @@ function SingleScreen() {
                       cursor: "pointer",
                       opacity: isLeftButtonVisible ? 0 : 1,
                       transition: "opacity 1.2s ease",
-                      zIndex: "10",
+                      zIndex: "30",
                     }}
-                    onClick={handleMouseMoveLeft}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleMouseMoveLeft();
+                    }}
+                    className="bg-white/20 backdrop-blur-md p-3 rounded-full hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
                   >
-                    <ChevronLeft className="w-6 h-6" />
+                    <ChevronLeft className="w-6 h-6 text-[#2563EB] " />
                   </div>
                 )}
               </>
@@ -255,67 +269,68 @@ function SingleScreen() {
                       cursor: "pointer",
                       opacity: isRightButtonVisible ? 0 : 1,
                       transition: "opacity 1.2s ease",
-                      zIndex: "10",
+                      zIndex: "30",
                     }}
-                    onClick={handleMouseMoveRight}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleMouseMoveRight();
+                    }}
+                    className="bg-white/20 backdrop-blur-md p-3 rounded-full hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
                   >
-                    <ChevronRight className="w-6 h-6" />
+                    <ChevronRight className="w-6 h-6 text-white" />
                   </div>
                 )}
                 <div
                   className={`${newst ? "right-section-to" : ""}`}
                   style={{
-                    // marginTop: "5rem",
-                    paddingLeft: "5rem",
+                    paddingLeft: "2rem",
+                    paddingRight: "3rem",
+                    paddingBottom: "2rem",
                     transform: `scale(${rightScale})`,
                     zIndex: "10",
-
-                    // transform: `scale(${rightScale}) ${
-                    //   !isRightContentVisible ? "translateX(100%)" : "translateX(0)"
-                    // }`, // Slide out to the right
-                    // height: rightImageHeight,
-                    // transition: "transform 1.2s ease",
-                    // transformOrigin: "top",
-
-                    marginTop: "5rem",
-                    height: "75%",
+                    marginTop: "3rem",
+                    maxWidth: "100%",
+                    overflow: "hidden",
                     transition: "transform 1.2s ease-in-out",
-                    // transform: "scale(1.3)",
-
                     transformOrigin: "top left",
+                    position: "relative",
                   }}
                 >
                   {isRightButtonVisible && (
                     <span
                       style={{
-                        fontSize: "12px",
+                        fontSize: "14px",
                         fontWeight: "600",
                         cursor: "pointer",
                         maxWidth: "maxContent",
                         display: 'flex',
                         alignItems: 'center',
-                        marginBottom: '1rem'
+                        marginBottom: '1rem',
+                        zIndex: "15",
+                        position: "relative",
                       }}
                       onClick={handleBackRightClick}
+                      className="text-white hover:text-blue-100 transition-colors duration-300"
                     >
                       <img height={10} width={22} src="/arrowBackWhite.svg" className="me-3" alt="" />
                       Back
                     </span>
                   )}
-                  <h2 style={{ fontSize: "12px", fontWeight: "600" }}>
+                  <h2 style={{ fontSize: "14px", fontWeight: "600", letterSpacing: "0.5px", textTransform: "uppercase" }}>
                     For Service
                   </h2>
                   <h2
-                    style={{ fontSize: "36px", fontWeight: "900" }}
+                    style={{ fontSize: "clamp(20px, 4vw, 28px)", fontWeight: "800", lineHeight: "1.2" }}
                     className="italic"
                   >
                     Get Your AC <br /> Repaired & Serviced <br /> Today
                   </h2>
-                  <p style={{ fontSize: "12px", fontWeight: "400" }}>
+                  <p style={{ fontSize: "clamp(12px, 1.5vw, 14px)", fontWeight: "400", lineHeight: "1.5", marginTop: "0.75rem" }}>
                     Need AC repair or maintenance? Book a service <br /> request easily and get professional <br /> technicians at your doorstep!
                   </p>
                   <Link to="/service-request">
-                    <button className="right-button bg-[#fff] text-primary-blue w-[120px]">
+                    <button className="right-button ml-4  w-auto bg-white/95 backdrop-blur-sm text-primary-blue px-5 py-2.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border-2 border-white/30 text-sm mt-4">
                       Service Request
                     </button>
                   </Link>
@@ -325,11 +340,13 @@ function SingleScreen() {
                     style={{
                       position: "absolute",
                       bottom: 0,
-                      right: "2rem",
+                      right: "1rem",
                       height: rightImageHeight,
                       transform: `scale(${rightScale})`,
                       transformOrigin: "top right",
                       transition: "all 1.2s ease",
+                      maxWidth: "50%",
+                      overflow: "hidden",
                     }}
                   >
                     {/* <img
@@ -356,14 +373,14 @@ function SingleScreen() {
             <p className="text-xs">For Renters</p>
             <h1 className="italic text-xl font-bold">
               {" "}
-              Find the Perfect AC <br /> for Your Comfort <br /> Today
+              Find the Perfect AC  for <br /> Your Comfort Today
             </h1>
             <p className="text-sm mt-2">
               Browse through our wide selection of ACs, choose your preferred model, and enjoy cool comfort.
             </p>
             <Link to="/browse">
               <button
-                className="mt-3 px-3 py-1 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                className="mt-3 px-6 py-3 bg-gradient-to-r from-primary-blue to-primary-blue-light text-white rounded-xl font-semibold hover:shadow-xl transition-all duration-300 hover:scale-105"
                 style={{ minWidth: '140px' }}
               >
                 Browse ACs
@@ -391,7 +408,7 @@ function SingleScreen() {
 
             <Link to="/service-request">
               <button
-                className="mt-3 px-2 py-1 bg-white/20 backdrop-blur-sm text-white rounded-lg font-semibold border-2 border-white/30 hover:bg-white/30 hover:border-white/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                className="mt-3 px-6 py-3 bg-white/20 w-auto backdrop-blur-md text-white rounded-xl font-semibold border-2 border-white/30 hover:bg-white/30 hover:border-white/50 transition-all duration-300 hover:shadow-xl hover:scale-105"
                 style={{ minWidth: '140px' }}
               >
                 Service Request

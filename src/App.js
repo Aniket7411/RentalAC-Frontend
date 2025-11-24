@@ -26,9 +26,9 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col bg-gray-50">
           <Header />
-          <main className="flex-grow pt-16">
+          <main className="flex-grow pt-16 md:pt-20">
             <ScrollToTop />
             <Routes>
               {/* Public Routes */}

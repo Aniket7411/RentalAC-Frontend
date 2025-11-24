@@ -15,47 +15,49 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white shadow-md fixed top-0 z-50 w-full font-sans">
+    <header className="bg-white/95 backdrop-blur-md shadow-lg fixed top-0 z-50 w-full border-b border-gray-100">
       <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-16 md:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 flex-shrink-0">
-            <div className="text-2xl font-bold text-primary-blue">CoolRentals</div>
+          <Link to="/" className="flex items-center space-x-2 flex-shrink-0 group">
+            <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary-blue to-primary-blue-light bg-clip-text text-transparent group-hover:scale-105 transition-transform">
+              CoolRentals
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
+          <nav className="hidden md:flex items-center space-x-1">
             {!user ? (
               <>
-                <Link to="/" className="text-text-dark hover:text-primary-blue transition">Home</Link>
-                <Link to="/browse" className="text-text-dark hover:text-primary-blue transition">Browse ACs</Link>
-                <Link to="/about" className="text-text-dark hover:text-primary-blue transition">About</Link>
-                <Link to="/contact" className="text-text-dark hover:text-primary-blue transition">Contact</Link>
-                <Link to="/admin/login" className="text-primary-blue hover:text-primary-blue-light transition">Admin Login</Link>
+                <Link to="/" className="px-4 py-2 text-text-dark hover:text-primary-blue transition-all rounded-lg hover:bg-gray-50 font-medium">Home</Link>
+                <Link to="/browse" className="px-4 py-2 text-text-dark hover:text-primary-blue transition-all rounded-lg hover:bg-gray-50 font-medium">Browse ACs</Link>
+                <Link to="/about" className="px-4 py-2 text-text-dark hover:text-primary-blue transition-all rounded-lg hover:bg-gray-50 font-medium">About</Link>
+                <Link to="/contact" className="px-4 py-2 text-text-dark hover:text-primary-blue transition-all rounded-lg hover:bg-gray-50 font-medium">Contact</Link>
+                <Link to="/admin/login" className="ml-2 px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition-all font-semibold shadow-md hover:shadow-lg">Admin Login</Link>
               </>
             ) : isAdmin ? (
               <>
-                <Link to="/admin/dashboard" className="flex items-center space-x-1 text-text-dark hover:text-primary-blue transition">
+                <Link to="/admin/dashboard" className="flex items-center space-x-2 px-4 py-2 text-text-dark hover:text-primary-blue transition-all rounded-lg hover:bg-gray-50 font-medium">
                   <User className="w-4 h-4" />
                   <span>Dashboard</span>
                 </Link>
-                <Link to="/admin/add-ac" className="flex items-center space-x-1 text-text-dark hover:text-primary-blue transition">
+                <Link to="/admin/add-ac" className="flex items-center space-x-2 px-4 py-2 text-text-dark hover:text-primary-blue transition-all rounded-lg hover:bg-gray-50 font-medium">
                   <Plus className="w-4 h-4" />
                   <span>Add AC</span>
                 </Link>
-                <Link to="/admin/manage-acs" className="flex items-center space-x-1 text-text-dark hover:text-primary-blue transition">
+                <Link to="/admin/manage-acs" className="flex items-center space-x-2 px-4 py-2 text-text-dark hover:text-primary-blue transition-all rounded-lg hover:bg-gray-50 font-medium">
                   <List className="w-4 h-4" />
                   <span>Manage ACs</span>
                 </Link>
-                <Link to="/admin/leads" className="flex items-center space-x-1 text-text-dark hover:text-primary-blue transition">
+                <Link to="/admin/leads" className="flex items-center space-x-2 px-4 py-2 text-text-dark hover:text-primary-blue transition-all rounded-lg hover:bg-gray-50 font-medium">
                   <Users className="w-4 h-4" />
                   <span>Leads</span>
                 </Link>
-                <Link to="/admin/manage-services" className="flex items-center space-x-1 text-text-dark hover:text-primary-blue transition">
+                <Link to="/admin/manage-services" className="flex items-center space-x-2 px-4 py-2 text-text-dark hover:text-primary-blue transition-all rounded-lg hover:bg-gray-50 font-medium">
                   <Wrench className="w-4 h-4" />
                   <span>Services</span>
                 </Link>
-                <button onClick={handleLogout} className="flex items-center space-x-1 text-red-600 hover:text-red-700 transition">
+                <button onClick={handleLogout} className="ml-2 flex items-center space-x-2 px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 transition-all rounded-lg font-medium">
                   <LogOut className="w-4 h-4" />
                   <span>Logout</span>
                 </button>
@@ -81,25 +83,25 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t bg-white">
-            <nav className="flex flex-col space-y-2">
+          <div className="md:hidden py-4 border-t bg-white/95 backdrop-blur-md">
+            <nav className="flex flex-col space-y-1">
               {!user ? (
                 <>
-                  <Link to="/" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">Home</Link>
-                  <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">Browse ACs</Link>
-                  <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">About</Link>
-                  <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">Contact</Link>
-                  <Link to="/service-request" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">Service Request</Link>
-                  <Link to="/admin/login" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded text-primary-blue">Admin Login</Link>
+                  <Link to="/" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-gray-50 text-text-dark font-medium transition-all">Home</Link>
+                  <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-gray-50 text-text-dark font-medium transition-all">Browse ACs</Link>
+                  <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-gray-50 text-text-dark font-medium transition-all">About</Link>
+                  <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-gray-50 text-text-dark font-medium transition-all">Contact</Link>
+                  <Link to="/service-request" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-gray-50 text-text-dark font-medium transition-all">Service Request</Link>
+                  <Link to="/admin/login" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg bg-primary-blue text-white font-semibold text-center">Admin Login</Link>
                 </>
               ) : isAdmin ? (
                 <>
-                  <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">Dashboard</Link>
-                  <Link to="/admin/add-ac" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">Add AC</Link>
-                  <Link to="/admin/manage-acs" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">Manage ACs</Link>
-                  <Link to="/admin/leads" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">Leads</Link>
-                  <Link to="/admin/manage-services" onClick={() => setMobileMenuOpen(false)} className="px-2 py-2 rounded hover:bg-gray-50 text-text-dark">Services</Link>
-                  <button onClick={handleLogout} className="text-red-600 text-left">Logout</button>
+                  <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-gray-50 text-text-dark font-medium transition-all">Dashboard</Link>
+                  <Link to="/admin/add-ac" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-gray-50 text-text-dark font-medium transition-all">Add AC</Link>
+                  <Link to="/admin/manage-acs" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-gray-50 text-text-dark font-medium transition-all">Manage ACs</Link>
+                  <Link to="/admin/leads" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-gray-50 text-text-dark font-medium transition-all">Leads</Link>
+                  <Link to="/admin/manage-services" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-gray-50 text-text-dark font-medium transition-all">Services</Link>
+                  <button onClick={handleLogout} className="px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 text-left font-medium transition-all">Logout</button>
                 </>
               ) : null}
             </nav>

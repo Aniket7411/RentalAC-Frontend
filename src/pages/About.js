@@ -20,6 +20,8 @@ const About = () => {
           </p>
         </motion.div>
 
+        <img src="/about.png" alt="About" className="w-full h-full object-cover" />
+
         {/* Mission & Vision */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
           <motion.div
@@ -30,8 +32,8 @@ const About = () => {
             <Target className="w-12 h-12 text-primary-blue mb-4" />
             <h2 className="text-2xl font-bold text-text-dark mb-4">Our Mission</h2>
             <p className="text-text-light">
-              To provide accessible, reliable, and affordable AC rental and repair services 
-              to customers across India. We connect users with trusted vendors, making 
+              To provide accessible, reliable, and affordable AC rental and repair services
+              to customers across India. We connect users with trusted vendors, making
               comfort and convenience accessible to everyone.
             </p>
           </motion.div>
@@ -44,8 +46,8 @@ const About = () => {
             <Eye className="w-12 h-12 text-primary-blue mb-4" />
             <h2 className="text-2xl font-bold text-text-dark mb-4">Our Vision</h2>
             <p className="text-text-light">
-              To become India's leading platform for AC rentals and services, 
-              revolutionizing how people access cooling solutions. We envision a future 
+              To become India's leading platform for AC rentals and services,
+              revolutionizing how people access cooling solutions. We envision a future
               where quality AC services are just a click away for every household.
             </p>
           </motion.div>
@@ -63,7 +65,7 @@ const About = () => {
               <Users className="w-16 h-16 text-primary-blue mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-text-dark mb-2">Customer First</h3>
               <p className="text-text-light">
-                Your comfort and satisfaction are our top priorities. We go the extra mile 
+                Your comfort and satisfaction are our top priorities. We go the extra mile
                 to ensure you have the best experience.
               </p>
             </motion.div>
@@ -77,7 +79,7 @@ const About = () => {
               <Award className="w-16 h-16 text-primary-blue mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-text-dark mb-2">Quality Assurance</h3>
               <p className="text-text-light">
-                We partner with verified vendors and ensure all services meet our 
+                We partner with verified vendors and ensure all services meet our
                 high standards of quality and reliability.
               </p>
             </motion.div>
@@ -91,7 +93,7 @@ const About = () => {
               <Target className="w-16 h-16 text-primary-blue mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-text-dark mb-2">Transparency</h3>
               <p className="text-text-light">
-                Clear pricing, honest communication, and transparent processes. 
+                Clear pricing, honest communication, and transparent processes.
                 No hidden fees, no surprises.
               </p>
             </motion.div>

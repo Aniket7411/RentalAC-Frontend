@@ -18,6 +18,13 @@ module.exports = {
           light: '#64748b',
         },
       },
+      backdropBlur: {
+        xs: '2px',
+      },
+      boxShadow: {
+        'premium': '0 10px 40px -10px rgba(0, 0, 0, 0.1)',
+        'premium-lg': '0 20px 60px -15px rgba(0, 0, 0, 0.15)',
+      },
     },
   },
   plugins: [],

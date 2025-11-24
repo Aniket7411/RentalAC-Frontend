@@ -113,6 +113,7 @@ const Contact = () => {
           </p>
         </motion.div>
 
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Contact Info */}
           <div className="lg:col-span-1 space-y-6">
