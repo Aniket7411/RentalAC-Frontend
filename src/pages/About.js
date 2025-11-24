@@ -20,7 +20,11 @@ const About = () => {
           </p>
         </motion.div>
 
-        <img src="/about.png" alt="About" className="w-full h-full object-cover" />
+        <img
+          src="/about.png"
+          alt="About"
+          className="w-full h-full object-cover rounded-2xl shadow-lg md:hidden"
+        />
 
         {/* Mission & Vision */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
@@ -150,7 +154,7 @@ const About = () => {
         </div>
 
         {/* CTA */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-primary-blue text-white p-8 rounded-lg text-center"
@@ -173,7 +177,7 @@ const About = () => {
               Sign Up
             </a>
           </div>
-        </motion.div>
+        </motion.div> */}
       </div>
     </div>
   );
