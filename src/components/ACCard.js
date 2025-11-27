@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FiShoppingCart, FiHeart, FiCheck } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
 const ACCard = ({ ac }) => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [addedToCart, setAddedToCart] = useState(false);
+  const [addedToWishlist, setAddedToWishlist] = useState(false);
 
   const nextImage = (e) => {
     e.preventDefault();
@@ -20,12 +26,94 @@ const ACCard = ({ ac }) => {
     }
   };
 
+  const addToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const existingItem = cart.find(item => item.id === (ac._id || ac.id));
+      
+      if (existingItem) {
+        const updatedCart = cart.map(item =>
+          item.id === (ac._id || ac.id)
+            ? { ...item, quantity: (item.quantity || 1) + 1 }
+            : item
+        );
+        localStorage.setItem('cart', JSON.stringify(updatedCart));
+      } else {
+        const newItem = {
+          id: ac._id || ac.id,
+          brand: ac.brand,
+          model: ac.model,
+          name: `${ac.brand} ${ac.model}`,
+          capacity: ac.capacity,
+          type: ac.type,
+          location: ac.location,
+          price: ac.price,
+          images: ac.images,
+          quantity: 1,
+        };
+        localStorage.setItem('cart', JSON.stringify([...cart, newItem]));
+      }
+      
+      setAddedToCart(true);
+      window.dispatchEvent(new Event('cartUpdated'));
+      setTimeout(() => setAddedToCart(false), 2000);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    }
+  };
+
+  const addToWishlist = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+      const existingItem = wishlist.find(item => item.id === (ac._id || ac.id));
+      
+      if (!existingItem) {
+        const newItem = {
+          id: ac._id || ac.id,
+          brand: ac.brand,
+          model: ac.model,
+          name: `${ac.brand} ${ac.model}`,
+          capacity: ac.capacity,
+          type: ac.type,
+          location: ac.location,
+          price: ac.price,
+          images: ac.images,
+        };
+        localStorage.setItem('wishlist', JSON.stringify([...wishlist, newItem]));
+        setAddedToWishlist(true);
+        window.dispatchEvent(new Event('wishlistUpdated'));
+        setTimeout(() => setAddedToWishlist(false), 2000);
+      }
+    } catch (error) {
+      console.error('Error adding to wishlist:', error);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 border-gray-200 hover:border-primary-blue/30 hover:-translate-y-2 group"
+      className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 border-gray-200 hover:border-gradient-to-r hover:from-primary-blue/20 hover:via-primary-blue-light/20 hover:to-primary-blue/20 hover:-translate-y-2 group"
+      style={{
+        borderImage: 'none',
+      }}
     >
       <Link to={`/ac/${ac._id || ac.id}`} className="relative block h-32 sm:h-40 md:h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden cursor-pointer">
         {ac.images && ac.images.length > 0 ? (
@@ -70,6 +158,39 @@ const ACCard = ({ ac }) => {
             No Image
           </div>
         )}
+        {/* Action Buttons */}
+        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col gap-2 z-20">
+          <button
+            onClick={addToWishlist}
+            className={`p-2 rounded-full backdrop-blur-md shadow-lg transition-all ${
+              addedToWishlist
+                ? 'bg-green-500/90 text-white'
+                : 'bg-white/90 text-red-600 hover:bg-red-50'
+            }`}
+            title={addedToWishlist ? 'Added to wishlist' : 'Add to wishlist'}
+          >
+            {addedToWishlist ? (
+              <FiCheck className="w-4 h-4" />
+            ) : (
+              <FiHeart className="w-4 h-4" />
+            )}
+          </button>
+          <button
+            onClick={addToCart}
+            className={`p-2 rounded-full backdrop-blur-md shadow-lg transition-all ${
+              addedToCart
+                ? 'bg-green-500/90 text-white'
+                : 'bg-white/90 text-primary-blue hover:bg-blue-50'
+            }`}
+            title={addedToCart ? 'Added to cart' : 'Add to cart'}
+          >
+            {addedToCart ? (
+              <FiCheck className="w-4 h-4" />
+            ) : (
+              <FiShoppingCart className="w-4 h-4" />
+            )}
+          </button>
+        </div>
         {ac.status && (
           <div className={`absolute top-2 right-2 sm:top-3 sm:right-3 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold backdrop-blur-md shadow-lg z-10 ${
             ac.status === 'Available' ? 'bg-green-500/90 text-white' :

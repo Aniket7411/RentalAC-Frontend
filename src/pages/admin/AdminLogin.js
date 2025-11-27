@@ -35,15 +35,20 @@ const AdminLogin = () => {
     setError('');
     setLoading(true);
 
-    const result = await login(formData.email, formData.password);
+    try {
+      const result = await login(formData.email, formData.password, 'admin');
 
-    if (result.success) {
-      navigate('/admin/dashboard');
-    } else {
-      setError(result.message || 'Login failed. Please check your credentials.');
+      if (result.success) {
+        navigate('/admin/dashboard');
+      } else {
+        setError(result.message || 'Login failed. Please check your credentials.');
+      }
+    } catch (error) {
+      console.error('Admin login error:', error);
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (

@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import PasswordInput from '../components/PasswordInput';
-import { Mail, AlertCircle } from 'lucide-react';
+import { FiMail, FiAlertCircle, FiUser } from 'react-icons/fi';
+import { Loader2, User } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    role: 'user',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,122 +29,157 @@ const Login = () => {
     setError('');
     setLoading(true);
 
-    const result = await login(formData.email, formData.password, formData.role);
-    
-    if (result.success) {
-      if (formData.role === 'vendor') {
-        navigate('/vendor/dashboard');
+    try {
+      const result = await login(formData.email, formData.password);
+
+      if (result.success) {
+        // Auto-redirect based on user role
+        if (result.user?.role === 'admin') {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/user/dashboard');
+        }
       } else {
-        navigate('/user/dashboard');
+        setError(result.message || 'Login failed. Please check your credentials.');
       }
-    } else {
-      setError(result.message || 'Login failed. Please check your credentials.');
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-background-light flex items-center justify-center pt-10 pb-6 sm:pt-14 sm:pb-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-text-dark">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-text-light">
-            Or{' '}
-            <Link to="/signup" className="font-medium text-primary-blue hover:text-primary-blue-light">
-              create a new account
-            </Link>
-          </p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center space-x-2">
-              <AlertCircle className="w-5 h-5" />
-              <span>{error}</span>
-            </div>
-          )}
-          
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-text-dark mb-1">
-                Email address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-light w-5 h-5" />
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full">
+        {/* Login Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100"
+        >
+          {/* Header Section with Gradient */}
+          <div className="bg-gradient-to-r from-primary-blue to-primary-blue-light px-8 py-8 text-center">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full mb-4"
+            >
+              <User className="w-8 h-8 text-white" />
+            </motion.div>
+            <h2 className="text-3xl font-bold text-white mb-2">Login</h2>
+            <p className="text-blue-100 text-sm">Sign in to your account</p>
+          </div>
+
+          {/* Form Section */}
+          <div className="px-8 py-8">
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              {/* Error Message */}
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg flex items-start space-x-3 shadow-sm"
+                >
+                  <FiAlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm font-medium">{error}</span>
+                </motion.div>
+              )}
+
+              {/* Email Field */}
+              <div>
+                <label htmlFor="email" className="block text-sm font-semibold text-text-dark mb-2">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <FiMail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-text-light w-5 h-5" />
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl text-text-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all duration-300 bg-gray-50 focus:bg-white"
+                    placeholder="user@example.com"
+                  />
+                </div>
+              </div>
+
+              {/* Password Field */}
+              <div>
+                <label htmlFor="password" className="block text-sm font-semibold text-text-dark mb-2">
+                  Password
+                </label>
+                <PasswordInput
+                  value={formData.password}
                   onChange={handleChange}
-                  className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-text-dark rounded-lg focus:outline-none focus:ring-primary-blue focus:border-primary-blue focus:z-10 sm:text-sm"
-                  placeholder="Email address"
+                  placeholder="Enter your password"
+                  required
+                  name="password"
+                  className="px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl text-text-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all duration-300 bg-gray-50 focus:bg-white"
                 />
               </div>
-            </div>
-            
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-text-dark mb-1">
-                Password
-              </label>
-              <PasswordInput
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Password"
-                required
-                name="password"
-              />
-            </div>
 
-            <div>
-              <label htmlFor="role" className="block text-sm font-medium text-text-dark mb-1">
-                I am a
-              </label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg text-text-dark focus:outline-none focus:ring-primary-blue focus:border-primary-blue sm:text-sm"
+              {/* Forgot Password Link */}
+              <div className="flex items-center justify-end">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm font-medium text-primary-blue hover:text-primary-blue-light transition-colors"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
+
+              {/* Submit Button */}
+              <motion.button
+                type="submit"
+                disabled={loading}
+                whileHover={{ scale: loading ? 1 : 1.02 }}
+                whileTap={{ scale: loading ? 1 : 0.98 }}
+                className="w-full bg-gradient-to-r from-primary-blue to-primary-blue-light text-white py-3.5 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
-                <option value="user">User</option>
-                <option value="vendor">Vendor</option>
-              </select>
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Signing in...</span>
+                  </>
+                ) : (
+                  <span>Sign In</span>
+                )}
+              </motion.button>
+            </form>
+
+            {/* Sign Up Link */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <p className="text-sm text-center text-text-light">
+                Don't have an account?{' '}
+                <Link to="/signup" className="font-semibold text-primary-blue hover:text-primary-blue-light transition-colors">
+                  Sign up
+                </Link>
+              </p>
             </div>
           </div>
+        </motion.div>
 
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
-              <Link to="/forgot-password" className="font-medium text-primary-blue hover:text-primary-blue-light">
-                Forgot your password?
-              </Link>
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-blue hover:bg-primary-blue-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-blue disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Signing in...' : 'Sign in'}
-            </button>
-          </div>
-
-          <div className="text-center text-sm text-text-light">
-            <p>Demo Credentials:</p>
-            <p className="mt-1">
-              User: <span className="font-mono">user@example.com</span> / <span className="font-mono">password</span>
-            </p>
-            <p className="mt-1">
-              Vendor: <span className="font-mono">vendor@example.com</span> / <span className="font-mono">password</span>
-            </p>
-          </div>
-        </form>
+        {/* Additional Info Card */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mt-6 bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200"
+        >
+          <p className="text-xs text-center text-text-light">
+            <span className="font-semibold text-text-dark">Demo Credentials:</span>{' '}
+            User: <span className="font-mono">user@example.com</span> / <span className="font-mono">password</span>
+            {' | '}
+            Admin: <span className="font-mono">admin@example.com</span> / <span className="font-mono">password</span>
+          </p>
+        </motion.div>
       </div>
     </div>
   );

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Mail, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
+import { FiMail, FiAlertCircle, FiCheckCircle, FiArrowLeft } from 'react-icons/fi';
+import { Loader2 } from 'lucide-react';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -20,17 +21,29 @@ const ForgotPassword = () => {
       return;
     }
 
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
     setLoading(true);
 
-    const result = await forgotPassword(email);
-    
-    if (result.success) {
-      setSuccess(true);
-    } else {
-      setError(result.message || 'Failed to send reset link. Please try again.');
+    try {
+      const result = await forgotPassword(email);
+      
+      if (result.success) {
+        setSuccess(true);
+      } else {
+        setError(result.message || 'Failed to send reset link. Please try again.');
+      }
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   return (
@@ -46,16 +59,16 @@ const ForgotPassword = () => {
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center space-x-2">
-              <AlertCircle className="w-5 h-5" />
-              <span>{error}</span>
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-start space-x-2">
+              <FiAlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <span className="text-sm">{error}</span>
             </div>
           )}
           
           {success && (
             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
               <div className="flex items-center space-x-2 mb-2">
-                <CheckCircle className="w-5 h-5" />
+                <FiCheckCircle className="w-5 h-5 flex-shrink-0" />
                 <span className="font-semibold">Email Sent!</span>
               </div>
               <p className="text-sm">
@@ -73,7 +86,7 @@ const ForgotPassword = () => {
                     Email address
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-light w-5 h-5" />
+                    <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-light w-5 h-5" />
                     <input
                       id="email"
                       name="email"
@@ -93,9 +106,16 @@ const ForgotPassword = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-blue hover:bg-primary-blue-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-blue disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="group relative w-full flex justify-center items-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-blue hover:bg-primary-blue-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-blue disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
-                  {loading ? 'Sending...' : 'Send Reset Link'}
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    'Send Reset Link'
+                  )}
                 </button>
               </div>
             </>
@@ -104,9 +124,9 @@ const ForgotPassword = () => {
           <div className="text-center">
             <Link
               to="/login"
-              className="inline-flex items-center space-x-1 text-sm font-medium text-primary-blue hover:text-primary-blue-light"
+              className="inline-flex items-center space-x-1 text-sm font-medium text-primary-blue hover:text-primary-blue-light transition-colors"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <FiArrowLeft className="w-4 h-4" />
               <span>Back to Login</span>
             </Link>
           </div>

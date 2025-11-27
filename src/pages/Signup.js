@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import PasswordInput from '../components/PasswordInput';
-import { Mail, User, Phone, AlertCircle, CheckCircle } from 'lucide-react';
+import { FiMail, FiUser, FiPhone, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
+import { Loader2, UserPlus } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -20,15 +22,32 @@ const Signup = () => {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
     setError('');
     setSuccess(false);
   };
 
   const validateForm = () => {
+    if (!formData.name.trim()) {
+      setError('Name is required');
+      return false;
+    }
+    if (!formData.email.trim()) {
+      setError('Email is required');
+      return false;
+    }
+    if (!formData.phone.trim()) {
+      setError('Phone number is required');
+      return false;
+    }
+    if (formData.phone.length < 10) {
+      setError('Phone number must be at least 10 digits');
+      return false;
+    }
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return false;
@@ -51,166 +70,199 @@ const Signup = () => {
 
     setLoading(true);
 
-    const { confirmPassword, ...signupData } = formData;
-    const result = await signup(signupData);
-    
-    if (result.success) {
-      setSuccess(true);
-      setTimeout(() => {
-        if (formData.role === 'vendor') {
-          navigate('/vendor/dashboard');
-        } else {
+    try {
+      const { confirmPassword, ...signupData } = formData;
+      const result = await signup(signupData);
+
+      if (result.success) {
+        setSuccess(true);
+        setTimeout(() => {
           navigate('/user/dashboard');
-        }
-      }, 1500);
-    } else {
-      setError(result.message || 'Signup failed. Please try again.');
+        }, 1500);
+      } else {
+        setError(result.message || 'Signup failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-background-light flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-text-dark">
-            Create your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-text-light">
-            Or{' '}
-            <Link to="/login" className="font-medium text-primary-blue hover:text-primary-blue-light">
-              sign in to existing account
-            </Link>
-          </p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center space-x-2">
-              <AlertCircle className="w-5 h-5" />
-              <span>{error}</span>
-            </div>
-          )}
-          
-          {success && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center space-x-2">
-              <CheckCircle className="w-5 h-5" />
-              <span>Account created successfully! Redirecting...</span>
-            </div>
-          )}
-          
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-text-dark mb-1">
-                Full Name
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-light w-5 h-5" />
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-text-dark rounded-lg focus:outline-none focus:ring-primary-blue focus:border-primary-blue focus:z-10 sm:text-sm"
-                  placeholder="Full Name"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-text-dark mb-1">
-                Email address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-light w-5 h-5" />
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-text-dark rounded-lg focus:outline-none focus:ring-primary-blue focus:border-primary-blue focus:z-10 sm:text-sm"
-                  placeholder="Email address"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-text-dark mb-1">
-                Phone Number
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-light w-5 h-5" />
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  required
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-text-dark rounded-lg focus:outline-none focus:ring-primary-blue focus:border-primary-blue focus:z-10 sm:text-sm"
-                  placeholder="Phone Number"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-text-dark mb-1">
-                Password
-              </label>
-              <PasswordInput
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Password (min 6 characters)"
-                required
-                name="password"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-text-dark mb-1">
-                Confirm Password
-              </label>
-              <PasswordInput
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Confirm Password"
-                required
-                name="confirmPassword"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="role" className="block text-sm font-medium text-text-dark mb-1">
-                I want to
-              </label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg text-text-dark focus:outline-none focus:ring-primary-blue focus:border-primary-blue sm:text-sm"
-              >
-                <option value="user">Rent ACs / Book Services</option>
-                <option value="vendor">List ACs / Provide Services</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-blue hover:bg-primary-blue-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-blue disabled:opacity-50 disabled:cursor-not-allowed"
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full">
+        {/* Signup Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100"
+        >
+          {/* Header Section with Gradient */}
+          <div className="bg-gradient-to-r from-primary-blue to-primary-blue-light px-8 py-8 text-center">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full mb-4"
             >
-              {loading ? 'Creating account...' : 'Create account'}
-            </button>
+              <UserPlus className="w-8 h-8 text-white" />
+            </motion.div>
+            <h2 className="text-3xl font-bold text-white mb-2">Create Account</h2>
+            <p className="text-blue-100 text-sm">Sign up to get started</p>
           </div>
-        </form>
+
+          {/* Form Section */}
+          <div className="px-8 py-8">
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              {/* Error Message */}
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg flex items-start space-x-3 shadow-sm"
+                >
+                  <FiAlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm font-medium">{error}</span>
+                </motion.div>
+              )}
+
+              {/* Success Message */}
+              {success && (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="bg-green-50 border-l-4 border-green-500 text-green-700 px-4 py-3 rounded-lg flex items-start space-x-3 shadow-sm"
+                >
+                  <FiCheckCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm font-medium">Account created successfully! Redirecting...</span>
+                </motion.div>
+              )}
+
+              {/* Name Field */}
+              <div>
+                <label htmlFor="name" className="block text-sm font-semibold text-text-dark mb-2">
+                  Full Name
+                </label>
+                <div className="relative">
+                  <FiUser className="absolute left-4 top-1/2 transform -translate-y-1/2 text-text-light w-5 h-5" />
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl text-text-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all duration-300 bg-gray-50 focus:bg-white"
+                    placeholder="Enter your full name"
+                  />
+                </div>
+              </div>
+
+              {/* Email Field */}
+              <div>
+                <label htmlFor="email" className="block text-sm font-semibold text-text-dark mb-2">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <FiMail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-text-light w-5 h-5" />
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl text-text-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all duration-300 bg-gray-50 focus:bg-white"
+                    placeholder="user@example.com"
+                  />
+                </div>
+              </div>
+
+              {/* Phone Field */}
+              <div>
+                <label htmlFor="phone" className="block text-sm font-semibold text-text-dark mb-2">
+                  Phone Number
+                </label>
+                <div className="relative">
+                  <FiPhone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-text-light w-5 h-5" />
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    required
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl text-text-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all duration-300 bg-gray-50 focus:bg-white"
+                    placeholder="1234567890"
+                    maxLength={10}
+                  />
+                </div>
+              </div>
+
+              {/* Password Field */}
+              <div>
+                <label htmlFor="password" className="block text-sm font-semibold text-text-dark mb-2">
+                  Password
+                </label>
+                <PasswordInput
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password (min 6 characters)"
+                  required
+                  name="password"
+                  className="px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl text-text-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all duration-300 bg-gray-50 focus:bg-white"
+                />
+              </div>
+
+              {/* Confirm Password Field */}
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-semibold text-text-dark mb-2">
+                  Confirm Password
+                </label>
+                <PasswordInput
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm your password"
+                  required
+                  name="confirmPassword"
+                  className="px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl text-text-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all duration-300 bg-gray-50 focus:bg-white"
+                />
+              </div>
+
+              {/* Submit Button */}
+              <motion.button
+                type="submit"
+                disabled={loading}
+                whileHover={{ scale: loading ? 1 : 1.02 }}
+                whileTap={{ scale: loading ? 1 : 0.98 }}
+                className="w-full bg-gradient-to-r from-primary-blue to-primary-blue-light text-white py-3.5 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Creating account...</span>
+                  </>
+                ) : (
+                  <span>Create Account</span>
+                )}
+              </motion.button>
+            </form>
+
+            {/* Login Link */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <p className="text-sm text-center text-text-light">
+                Already have an account?{' '}
+                <Link to="/login" className="font-semibold text-primary-blue hover:text-primary-blue-light transition-colors">
+                  Sign in
+                </Link>
+              </p>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

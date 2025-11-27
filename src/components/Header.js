@@ -1,12 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { AlignJustify, X, LogOut, User, Wrench, Plus, List, Users } from 'lucide-react';
+import { LogOut, Wrench, Plus, List, Users, LayoutDashboard } from 'lucide-react';
+import { FiShoppingCart, FiHeart, FiUser, FiMenu, FiX } from 'react-icons/fi';
 
 const Header = () => {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout, isAdmin, isUser } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+  const [wishlistCount, setWishlistCount] = useState(0);
+
+  useEffect(() => {
+    // Load cart and wishlist counts from localStorage
+    const updateCounts = () => {
+      try {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+        setCartCount(cart.length);
+        setWishlistCount(wishlist.length);
+      } catch (error) {
+        console.error('Error loading cart/wishlist:', error);
+      }
+    };
+
+    updateCounts();
+    // Update counts when storage changes
+    window.addEventListener('storage', updateCounts);
+    // Custom event for same-tab updates
+    window.addEventListener('cartUpdated', updateCounts);
+    window.addEventListener('wishlistUpdated', updateCounts);
+
+    return () => {
+      window.removeEventListener('storage', updateCounts);
+      window.removeEventListener('cartUpdated', updateCounts);
+      window.removeEventListener('wishlistUpdated', updateCounts);
+    };
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -38,26 +68,26 @@ const Header = () => {
           <nav className="hidden md:flex items-center space-x-1">
             {!user ? (
               <>
-                <Link to="/" className="px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">Home</Link>
-                <Link to="/browse" className="px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">Browse ACs</Link>
+                {/* <Link to="/" className="px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">Home</Link> */}
+                <Link to="/browse" className="px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">Browse Products</Link>
                 <Link to="/about" className="px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">About</Link>
                 <Link to="/contact" className="px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">Contact</Link>
                 <Link to="/service-request" className="px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">Services</Link>
-                <Link to="/admin/login" className="ml-2 px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-700 transition-all font-semibold shadow-md hover:shadow-lg">Admin Login</Link>
+                <Link to="/login" className="ml-2 px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-700 transition-all font-semibold shadow-md hover:shadow-lg">Login</Link>
               </>
             ) : isAdmin ? (
               <>
                 <Link to="/admin/dashboard" className="flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
-                  <User className="w-4 h-4" />
+                  <LayoutDashboard className="w-4 h-4" />
                   <span>Dashboard</span>
                 </Link>
-                <Link to="/admin/add-ac" className="flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
+                <Link to="/admin/add-product" className="flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
                   <Plus className="w-4 h-4" />
-                  <span>Add AC</span>
+                  <span>Add Product</span>
                 </Link>
-                <Link to="/admin/manage-acs" className="flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
+                <Link to="/admin/manage-products" className="flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
                   <List className="w-4 h-4" />
-                  <span>Manage ACs</span>
+                  <span>Manage Products</span>
                 </Link>
                 <Link to="/admin/leads" className="flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
                   <Users className="w-4 h-4" />
@@ -72,10 +102,69 @@ const Header = () => {
                   <span>Logout</span>
                 </button>
               </>
+            ) : isUser ? (
+              <>
+                {/* <Link to="/" className="px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">Home</Link> */}
+                <Link to="/browse" className="px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">Browse</Link>
+                <Link to="/user/dashboard" className="flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span>Dashboard</span>
+                </Link>
+                <Link to="/user/cart" className="relative flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
+                  <FiShoppingCart className="w-5 h-5" />
+                  <span>Cart</span>
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {cartCount > 9 ? '9+' : cartCount}
+                    </span>
+                  )}
+                </Link>
+                <Link to="/user/wishlist" className="relative flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
+                  <FiHeart className="w-5 h-5" />
+                  <span>Wishlist</span>
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {wishlistCount > 9 ? '9+' : wishlistCount}
+                    </span>
+                  )}
+                </Link>
+                <Link to="/user/orders" className="px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">Orders</Link>
+                <Link to="/service-request" className="px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">Services</Link>
+                <div className="flex items-center space-x-2 ml-2 px-4 py-2">
+                  <FiUser className="w-4 h-4 text-neutral-900" />
+                  <span className="text-sm font-medium text-neutral-900">{user?.name || 'User'}</span>
+                </div>
+                <button onClick={handleLogout} className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 transition-all rounded-lg font-medium">
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+              </>
             ) : null}
           </nav>
 
           {/* Mobile Menu Button - Always on the right */}
+
+          {/* User Actions for Mobile - Show cart/wishlist even when menu is closed */}
+          {isUser && (
+            <div className="md:hidden flex items-center space-x-2 mr-2">
+              <Link to="/user/cart" className="relative p-2 text-neutral-900 hover:text-sky-500 transition-all">
+                <FiShoppingCart className="w-6 h-6" />
+                {cartCount > 0 && (
+                  <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {cartCount > 9 ? '9+' : cartCount}
+                  </span>
+                )}
+              </Link>
+              <Link to="/user/wishlist" className="relative p-2 text-neutral-900 hover:text-sky-500 transition-all">
+                <FiHeart className="w-6 h-6" />
+                {wishlistCount > 0 && (
+                  <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {wishlistCount > 9 ? '9+' : wishlistCount}
+                  </span>
+                )}
+              </Link>
+            </div>
+          )}
 
           <button
             type="button"
@@ -84,9 +173,9 @@ const Header = () => {
             aria-label="Toggle navigation menu"
           >
             {mobileMenuOpen ? (
-              <X className="w-5 h-5" />
+              <FiX className="w-5 h-5" />
             ) : (
-              <AlignJustify className="w-7 h-7" />
+              <FiMenu className="w-6 h-6" />
             )}
           </button>
 
@@ -99,20 +188,47 @@ const Header = () => {
               {!user ? (
                 <>
                   <Link to="/" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Home</Link>
-                  <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Browse ACs</Link>
+                  <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Browse Products</Link>
                   <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">About</Link>
                   <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Contact</Link>
-                  <Link to="/service-request" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Service Request</Link>
-                  <Link to="/admin/login" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg bg-sky-500 text-white font-semibold text-center hover:bg-sky-700 transition-all">Admin Login</Link>
+                  <Link to="/service-request" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Services</Link>
+                  <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Login</Link>
+                  <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg bg-sky-500 text-white font-semibold text-center hover:bg-sky-700 transition-all">Sign Up</Link>
                 </>
               ) : isAdmin ? (
                 <>
                   <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Dashboard</Link>
-                  <Link to="/admin/add-ac" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Add AC</Link>
-                  <Link to="/admin/manage-acs" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Manage ACs</Link>
+                  <Link to="/admin/add-product" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Add Product</Link>
+                  <Link to="/admin/manage-products" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Manage Products</Link>
                   <Link to="/admin/leads" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Leads</Link>
                   <Link to="/admin/manage-services" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Services</Link>
                   <button onClick={handleLogout} className="px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 text-left font-medium transition-all">Logout</button>
+                </>
+              ) : isUser ? (
+                <>
+                  {/* <Link to="/" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Home</Link> */}
+                  <Link to="/browse" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Browse Products</Link>
+                  <Link to="/user/dashboard" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all flex items-center space-x-2">
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span>Dashboard</span>
+                  </Link>
+                  <Link to="/user/cart" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all flex items-center space-x-2">
+                    <FiShoppingCart className="w-4 h-4" />
+                    <span>Cart {cartCount > 0 && `(${cartCount})`}</span>
+                  </Link>
+                  <Link to="/user/wishlist" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all flex items-center space-x-2">
+                    <FiHeart className="w-4 h-4" />
+                    <span>Wishlist {wishlistCount > 0 && `(${wishlistCount})`}</span>
+                  </Link>
+                  <Link to="/user/orders" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Orders</Link>
+                  <Link to="/service-request" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Services</Link>
+                  <div className="px-4 py-3 border-t border-gray-200 mt-2 pt-3">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <FiUser className="w-4 h-4 text-neutral-900" />
+                      <span className="text-sm font-medium text-neutral-900">{user?.name || 'User'}</span>
+                    </div>
+                    <button onClick={handleLogout} className="w-full px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 text-left font-medium transition-all">Logout</button>
+                  </div>
                 </>
               ) : null}
             </nav>

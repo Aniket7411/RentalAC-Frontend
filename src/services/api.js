@@ -2,8 +2,8 @@ import axios from 'axios';
 import { uploadMultipleFilesToCloudinary } from '../utils/cloudinary';
 
 // Configure base URL - Update this with your backend URL
-// const API_BASE_URL = 'http://localhost:5000/api';
-const API_BASE_URL = "https://rentalac-b.onrender.com/api"
+const API_BASE_URL = 'http://localhost:5000/api';
+// const API_BASE_URL = "https://rentalac-b.onrender.com/api"
 
 // Create axios instance with default config
 const api = axios.create({
@@ -42,10 +42,27 @@ api.interceptors.response.use(
 
 // API Service Functions
 export const apiService = {
-  // Admin Authentication
+  // Unified Login - Auto-detects admin or user
+  login: async (email, password) => {
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      return {
+        success: true,
+        token: response.data.token,
+        user: response.data.user,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Login failed. Please check your credentials.',
+      };
+    }
+  },
+
+  // Admin Authentication (kept for backward compatibility)
   adminLogin: async (email, password) => {
     try {
-      const response = await api.post('/admin/login', { email, password });
+      const response = await api.post('/auth/login', { email, password });
       return {
         success: true,
         token: response.data.token,
@@ -55,6 +72,38 @@ export const apiService = {
       return {
         success: false,
         message: error.response?.data?.message || 'Login failed',
+      };
+    }
+  },
+
+  userSignup: async (userData) => {
+    try {
+      const response = await api.post('/auth/signup', userData);
+      return {
+        success: true,
+        token: response.data.token,
+        user: response.data.user,
+        message: response.data.message || 'Account created successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Signup failed. Please try again.',
+      };
+    }
+  },
+
+  forgotPassword: async (email) => {
+    try {
+      const response = await api.post('/auth/forgot-password', { email });
+      return {
+        success: true,
+        message: response.data.message || 'Password reset link sent to your email',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to send reset link. Please try again.',
       };
     }
   },
@@ -167,10 +216,10 @@ export const apiService = {
     }
   },
 
-  // Admin - AC Management
+  // Admin - AC Management (kept for backward compatibility)
   getAdminACs: async () => {
     try {
-      const response = await api.get('/admin/acs');
+      const response = await api.get('/admin/products');
       return {
         success: true,
         data: response.data.data || response.data,
@@ -178,7 +227,24 @@ export const apiService = {
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || 'Failed to fetch ACs',
+        message: error.response?.data?.message || 'Failed to fetch products',
+        data: [],
+      };
+    }
+  },
+
+  // Admin - Product Management
+  getAdminProducts: async () => {
+    try {
+      const response = await api.get('/admin/products');
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch products',
         data: [],
       };
     }
@@ -186,8 +252,6 @@ export const apiService = {
 
   addAC: async (acData) => {
     try {
-      // Images are already uploaded to Cloudinary by the component
-      // Just send the URLs to backend
       const dataToSend = {
         brand: acData.brand,
         model: acData.model,
@@ -197,7 +261,7 @@ export const apiService = {
         location: acData.location,
         status: acData.status,
         price: acData.price,
-        images: acData.images || [], // Already URLs from Cloudinary
+        images: acData.images || [],
       };
 
       const response = await api.post('/admin/acs', dataToSend);
@@ -210,6 +274,53 @@ export const apiService = {
       return {
         success: false,
         message: error.response?.data?.message || 'Failed to add AC',
+      };
+    }
+  },
+
+  addProduct: async (productData) => {
+    try {
+      const response = await api.post('/admin/products', productData);
+      return {
+        success: true,
+        message: response.data.message || 'Product added successfully',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to add product',
+      };
+    }
+  },
+
+  updateProduct: async (id, productData) => {
+    try {
+      const response = await api.patch(`/admin/products/${id}`, productData);
+      return {
+        success: true,
+        message: response.data.message || 'Product updated successfully',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to update product',
+      };
+    }
+  },
+
+  deleteProduct: async (id) => {
+    try {
+      const response = await api.delete(`/admin/products/${id}`);
+      return {
+        success: true,
+        message: response.data.message || 'Product deleted successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to delete product',
       };
     }
   },
@@ -455,6 +566,40 @@ export const apiService = {
       return {
         success: false,
         message: error.response?.data?.message || 'Failed to delete service',
+      };
+    }
+  },
+
+  // User Orders
+  getUserOrders: async (userId) => {
+    try {
+      const response = await api.get(`/users/${userId}/orders`);
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch orders',
+        data: [],
+      };
+    }
+  },
+
+  // User Profile
+  updateUserProfile: async (profileData) => {
+    try {
+      const response = await api.patch('/users/profile', profileData);
+      return {
+        success: true,
+        data: response.data.data || response.data.user,
+        message: response.data.message || 'Profile updated successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to update profile',
       };
     }
   },

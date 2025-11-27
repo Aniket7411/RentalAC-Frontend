@@ -173,36 +173,42 @@ const ManageServices = () => {
     }
   };
 
+  const containerClasses = 'w-full px-4 sm:px-6 lg:px-10 xl:px-16 2xl:px-24';
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <Loader2 className="w-8 h-8 animate-spin text-primary-blue" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background-light py-8">
+    <div className="min-h-screen bg-slate-50 py-10">
       <ToastContainer toasts={toasts} removeToast={removeToast} />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-text-dark">Manage Services</h1>
+      <div className={containerClasses}>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Service Catalog</p>
+            <h1 className="text-3xl font-bold text-slate-900 mt-2">Manage Services</h1>
+            <p className="text-slate-500 mt-1">Keep offerings fresh, pricing accurate, and details crisp.</p>
+          </div>
           <button
             onClick={handleAdd}
-            className="flex items-center space-x-2 bg-primary-blue text-white px-6 py-3 rounded-lg hover:bg-primary-blue-light transition"
+            className="flex items-center space-x-2 bg-primary-blue text-white px-6 py-3 rounded-2xl shadow-lg shadow-primary-blue/30 hover:bg-primary-blue-light transition"
           >
             <Plus className="w-5 h-5" />
             <span>Add Service</span>
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
           {services.map((service) => (
             <motion.div
               key={service._id || service.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-lg shadow-md overflow-hidden"
+              className="bg-white rounded-3xl shadow-lg overflow-hidden border border-slate-100"
             >
               <div className="h-48 overflow-hidden">
                 <img
@@ -255,7 +261,7 @@ const ManageServices = () => {
         </div>
 
         {services.length === 0 && (
-          <div className="text-center py-12">
+          <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200 shadow-sm">
             <p className="text-gray-500 text-lg">No services added yet</p>
             <button
               onClick={handleAdd}

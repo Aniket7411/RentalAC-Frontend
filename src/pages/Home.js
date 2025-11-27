@@ -11,6 +11,8 @@ import InstallCard from '../components/installcard';
 
 const Home = () => {
   const [featuredACs, setFeaturedACs] = useState([]);
+  const [featuredRefrigerators, setFeaturedRefrigerators] = useState([]);
+  const [featuredWashingMachines, setFeaturedWashingMachines] = useState([]);
   const [services, setServices] = useState([]);
   const [loadingServices, setLoadingServices] = useState(true);
   const [selectedService, setSelectedService] = useState(null);
@@ -18,21 +20,39 @@ const Home = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      const [acsResponse, servicesResponse] = await Promise.all([
-        apiService.getACs(),
-        apiService.getServices(),
-      ]);
+      try {
+        setLoadingServices(true);
+        const [acsResponse, refrigeratorsResponse, washingMachinesResponse, servicesResponse] = await Promise.all([
+          apiService.getACs({ category: 'AC' }),
+          apiService.getACs({ category: 'Refrigerator' }),
+          apiService.getACs({ category: 'Washing Machine' }),
+          apiService.getServices(),
+        ]);
 
-      if (acsResponse.success) {
-        const acs = Array.isArray(acsResponse.data) ? acsResponse.data : (Array.isArray(acsResponse.data?.data) ? acsResponse.data.data : []);
-        setFeaturedACs(acs.slice(0, 6));
-      }
+        if (acsResponse.success) {
+          const acs = Array.isArray(acsResponse.data) ? acsResponse.data : (Array.isArray(acsResponse.data?.data) ? acsResponse.data.data : []);
+          setFeaturedACs(acs.slice(0, 6));
+        }
 
-      if (servicesResponse.success) {
-        const svcs = Array.isArray(servicesResponse.data) ? servicesResponse.data : (Array.isArray(servicesResponse.data?.data) ? servicesResponse.data.data : []);
-        setServices(svcs.slice(0, 3));
+        if (refrigeratorsResponse.success) {
+          const fridges = Array.isArray(refrigeratorsResponse.data) ? refrigeratorsResponse.data : (Array.isArray(refrigeratorsResponse.data?.data) ? refrigeratorsResponse.data.data : []);
+          setFeaturedRefrigerators(fridges.slice(0, 6));
+        }
+
+        if (washingMachinesResponse.success) {
+          const wms = Array.isArray(washingMachinesResponse.data) ? washingMachinesResponse.data : (Array.isArray(washingMachinesResponse.data?.data) ? washingMachinesResponse.data.data : []);
+          setFeaturedWashingMachines(wms.slice(0, 6));
+        }
+
+        if (servicesResponse.success) {
+          const svcs = Array.isArray(servicesResponse.data) ? servicesResponse.data : (Array.isArray(servicesResponse.data?.data) ? servicesResponse.data.data : []);
+          setServices(svcs.slice(0, 3));
+        }
+      } catch (error) {
+        console.error('Error loading home data:', error);
+      } finally {
+        setLoadingServices(false);
       }
-      setLoadingServices(false);
     };
     loadData();
   }, []);
@@ -91,33 +111,203 @@ const Home = () => {
       <div className="w-full" style={{ minHeight: '100vh' }}>
         <SingleScreen />
       </div>
+
+      {/* Product Category Selection Section */}
+      <section className="py-6 md:py-8 bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6"
+          >
+            <Link
+              to="/browse?category=AC"
+              className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+            >
+              <div className="aspect-video bg-gradient-to-br from-blue-50 to-blue-100 relative">
+                <img
+                  src="https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=800&q=80"
+                  alt="Air Conditioners"
+                  className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex flex-col justify-end p-4 md:p-6">
+                  <h3 className="text-xl md:text-2xl font-bold text-white mb-2">Air Conditioners</h3>
+                  <p className="text-white/90 text-sm md:text-base">Stay cool & comfortable</p>
+                  <ArrowRight className="w-5 h-5 md:w-6 md:h-6 text-white mt-2 group-hover:translate-x-2 transition-transform" />
+                </div>
+              </div>
+            </Link>
+
+            <Link
+              to="/browse?category=Refrigerator"
+              className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+            >
+              <div className="aspect-video bg-gradient-to-br from-cyan-50 to-cyan-100 relative">
+                <img
+                  src="https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=800&q=80"
+                  alt="Refrigerators"
+                  className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex flex-col justify-end p-4 md:p-6">
+                  <h3 className="text-xl md:text-2xl font-bold text-white mb-2">Refrigerators</h3>
+                  <p className="text-white/90 text-sm md:text-base">Fresh storage solutions</p>
+                  <ArrowRight className="w-5 h-5 md:w-6 md:h-6 text-white mt-2 group-hover:translate-x-2 transition-transform" />
+                </div>
+              </div>
+            </Link>
+
+            <Link
+              to="/browse?category=Washing Machine"
+              className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+            >
+              <div className="aspect-video bg-gradient-to-br from-purple-50 to-purple-100 relative">
+                <img
+                  src="https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80"
+                  alt="Washing Machines"
+                  className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex flex-col justify-end p-4 md:p-6">
+                  <h3 className="text-xl md:text-2xl font-bold text-white mb-2">Washing Machines</h3>
+                  <p className="text-white/90 text-sm md:text-base">Clean clothes effortlessly</p>
+                  <ArrowRight className="w-5 h-5 md:w-6 md:h-6 text-white mt-2 group-hover:translate-x-2 transition-transform" />
+                </div>
+              </div>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Featured ACs */}
-      <section className="py-12 md:py-16 bg-gradient-to-b from-white to-gray-50">
+      <section className="py-6 md:py-8 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 md:mb-12"
+            className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6"
           >
             <div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-dark mb-2">Featured ACs</h2>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-dark mb-2">Featured Air Conditioners</h2>
               <p className="text-sm sm:text-base text-text-light">Discover our premium collection of air conditioners</p>
             </div>
             <Link
-              to="/browse"
+              to="/browse?category=AC"
               className="mt-4 sm:mt-0 text-primary-blue hover:text-primary-blue-light flex items-center space-x-2 font-semibold group transition-all"
             >
               <span>View All</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </motion.div>
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
-            {featuredACs.map((ac) => (
-              <ACCard key={ac.id || ac._id} ac={ac} />
-            ))}
-          </div>
+          {loadingServices ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary-blue" />
+            </div>
+          ) : featuredACs.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
+              {featuredACs.map((ac) => (
+                <ACCard key={ac.id || ac._id} ac={ac} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-lg">
+              <Snowflake className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">No ACs available at the moment</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Featured Refrigerators */}
+      <section className="py-6 md:py-8 bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6"
+          >
+            <div>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-dark mb-2">Featured Refrigerators</h2>
+              <p className="text-sm sm:text-base text-text-light">Cool your home with our premium refrigerator collection</p>
+            </div>
+            <Link
+              to="/browse?category=Refrigerator"
+              className="mt-4 sm:mt-0 text-primary-blue hover:text-primary-blue-light flex items-center space-x-2 font-semibold group transition-all"
+            >
+              <span>View All</span>
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </motion.div>
+          {loadingServices ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary-blue" />
+            </div>
+          ) : featuredRefrigerators.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
+              {featuredRefrigerators.map((item) => (
+                <ACCard key={item.id || item._id} ac={item} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-lg">
+              <Snowflake className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">No Refrigerators available at the moment</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Featured Washing Machines */}
+      <section className="py-6 md:py-8 bg-gradient-to-b from-white to-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6"
+          >
+            <div>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-dark mb-2">Featured Washing Machines</h2>
+              <p className="text-sm sm:text-base text-text-light">Clean clothes effortlessly with our washing machine rentals</p>
+            </div>
+            <Link
+              to="/browse?category=Washing Machine"
+              className="mt-4 sm:mt-0 text-primary-blue hover:text-primary-blue-light flex items-center space-x-2 font-semibold group transition-all"
+            >
+              <span>View All</span>
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </motion.div>
+          {loadingServices ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary-blue" />
+            </div>
+          ) : featuredWashingMachines.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
+              {featuredWashingMachines.map((item) => (
+                <ACCard key={item.id || item._id} ac={item} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-lg">
+              <Wrench className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">No Washing Machines available at the moment</p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -129,14 +319,14 @@ const Home = () => {
 
 
       {/* Services Section */}
-      <section className="py-12 md:py-16 bg-gradient-to-b from-gray-50 to-white">
+      <section className="py-6 md:py-8 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 md:mb-12"
+            className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6"
           >
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-text-dark mb-2">AC Repair & Maintenance Services</h2>
@@ -184,21 +374,21 @@ const Home = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-12 md:py-16 bg-white">
+      <section className="py-6 md:py-8 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-12"
+            className="text-center mb-6 md:mb-8"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-text-dark mb-4">Why Choose Us?</h2>
             <p className="text-lg text-text-light max-w-2xl mx-auto">
               Experience premium AC rental and service solutions tailored to your needs
             </p>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             {[
               {
                 icon: Shield,
@@ -252,21 +442,21 @@ const Home = () => {
       )}
 
       {/* Testimonials */}
-      <section className="py-12 md:py-16 bg-gradient-to-b from-white via-gray-50 to-white">
+      <section className="py-6 md:py-8 bg-gradient-to-b from-white via-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-12"
+            className="text-center mb-6 md:mb-8"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-text-dark mb-4">What Our Customers Say</h2>
             <p className="text-lg text-text-light max-w-2xl mx-auto">
               Don't just take our word for it - hear from our satisfied customers
             </p>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={index}

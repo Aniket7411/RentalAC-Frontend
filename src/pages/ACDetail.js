@@ -15,7 +15,7 @@ const ACDetail = () => {
   const [ac, setAc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [selectedDuration, setSelectedDuration] = useState('monthly');
+  const [selectedDuration, setSelectedDuration] = useState('monthly'); // 'monthly', '3', '6', '9', '11'
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [inquiryData, setInquiryData] = useState({
     name: '',
@@ -63,58 +63,57 @@ const ACDetail = () => {
 
       const currentACId = ac._id || ac.id;
 
-      // First, try to get ACs with same brand and capacity
+      const productCategory = ac?.category || 'AC';
+
+      // First, get products of the same category
       let response = await apiService.getACs({
-        brand: ac.brand,
-        capacity: ac.capacity,
+        category: productCategory,
       });
 
-      let acs = [];
-      if (response.success) {
-        acs = Array.isArray(response.data) ? response.data : (Array.isArray(response.data?.data) ? response.data.data : []);
+      let products = [];
+      if (response?.success) {
+        products = Array.isArray(response.data) ? response.data : (Array.isArray(response.data?.data) ? response.data.data : []);
       }
 
-      // Filter out current AC
-      let filtered = acs.filter((relatedAC) => (relatedAC._id || relatedAC.id) !== currentACId);
+      // Filter out current product
+      let filtered = products.filter((relatedProduct) => {
+        const relatedId = relatedProduct?._id || relatedProduct?.id;
+        return relatedId && relatedId !== currentACId;
+      });
 
-      // If we don't have enough related ACs, try to get ACs with same brand only
-      if (filtered.length < 3) {
-        response = await apiService.getACs({ brand: ac.brand });
-        if (response.success) {
-          const brandACs = Array.isArray(response.data) ? response.data : (Array.isArray(response.data?.data) ? response.data.data : []);
-          const brandFiltered = brandACs.filter((relatedAC) => {
-            const relatedId = relatedAC._id || relatedAC.id;
-            return relatedId !== currentACId && !filtered.some(f => (f._id || f.id) === relatedId);
+      // If we don't have enough, try to get products with same brand and category
+      if (filtered.length < 6 && ac?.brand) {
+        response = await apiService.getACs({
+          category: productCategory,
+          brand: ac.brand
+        });
+        if (response?.success) {
+          const brandProducts = Array.isArray(response.data) ? response.data : (Array.isArray(response.data?.data) ? response.data.data : []);
+          const brandFiltered = brandProducts.filter((relatedProduct) => {
+            const relatedId = relatedProduct?._id || relatedProduct?.id;
+            return relatedId && relatedId !== currentACId && !filtered.some(f => (f?._id || f?.id) === relatedId);
           });
           filtered = [...filtered, ...brandFiltered];
         }
       }
 
-      // If still not enough, get any other ACs
-      if (filtered.length < 3) {
-        response = await apiService.getACs();
-        if (response.success) {
-          const allACs = Array.isArray(response.data) ? response.data : (Array.isArray(response.data?.data) ? response.data.data : []);
-          const otherACs = allACs.filter((relatedAC) => {
-            const relatedId = relatedAC._id || relatedAC.id;
-            return relatedId !== currentACId && !filtered.some(f => (f._id || f.id) === relatedId);
-          });
-          filtered = [...filtered, ...otherACs];
-        }
-      }
-
-      // Set related ACs (max 3)
-      setRelatedACs(filtered.slice(0, 3));
+      // Set related products (max 6)
+      setRelatedACs(filtered.slice(0, 6));
     } catch (err) {
       console.error('Failed to load related ACs:', err);
       // Fallback: try to get any ACs
       try {
         const response = await apiService.getACs();
         if (response.success) {
-          const allACs = Array.isArray(response.data) ? response.data : (Array.isArray(response.data?.data) ? response.data.data : []);
-          const currentACId = ac?._id || ac?.id;
-          const filtered = allACs.filter((relatedAC) => (relatedAC._id || relatedAC.id) !== currentACId);
-          setRelatedACs(filtered.slice(0, 3));
+          const allProducts = Array.isArray(response.data) ? response.data : (Array.isArray(response.data?.data) ? response.data.data : []);
+          const currentProductId = ac?._id || ac?.id;
+          const productCategory = ac?.category || 'AC';
+          const filtered = allProducts.filter((relatedProduct) => {
+            const relatedId = relatedProduct?._id || relatedProduct?.id;
+            const relatedCategory = relatedProduct?.category || 'AC';
+            return relatedId && relatedId !== currentProductId && relatedCategory === productCategory;
+          });
+          setRelatedACs(filtered.slice(0, 6));
         }
       } catch (fallbackErr) {
         console.error('Fallback failed:', fallbackErr);
@@ -226,7 +225,13 @@ const ACDetail = () => {
     );
   }
 
-  const price = ac.price?.[selectedDuration] || 0;
+  // Get price based on selected duration
+  const getPrice = () => {
+    if (!ac.price) return 0;
+    if (selectedDuration === 'monthly') return ac.price.monthly || 0;
+    return ac.price[selectedDuration] || 0;
+  };
+  const price = getPrice();
   const hasImages = ac.images && ac.images.length > 0;
 
   return (
@@ -346,23 +351,29 @@ const ACDetail = () => {
             <div className="mb-6">
               <h3 className="font-semibold text-text-dark mb-4 text-lg">Rental Pricing</h3>
               <div className="flex flex-wrap gap-2 mb-4">
-                {['monthly', 'quarterly', 'yearly'].map((duration) => (
+                {[
+                  { key: 'monthly', label: 'Monthly' },
+                  { key: '3', label: '3 Months' },
+                  { key: '6', label: '6 Months' },
+                  { key: '9', label: '9 Months' },
+                  { key: '11', label: '11 Months' }
+                ].map((duration) => (
                   <button
-                    key={duration}
-                    onClick={() => setSelectedDuration(duration)}
-                    className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 ${selectedDuration === duration
+                    key={duration.key}
+                    onClick={() => setSelectedDuration(duration.key)}
+                    className={`px-4 py-2 rounded-xl font-medium transition-all duration-300 ${selectedDuration === duration.key
                       ? 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white shadow-lg'
                       : 'bg-gray-100 text-text-dark hover:bg-gray-200'
                       }`}
                   >
-                    {duration.charAt(0).toUpperCase() + duration.slice(1)}
+                    {duration.label}
                   </button>
                 ))}
               </div>
               <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary-blue mb-1">
                 ₹{price.toLocaleString()}
                 <span className="text-base sm:text-lg md:text-xl text-text-light font-normal ml-2">
-                  /{selectedDuration === 'monthly' ? 'month' : selectedDuration === 'quarterly' ? 'quarter' : 'year'}
+                  /{selectedDuration === 'monthly' ? 'month' : selectedDuration === '3' ? '3 months' : selectedDuration === '6' ? '6 months' : selectedDuration === '9' ? '9 months' : '11 months'}
                 </span>
               </div>
             </div>
@@ -545,16 +556,18 @@ const ACDetail = () => {
             className="mt-12 md:mt-16"
           >
             <div className="flex items-center justify-between mb-6 md:mb-8">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-dark">Related ACs</h2>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-dark">
+                Related {ac?.category === 'Refrigerator' ? 'Refrigerators' : ac?.category === 'Washing Machine' ? 'Washing Machines' : 'ACs'}
+              </h2>
               <Link
-                to="/browse"
+                to={`/browse?category=${ac?.category || 'AC'}`}
                 className="text-primary-blue hover:text-primary-blue-light flex items-center space-x-1 text-sm sm:text-base font-semibold group"
               >
                 <span>View All</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
               {relatedACs.map((relatedAC) => (
                 <ACCard key={relatedAC._id || relatedAC.id} ac={relatedAC} />
               ))}

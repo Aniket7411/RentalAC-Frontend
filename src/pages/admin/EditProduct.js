@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import uploadFileToCloudinary, { uploadMultipleFilesToCloudinary } from '../../utils/cloudinary';
 import { Upload, AlertCircle, CheckCircle, X, Loader2 } from 'lucide-react';
@@ -7,8 +7,10 @@ import { motion } from 'framer-motion';
 import { useToast } from '../../hooks/useToast';
 import { ToastContainer } from '../../components/Toast';
 
-const AddAC = () => {
+const EditProduct = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     category: 'AC',
     name: '',
@@ -16,7 +18,7 @@ const AddAC = () => {
     model: '',
     capacity: '',
     type: '',
-    condition: 'New', // Separate condition field (Refurbished/New)
+    condition: 'New',
     description: '',
     location: '',
     price: {
@@ -28,14 +30,12 @@ const AddAC = () => {
     },
     discount: 0,
     status: 'Available',
-    heroImage: null, // Hero/primary image
-    heroImageUrl: '', // Uploaded hero image URL
-    images: [], // Other images
-    uploadedImageUrls: [], // Uploaded other images URLs
+    heroImageUrl: '', // Existing hero image URL
+    uploadedImageUrls: [], // Existing additional images URLs
     // Category-specific fields
-    energyRating: '', // For Refrigerator
-    operationType: '', // For Washing Machine
-    loadType: '', // For Washing Machine
+    energyRating: '',
+    operationType: '',
+    loadType: '',
     features: {
       specs: [],
       dimensions: '',
@@ -43,15 +43,82 @@ const AddAC = () => {
     },
   });
   const [heroImagePreview, setHeroImagePreview] = useState('');
-  const [imagePreviews, setImagePreviews] = useState([]);
+  const [newHeroImage, setNewHeroImage] = useState(null);
+  const [newImageFiles, setNewImageFiles] = useState([]);
+  const [newImagePreviews, setNewImagePreviews] = useState([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [uploadingHeroImage, setUploadingHeroImage] = useState(false);
   const [specInput, setSpecInput] = useState('');
   const [safetyInput, setSafetyInput] = useState('');
   const { toasts, removeToast, success: showSuccess, error: showError } = useToast();
+
+  // Load product data
+  useEffect(() => {
+    loadProduct();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  const loadProduct = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await apiService.getAdminProducts();
+      if (response.success) {
+        const product = response.data.find(p => (p._id || p.id) === id);
+        if (product) {
+          const images = product.images || [];
+          const heroImageUrl = images[0] || '';
+          const additionalImages = images.slice(1);
+
+          setFormData({
+            category: product.category || 'AC',
+            name: product.name || '',
+            brand: product.brand || '',
+            model: product.model || '',
+            capacity: product.capacity || '',
+            type: product.type || '',
+            condition: product.condition || 'New',
+            description: product.description || '',
+            location: product.location || '',
+            price: {
+              3: product.price?.[3] || '',
+              6: product.price?.[6] || '',
+              9: product.price?.[9] || '',
+              11: product.price?.[11] || '',
+              monthly: product.price?.monthly || '',
+            },
+            discount: product.discount || 0,
+            status: product.status || 'Available',
+            heroImageUrl: heroImageUrl,
+            uploadedImageUrls: additionalImages,
+            energyRating: product.energyRating || '',
+            operationType: product.operationType || '',
+            loadType: product.loadType || '',
+            features: {
+              specs: product.features?.specs || [],
+              dimensions: product.features?.dimensions || '',
+              safety: product.features?.safety || [],
+            },
+          });
+          setHeroImagePreview(heroImageUrl);
+        } else {
+          setError('Product not found');
+          showError('Product not found');
+        }
+      } else {
+        setError(response.message || 'Failed to load product');
+        showError(response.message || 'Failed to load product');
+      }
+    } catch (err) {
+      setError('An error occurred while loading product');
+      showError('An error occurred while loading product');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -63,18 +130,6 @@ const AddAC = () => {
           ...formData.price,
           [priceKey]: value,
         },
-      });
-    } else if (name === 'category') {
-      // Reset category-specific fields when category changes
-      setFormData({
-        ...formData,
-        category: value,
-        capacity: '',
-        type: '',
-        condition: 'New',
-        energyRating: '',
-        operationType: '',
-        loadType: '',
       });
     } else {
       setFormData({
@@ -91,6 +146,7 @@ const AddAC = () => {
     if (!file) return;
 
     setHeroImagePreview(URL.createObjectURL(file));
+    setNewHeroImage(file);
     setUploadingHeroImage(true);
     setError('');
 
@@ -99,7 +155,6 @@ const AddAC = () => {
       if (imageUrl) {
         setFormData({
           ...formData,
-          heroImage: file,
           heroImageUrl: imageUrl,
         });
         showSuccess('Hero image uploaded successfully!');
@@ -117,8 +172,9 @@ const AddAC = () => {
   // Handle additional images change with auto-upload
   const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
-    if (files.length + formData.uploadedImageUrls.length > 5) {
-      setError('Maximum 5 additional images allowed');
+    const maxImages = 5;
+    if (files.length + formData.uploadedImageUrls.length > maxImages) {
+      setError(`Maximum ${maxImages} additional images allowed`);
       return;
     }
 
@@ -127,7 +183,8 @@ const AddAC = () => {
 
     try {
       const newPreviews = files.map(file => URL.createObjectURL(file));
-      setImagePreviews([...imagePreviews, ...newPreviews]);
+      setNewImagePreviews([...newImagePreviews, ...newPreviews]);
+      setNewImageFiles([...newImageFiles, ...files]);
 
       // Auto-upload each image
       const uploadPromises = files.map(file => uploadFileToCloudinary(file));
@@ -137,7 +194,6 @@ const AddAC = () => {
       if (successfulUrls.length > 0) {
         setFormData({
           ...formData,
-          images: [...formData.images, ...files],
           uploadedImageUrls: [...formData.uploadedImageUrls, ...successfulUrls],
         });
         showSuccess(`${successfulUrls.length} image(s) uploaded successfully!`);
@@ -154,22 +210,22 @@ const AddAC = () => {
 
   const removeHeroImage = () => {
     setHeroImagePreview('');
+    setNewHeroImage(null);
     setFormData({
       ...formData,
-      heroImage: null,
       heroImageUrl: '',
     });
   };
 
   const removeImage = (index) => {
-    const newPreviews = imagePreviews.filter((_, i) => i !== index);
-    const newImages = formData.images.filter((_, i) => i !== index);
+    const newPreviews = newImagePreviews.filter((_, i) => i !== index);
+    const newFiles = newImageFiles.filter((_, i) => i !== index);
     const newUploadedUrls = formData.uploadedImageUrls.filter((_, i) => i !== index);
 
-    setImagePreviews(newPreviews);
+    setNewImagePreviews(newPreviews);
+    setNewImageFiles(newFiles);
     setFormData({
       ...formData,
-      images: newImages,
       uploadedImageUrls: newUploadedUrls,
     });
   };
@@ -233,7 +289,6 @@ const AddAC = () => {
     });
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -254,7 +309,7 @@ const AddAC = () => {
       return;
     }
 
-    setLoading(true);
+    setSubmitting(true);
 
     try {
       // Combine hero image with other images (hero image first)
@@ -292,20 +347,23 @@ const AddAC = () => {
         if (formData.loadType) productData.loadType = formData.loadType;
       }
 
-      const response = await apiService.addProduct(productData);
+      const response = await apiService.updateProduct(id, productData);
 
       if (response.success) {
-        showSuccess(`${formData.category} added successfully!`);
+        showSuccess(`${formData.category} updated successfully!`);
+        setSuccess(true);
         setTimeout(() => {
           navigate('/admin/manage-products');
         }, 1500);
       } else {
-        showError(response.message || `Failed to add ${formData.category}`);
+        setError(response.message || `Failed to update ${formData.category}`);
+        showError(response.message || `Failed to update ${formData.category}`);
       }
     } catch (err) {
       setError('An error occurred. Please try again.');
+      showError('An error occurred. Please try again.');
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -336,13 +394,24 @@ const AddAC = () => {
   const energyRatings = ['2 Star', '3 Star', '4 Star', '5 Star'];
   const containerClasses = 'w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-10';
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-primary-blue mx-auto mb-4" />
+          <p className="text-text-light">Loading product details...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 py-10">
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <div className={containerClasses}>
-        <p className="text-xs uppercase tracking-[0.3em] text-slate-500">New Listing</p>
-        <h1 className="text-3xl font-bold text-text-dark mb-2 mt-2">Add New Product</h1>
-        <p className="text-text-light mb-8">Fill in the details to list your product for rental</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Edit Listing</p>
+        <h1 className="text-3xl font-bold text-text-dark mb-2 mt-2">Edit Product</h1>
+        <p className="text-text-light mb-8">Update the product details below</p>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -359,7 +428,7 @@ const AddAC = () => {
           {success && (
             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center space-x-2 mb-6">
               <CheckCircle className="w-5 h-5" />
-              <span>AC added successfully! Redirecting...</span>
+              <span>Product updated successfully! Redirecting...</span>
             </div>
           )}
 
@@ -367,7 +436,7 @@ const AddAC = () => {
             {/* Category Selection - Visual Tabs */}
             <div>
               <label className="block text-sm font-medium text-text-dark mb-3">
-                Select Product Category <span className="text-red-500">*</span>
+                Product Category <span className="text-red-500">*</span>
               </label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <button
@@ -387,7 +456,6 @@ const AddAC = () => {
                     <div className={`font-semibold text-lg ${formData.category === 'AC' ? 'text-primary-blue' : 'text-text-dark'}`}>
                       Air Conditioner
                     </div>
-                    <div className="text-xs text-text-light mt-1">Cool & Comfort</div>
                   </div>
                 </button>
                 <button
@@ -407,7 +475,6 @@ const AddAC = () => {
                     <div className={`font-semibold text-lg ${formData.category === 'Refrigerator' ? 'text-primary-blue' : 'text-text-dark'}`}>
                       Refrigerator
                     </div>
-                    <div className="text-xs text-text-light mt-1">Fresh Storage</div>
                   </div>
                 </button>
                 <button
@@ -427,12 +494,12 @@ const AddAC = () => {
                     <div className={`font-semibold text-lg ${formData.category === 'Washing Machine' ? 'text-primary-blue' : 'text-text-dark'}`}>
                       Washing Machine
                     </div>
-                    <div className="text-xs text-text-light mt-1">Clean & Fresh</div>
                   </div>
                 </button>
               </div>
             </div>
 
+            {/* Product Name and Brand */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-text-dark mb-2">
@@ -470,6 +537,7 @@ const AddAC = () => {
               </div>
             </div>
 
+            {/* Model */}
             <div>
               <label className="block text-sm font-medium text-text-dark mb-2">
                 Model (Optional)
@@ -484,6 +552,7 @@ const AddAC = () => {
               />
             </div>
 
+            {/* Capacity and Type */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-text-dark mb-2">
@@ -605,6 +674,7 @@ const AddAC = () => {
               </div>
             )}
 
+            {/* Location */}
             <div>
               <label className="block text-sm font-medium text-text-dark mb-2">
                 Location <span className="text-red-500">*</span>
@@ -620,6 +690,7 @@ const AddAC = () => {
               />
             </div>
 
+            {/* Description */}
             <div>
               <label className="block text-sm font-medium text-text-dark mb-2">
                 Description
@@ -629,11 +700,12 @@ const AddAC = () => {
                 value={formData.description}
                 onChange={handleChange}
                 rows="4"
-                placeholder="Describe the AC features, condition, etc."
+                placeholder="Describe the product features, condition, etc."
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
               />
             </div>
 
+            {/* Rental Prices */}
             <div>
               <label className="block text-sm font-medium text-text-dark mb-2">
                 Rental Prices (₹) <span className="text-red-500">*</span>
@@ -702,6 +774,7 @@ const AddAC = () => {
               </div>
             </div>
 
+            {/* Discount */}
             <div>
               <label className="block text-sm font-medium text-text-dark mb-2">
                 Discount (%)
@@ -839,6 +912,7 @@ const AddAC = () => {
               </div>
             </div>
 
+            {/* Status */}
             <div>
               <label className="block text-sm font-medium text-text-dark mb-2">
                 Status
@@ -981,26 +1055,27 @@ const AddAC = () => {
               )}
             </div>
 
+            {/* Submit Buttons */}
             <div className="flex space-x-4">
               <button
                 type="button"
-                onClick={() => navigate('/admin/dashboard')}
+                onClick={() => navigate('/admin/manage-products')}
                 className="flex-1 px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                disabled={loading || uploadingHeroImage || uploadingImages || !formData.heroImageUrl}
+                disabled={submitting || uploadingHeroImage || uploadingImages || !formData.heroImageUrl}
                 className="flex-1 px-6 py-3 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
               >
-                {loading ? (
+                {submitting ? (
                   <span className="flex items-center justify-center space-x-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Adding {formData.category}...</span>
+                    <span>Updating {formData.category}...</span>
                   </span>
                 ) : (
-                  `Add ${formData.category} Listing`
+                  `Update ${formData.category} Listing`
                 )}
               </button>
             </div>
@@ -1011,5 +1086,5 @@ const AddAC = () => {
   );
 };
 
-export default AddAC;
+export default EditProduct;
 

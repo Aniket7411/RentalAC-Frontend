@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { apiService } from '../../services/api';
-import { Phone, MapPin, Calendar, AlertCircle, ShoppingBag, Wrench, Store, Loader2, CheckCircle, Mail } from 'lucide-react';
+import { Phone, MapPin, Calendar, AlertCircle, ShoppingBag, Wrench, Store, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '../../hooks/useToast';
 import { ToastContainer } from '../../components/Toast';
@@ -201,8 +201,9 @@ const Leads = () => {
         SNo: idx + 1,
         Name: inq.name || '',
         Phone: inq.phone || '',
-        Brand: inq.acDetails?.brand || '',
-        Model: inq.acDetails?.model || '',
+        Category: inq.productCategory || inq.category || 'AC',
+        Brand: inq.acDetails?.brand || inq.brand || '',
+        Model: inq.acDetails?.model || inq.model || '',
         Message: inq.message || '',
         Status: inq.status || '',
         CreatedAt: formatDate(inq.createdAt),
@@ -229,9 +230,11 @@ const Leads = () => {
     downloadAsCsv(data, sheetName);
   };
 
+  const containerClasses = 'w-full px-4 sm:px-6 lg:px-10 xl:px-16 2xl:px-24';
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-primary-blue mx-auto mb-4" />
           <p className="text-text-light">Loading leads...</p>
@@ -241,14 +244,18 @@ const Leads = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background-light py-8">
+    <div className="min-h-screen bg-slate-50 py-10">
       <ToastContainer toasts={toasts} removeToast={removeToast} />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-          <h1 className="text-3xl font-bold text-text-dark">All Leads & Requests</h1>
+      <div className={containerClasses}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Pipeline</p>
+            <h1 className="text-3xl font-bold text-text-dark mt-2">All Leads & Requests</h1>
+            <p className="text-text-light mt-1">Switch between service, rental, or vendor requests instantly.</p>
+          </div>
           <button
             onClick={exportToExcel}
-            className="inline-flex items-center w-auto bg-green-500 text-[#fff] justify-center px-3 py-1 text-sm font-medium rounded-lg border border-gray-300  hover:bg-gray-50 hover:text-[#000]"
+            className="inline-flex items-center w-auto bg-emerald-500 text-white justify-center px-4 py-2 text-sm font-medium rounded-2xl shadow-lg shadow-emerald-500/30 hover:bg-emerald-600"
           >
             Download Excel
           </button>
@@ -262,7 +269,7 @@ const Leads = () => {
         )}
 
         {/* Tab Navigation */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+        <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-4 mb-8">
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => { setActiveTab('service'); setFilter('all'); }}
@@ -299,7 +306,7 @@ const Leads = () => {
 
         {/* Filter Tabs */}
         {activeTab === 'service' && (
-          <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+          <div className="bg-white rounded-2xl shadow-md border border-slate-100 p-4 mb-8">
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setFilter('all')}
@@ -360,7 +367,7 @@ const Leads = () => {
         )}
 
         {activeTab === 'rental' && (
-          <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+          <div className="bg-white rounded-2xl shadow-md border border-slate-100 p-4 mb-8">
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setFilter('all')}
@@ -406,7 +413,7 @@ const Leads = () => {
         {activeTab === 'service' && (
           <>
             {getFilteredServiceLeads().length === 0 ? (
-              <div className="bg-white p-12 rounded-lg shadow-md text-center">
+              <div className="bg-white p-12 rounded-2xl shadow-md border border-dashed border-slate-200 text-center">
                 <Wrench className="w-16 h-16 text-text-light mx-auto mb-4" />
                 <p className="text-text-light text-lg">No service requests found.</p>
               </div>
@@ -423,7 +430,7 @@ const Leads = () => {
                       key={leadId}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="bg-white rounded-lg shadow-md p-6"
+                      className="bg-white rounded-3xl shadow-lg border border-slate-100 p-6"
                     >
                       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                         <div className="flex-1">
@@ -519,99 +526,141 @@ const Leads = () => {
           </>
         )}
 
-        {/* Rental Inquiries List */}
+        {/* Rental Inquiries List - Category-wise grouping */}
         {activeTab === 'rental' && (
           <>
             {getFilteredRentalInquiries().length === 0 ? (
-              <div className="bg-white p-12 rounded-lg shadow-md text-center">
+              <div className="bg-white p-12 rounded-2xl shadow-md border border-dashed border-slate-200 text-center">
                 <ShoppingBag className="w-16 h-16 text-text-light mx-auto mb-4" />
                 <p className="text-text-light text-lg">No rental inquiries found.</p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {getFilteredRentalInquiries().map((inquiry) => {
-                  const inquiryId = inquiry._id || inquiry.id;
-                  const acDetails = inquiry.acDetails || {};
-                  return (
-                    <motion.div
-                      key={inquiryId}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-white rounded-lg shadow-md p-6"
-                    >
-                      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-start justify-between mb-4">
-                            <div>
-                              <h3 className="text-xl font-semibold text-text-dark mb-1">
-                                {inquiry.name}
-                              </h3>
-                              <p className="text-text-light mb-2">
-                                Interested in: <span className="font-semibold">{acDetails.brand} {acDetails.model}</span>
-                              </p>
-                              {inquiry.acId && (
-                                <Link
-                                  to={`/ac/${inquiry.acId}`}
-                                  className="text-primary-blue hover:text-primary-blue-light text-sm"
-                                >
-                                  View AC Details →
-                                </Link>
-                              )}
-                            </div>
-                            <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getInquiryStatusColor(inquiry.status)}`}>
-                              {inquiry.status}
-                            </span>
-                          </div>
+              <div className="space-y-6">
+                {(() => {
+                  // Group inquiries by product category
+                  const groupedInquiries = getFilteredRentalInquiries().reduce((acc, inquiry) => {
+                    const category = inquiry.productCategory || inquiry.category || 'Other';
+                    if (!acc[category]) {
+                      acc[category] = [];
+                    }
+                    acc[category].push(inquiry);
+                    return acc;
+                  }, {});
 
-                          {inquiry.message && (
-                            <p className="text-text-dark mb-4">{inquiry.message}</p>
-                          )}
+                  // Define category order and icons
+                  const categoryOrder = ['AC', 'Refrigerator', 'Washing Machine', 'Other'];
+                  const categoryLabels = {
+                    'AC': 'Air Conditioners',
+                    'Refrigerator': 'Refrigerators',
+                    'Washing Machine': 'Washing Machines',
+                    'Other': 'Other Products'
+                  };
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div className="flex items-center space-x-2 text-text-light">
-                              <Phone className="w-4 h-4" />
-                              <a href={`tel:${inquiry.phone}`} className="text-sm hover:text-primary-blue">
-                                {inquiry.phone}
-                              </a>
-                            </div>
-                            <div className="flex items-center space-x-2 text-text-light">
-                              <Calendar className="w-4 h-4" />
-                              <span className="text-sm">{formatDate(inquiry.createdAt)}</span>
-                            </div>
+                  return categoryOrder.map((category) => {
+                    const inquiries = groupedInquiries[category] || [];
+                    if (inquiries.length === 0) return null;
+
+                    return (
+                      <div key={category} className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+                        <div className="bg-gradient-to-r from-primary-blue to-primary-blue-light px-6 py-4 border-b border-slate-200">
+                          <div className="flex items-center justify-between">
+                            <h2 className="text-xl font-bold text-white">
+                              {categoryLabels[category] || category} ({inquiries.length})
+                            </h2>
                           </div>
                         </div>
+                        <div className="p-6 space-y-4">
+                          {inquiries.map((inquiry) => {
+                            const inquiryId = inquiry._id || inquiry.id;
+                            const acDetails = inquiry.acDetails || {};
+                            return (
+                              <motion.div
+                                key={inquiryId}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-slate-50 rounded-2xl shadow-md border border-slate-200 p-6"
+                              >
+                                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                                  <div className="flex-1">
+                                    <div className="flex items-start justify-between mb-4">
+                                      <div>
+                                        <h3 className="text-xl font-semibold text-text-dark mb-1">
+                                          {inquiry.name}
+                                        </h3>
+                                        <p className="text-text-light mb-2">
+                                          Product: <span className="font-semibold text-primary-blue">
+                                            {acDetails.brand || inquiry.brand || 'N/A'} {acDetails.model || inquiry.model || ''}
+                                          </span>
+                                        </p>
+                                        {(inquiry.acId || inquiry.productId) && (
+                                          <Link
+                                            to={`/ac/${inquiry.acId || inquiry.productId}`}
+                                            className="text-primary-blue hover:text-primary-blue-light text-sm inline-flex items-center space-x-1"
+                                          >
+                                            <span>View Product Details</span>
+                                            <span>→</span>
+                                          </Link>
+                                        )}
+                                      </div>
+                                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getInquiryStatusColor(inquiry.status)}`}>
+                                        {inquiry.status}
+                                      </span>
+                                    </div>
 
-                        <div className="flex flex-col space-y-2 md:w-48">
-                          <label className="text-sm font-medium text-text-dark">Update Status</label>
-                          <select
-                            value={inquiry.status}
-                            onChange={(e) => handleInquiryStatusUpdate(inquiryId, e.target.value)}
-                            disabled={updatingStatus === inquiryId}
-                            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue disabled:opacity-50"
-                          >
-                            <option value="Pending">Pending</option>
-                            <option value="Contacted">Contacted</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Cancelled">Cancelled</option>
-                          </select>
-                          {updatingStatus === inquiryId && (
-                            <div className="flex items-center justify-center space-x-2 text-sm text-text-light">
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              <span>Updating...</span>
-                            </div>
-                          )}
-                          <a
-                            href={`tel:${inquiry.phone}`}
-                            className="flex items-center justify-center space-x-2 px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition"
-                          >
-                            <Phone className="w-4 h-4" />
-                            <span>Call Now</span>
-                          </a>
+                                    {inquiry.message && (
+                                      <p className="text-text-dark mb-4">{inquiry.message}</p>
+                                    )}
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                      <div className="flex items-center space-x-2 text-text-light">
+                                        <Phone className="w-4 h-4" />
+                                        <a href={`tel:${inquiry.phone}`} className="text-sm hover:text-primary-blue">
+                                          {inquiry.phone}
+                                        </a>
+                                      </div>
+                                      <div className="flex items-center space-x-2 text-text-light">
+                                        <Calendar className="w-4 h-4" />
+                                        <span className="text-sm">Requested: {formatDate(inquiry.createdAt)}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex flex-col space-y-2 md:w-48">
+                                    <label className="text-sm font-medium text-text-dark">Update Status</label>
+                                    <select
+                                      value={inquiry.status}
+                                      onChange={(e) => handleInquiryStatusUpdate(inquiryId, e.target.value)}
+                                      disabled={updatingStatus === inquiryId}
+                                      className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue disabled:opacity-50"
+                                    >
+                                      <option value="Pending">Pending</option>
+                                      <option value="Contacted">Contacted</option>
+                                      <option value="Completed">Completed</option>
+                                      <option value="Cancelled">Cancelled</option>
+                                    </select>
+                                    {updatingStatus === inquiryId && (
+                                      <div className="flex items-center justify-center space-x-2 text-sm text-text-light">
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        <span>Updating...</span>
+                                      </div>
+                                    )}
+                                    <a
+                                      href={`tel:${inquiry.phone}`}
+                                      className="flex items-center justify-center space-x-2 px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition"
+                                    >
+                                      <Phone className="w-4 h-4" />
+                                      <span>Call Now</span>
+                                    </a>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            );
+                          })}
                         </div>
                       </div>
-                    </motion.div>
-                  );
-                })}
+                    );
+                  });
+                })()}
               </div>
             )}
           </>
@@ -621,7 +670,7 @@ const Leads = () => {
         {activeTab === 'vendor' && (
           <>
             {vendorRequests.length === 0 ? (
-              <div className="bg-white p-12 rounded-lg shadow-md text-center">
+              <div className="bg-white p-12 rounded-2xl shadow-md border border-dashed border-slate-200 text-center">
                 <Store className="w-16 h-16 text-text-light mx-auto mb-4" />
                 <p className="text-text-light text-lg">No vendor requests found.</p>
               </div>
@@ -634,7 +683,7 @@ const Leads = () => {
                       key={requestId}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="bg-white rounded-lg shadow-md p-6"
+                      className="bg-white rounded-3xl shadow-lg border border-slate-100 p-6"
                     >
                       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                         <div className="flex-1">
