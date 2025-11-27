@@ -215,7 +215,7 @@ const Home = () => {
               <Loader2 className="w-8 h-8 animate-spin text-primary-blue" />
             </div>
           ) : featuredACs.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
               {featuredACs.map((ac) => (
                 <ACCard key={ac.id || ac._id} ac={ac} />
               ))}
@@ -256,7 +256,7 @@ const Home = () => {
               <Loader2 className="w-8 h-8 animate-spin text-primary-blue" />
             </div>
           ) : featuredRefrigerators.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
               {featuredRefrigerators.map((item) => (
                 <ACCard key={item.id || item._id} ac={item} />
               ))}
@@ -297,7 +297,7 @@ const Home = () => {
               <Loader2 className="w-8 h-8 animate-spin text-primary-blue" />
             </div>
           ) : featuredWashingMachines.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
               {featuredWashingMachines.map((item) => (
                 <ACCard key={item.id || item._id} ac={item} />
               ))}

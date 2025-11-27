@@ -194,9 +194,9 @@ function SingleScreen() {
                       choose your preferred model, <br /> and enjoy cool comfort.
                     </p>
                   </div>
-                  <Link to="/browse">
+                  <Link to="/browse?categories=AC%2CRefrigerator%2CWashing+Machine">
                     <button className="left-button bg-gradient-to-r from-primary-blue to-primary-blue-light text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm mt-4">
-                      Browse ACs
+                      Browse Products
                     </button>
                   </Link>
                 </div>
@@ -378,12 +378,12 @@ function SingleScreen() {
             <p className="text-sm mt-2">
               Browse through our wide selection of ACs, choose your preferred model, and enjoy cool comfort.
             </p>
-            <Link to="/browse">
+            <Link to="/browse?categories=AC%2CRefrigerator%2CWashing+Machine">
               <button
                 className="mt-3 px-6 py-3 bg-gradient-to-r from-primary-blue to-primary-blue-light text-white rounded-xl font-semibold hover:shadow-xl transition-all duration-300 hover:scale-105"
                 style={{ minWidth: '140px' }}
               >
-                Browse ACs
+                Browse Products
               </button>
             </Link>
           </div>

@@ -29,7 +29,7 @@ const ACCard = ({ ac }) => {
   const addToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!isAuthenticated) {
       navigate('/login');
       return;
@@ -38,7 +38,7 @@ const ACCard = ({ ac }) => {
     try {
       const cart = JSON.parse(localStorage.getItem('cart') || '[]');
       const existingItem = cart.find(item => item.id === (ac._id || ac.id));
-      
+
       if (existingItem) {
         const updatedCart = cart.map(item =>
           item.id === (ac._id || ac.id)
@@ -61,7 +61,7 @@ const ACCard = ({ ac }) => {
         };
         localStorage.setItem('cart', JSON.stringify([...cart, newItem]));
       }
-      
+
       setAddedToCart(true);
       window.dispatchEvent(new Event('cartUpdated'));
       setTimeout(() => setAddedToCart(false), 2000);
@@ -73,7 +73,7 @@ const ACCard = ({ ac }) => {
   const addToWishlist = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!isAuthenticated) {
       navigate('/login');
       return;
@@ -82,7 +82,7 @@ const ACCard = ({ ac }) => {
     try {
       const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
       const existingItem = wishlist.find(item => item.id === (ac._id || ac.id));
-      
+
       if (!existingItem) {
         const newItem = {
           id: ac._id || ac.id,
@@ -110,12 +110,9 @@ const ACCard = ({ ac }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 border-gray-200 hover:border-gradient-to-r hover:from-primary-blue/20 hover:via-primary-blue-light/20 hover:to-primary-blue/20 hover:-translate-y-2 group"
-      style={{
-        borderImage: 'none',
-      }}
+      className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-200 hover:border-primary-blue/30 hover:-translate-y-1 group h-full flex flex-col"
     >
-      <Link to={`/ac/${ac._id || ac.id}`} className="relative block h-32 sm:h-40 md:h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden cursor-pointer">
+      <Link to={`/ac/${ac._id || ac.id}`} className="relative block h-36 sm:h-40 md:h-44 lg:h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden cursor-pointer">
         {ac.images && ac.images.length > 0 ? (
           <>
             <img
@@ -159,59 +156,58 @@ const ACCard = ({ ac }) => {
           </div>
         )}
         {/* Action Buttons */}
-        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col gap-2 z-20">
+        <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 flex flex-col gap-1 z-20">
           <button
+            type="button"
             onClick={addToWishlist}
-            className={`p-2 rounded-full backdrop-blur-md shadow-lg transition-all ${
-              addedToWishlist
-                ? 'bg-green-500/90 text-white'
-                : 'bg-white/90 text-red-600 hover:bg-red-50'
-            }`}
+            className={`w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md bg-white/95 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300 hover:scale-110 ${addedToWishlist
+              ? 'bg-green-500/95 text-white'
+              : 'text-red-600 hover:bg-red-50/90'
+              }`}
             title={addedToWishlist ? 'Added to wishlist' : 'Add to wishlist'}
           >
             {addedToWishlist ? (
-              <FiCheck className="w-4 h-4" />
+              <FiCheck className="w-3 h-3 sm:w-4 sm:h-4" />
             ) : (
-              <FiHeart className="w-4 h-4" />
+              <FiHeart className="w-3 h-3 sm:w-4 sm:h-4" />
             )}
           </button>
           <button
+            type="button"
             onClick={addToCart}
-            className={`p-2 rounded-full backdrop-blur-md shadow-lg transition-all ${
-              addedToCart
-                ? 'bg-green-500/90 text-white'
-                : 'bg-white/90 text-primary-blue hover:bg-blue-50'
-            }`}
+            className={`w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md bg-white/95 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300 hover:scale-110 ${addedToCart
+              ? 'bg-green-500/95 text-white'
+              : 'text-primary-blue hover:bg-blue-50/90'
+              }`}
             title={addedToCart ? 'Added to cart' : 'Add to cart'}
           >
             {addedToCart ? (
-              <FiCheck className="w-4 h-4" />
+              <FiCheck className="w-3 h-3 sm:w-4 sm:h-4" />
             ) : (
-              <FiShoppingCart className="w-4 h-4" />
+              <FiShoppingCart className="w-3 h-3 sm:w-4 sm:h-4" />
             )}
           </button>
         </div>
         {ac.status && (
-          <div className={`absolute top-2 right-2 sm:top-3 sm:right-3 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold backdrop-blur-md shadow-lg z-10 ${
-            ac.status === 'Available' ? 'bg-green-500/90 text-white' :
+          <div className={`absolute top-2 right-2 sm:top-3 sm:right-3 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold backdrop-blur-md shadow-lg z-10 ${ac.status === 'Available' ? 'bg-green-500/90 text-white' :
             ac.status === 'Rented Out' ? 'bg-red-500/90 text-white' :
-            'bg-yellow-500/90 text-white'
-          }`}>
+              'bg-yellow-500/90 text-white'
+            }`}>
             {ac.status}
           </div>
         )}
       </Link>
-      
-      <div className="p-3 sm:p-4 md:p-5 lg:p-6">
-        <h3 className="font-bold text-sm sm:text-base md:text-lg lg:text-xl text-text-dark mb-1 sm:mb-2 line-clamp-1">{ac.brand} {ac.model}</h3>
-        <p className="text-xs sm:text-sm text-text-light mb-2 sm:mb-3 font-medium line-clamp-1">{ac.capacity} • {ac.type}</p>
-        <div className="flex items-center text-xs sm:text-sm text-text-light mb-2 sm:mb-3 md:mb-4">
-          <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 text-primary-blue flex-shrink-0" />
-          <span className="truncate">{ac.location}</span>
+
+      <div className="p-3 sm:p-4 md:p-4 flex-1 flex flex-col">
+        <h3 className="font-bold text-sm sm:text-base md:text-lg text-text-dark mb-1.5 sm:mb-2 line-clamp-2">{ac.brand} {ac.model}</h3>
+        <p className="text-xs sm:text-sm text-text-light mb-2 sm:mb-2.5 font-medium">{ac.capacity} • {ac.type}</p>
+        <div className="flex items-center text-xs sm:text-sm text-text-light mb-2 sm:mb-2.5">
+          <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 text-primary-blue flex-shrink-0" />
+          <span className="line-clamp-1">{ac.location}</span>
         </div>
-        <div className="flex items-baseline justify-between mb-3 sm:mb-4 md:mb-5 pb-2 sm:pb-3 md:pb-4 border-b border-gray-100">
+        <div className="flex items-baseline justify-between mb-2.5 sm:mb-3 pb-2 sm:pb-2.5 border-b border-gray-100">
           <div>
-            <span className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-primary-blue">
+            <span className="text-lg sm:text-xl md:text-2xl font-bold text-primary-blue">
               ₹{ac.price?.monthly?.toLocaleString() || 'N/A'}
             </span>
             <span className="text-xs sm:text-sm text-text-light ml-1">/month</span>
@@ -219,7 +215,7 @@ const ACCard = ({ ac }) => {
         </div>
         <Link
           to={`/ac/${ac._id || ac.id}`}
-          className="block w-full text-center bg-gradient-to-r from-primary-blue to-primary-blue-light text-white py-2 sm:py-2.5 md:py-3 rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-300 text-xs sm:text-sm md:text-base font-semibold hover:scale-[1.02]"
+          className="block w-full text-center bg-gradient-to-r from-primary-blue to-primary-blue-light text-white py-2 sm:py-2.5 md:py-3 rounded-lg hover:shadow-lg transition-all duration-300 text-xs sm:text-sm md:text-base font-semibold hover:scale-[1.02] mt-auto"
         >
           View Details
         </Link>

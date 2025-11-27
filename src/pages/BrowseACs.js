@@ -531,7 +531,7 @@ const BrowseACs = () => {
                   <Loader2 className="w-12 h-12 animate-spin text-purple-600" />
                 </div>
               ) : (filters.condition || filters.priceSort ? filteredACs.length > 0 : acs.length > 0) ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
                   {(filters.condition || filters.priceSort ? filteredACs : acs).map((ac, index) => (
                     <motion.div
                       key={ac?._id || ac?.id}
