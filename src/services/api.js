@@ -603,6 +603,104 @@ export const apiService = {
       };
     }
   },
+
+  // Tickets - User endpoints
+  createTicket: async (ticketData) => {
+    try {
+      const response = await api.post('/tickets', ticketData);
+      return {
+        success: true,
+        message: response.data.message || 'Ticket created successfully',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to create ticket',
+      };
+    }
+  },
+
+  getUserTickets: async () => {
+    try {
+      const response = await api.get('/tickets');
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch tickets',
+        data: [],
+      };
+    }
+  },
+
+  getTicketById: async (ticketId) => {
+    try {
+      const response = await api.get(`/tickets/${ticketId}`);
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch ticket',
+        data: null,
+      };
+    }
+  },
+
+  // Admin - Ticket Management
+  getAllTickets: async (filters = {}) => {
+    try {
+      const response = await api.get('/admin/tickets', { params: filters });
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch tickets',
+        data: [],
+      };
+    }
+  },
+
+  updateTicketStatus: async (ticketId, status) => {
+    try {
+      const response = await api.patch(`/admin/tickets/${ticketId}/status`, { status });
+      return {
+        success: true,
+        message: response.data.message || 'Ticket status updated successfully',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to update ticket status',
+      };
+    }
+  },
+
+  addTicketRemark: async (ticketId, remark) => {
+    try {
+      const response = await api.post(`/admin/tickets/${ticketId}/remarks`, { remark });
+      return {
+        success: true,
+        message: response.data.message || 'Remark added successfully',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to add remark',
+      };
+    }
+  },
 };
 
 export default api;

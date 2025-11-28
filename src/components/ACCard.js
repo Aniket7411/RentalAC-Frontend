@@ -112,7 +112,7 @@ const ACCard = ({ ac }) => {
       transition={{ duration: 0.3 }}
       className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-200 hover:border-primary-blue/30 hover:-translate-y-1 group h-full flex flex-col"
     >
-      <Link to={`/ac/${ac._id || ac.id}`} className="relative block h-36 sm:h-40 md:h-44 lg:h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden cursor-pointer">
+      <Link to={`/ac/${ac._id || ac.id}`} className="relative block h-44 sm:h-48 md:h-52 lg:h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden cursor-pointer">
         {ac.images && ac.images.length > 0 ? (
           <>
             <img
@@ -201,18 +201,20 @@ const ACCard = ({ ac }) => {
       <div className="p-3 sm:p-4 md:p-4 flex-1 flex flex-col">
         <h3 className="font-bold text-sm sm:text-base md:text-lg text-text-dark mb-1.5 sm:mb-2 line-clamp-2">{ac.brand} {ac.model}</h3>
         <p className="text-xs sm:text-sm text-text-light mb-2 sm:mb-2.5 font-medium">{ac.capacity} • {ac.type}</p>
-        <div className="flex items-center text-xs sm:text-sm text-text-light mb-2 sm:mb-2.5">
+        {/* Location - Commented out for browsing view */}
+        {/* <div className="flex items-center text-xs sm:text-sm text-text-light mb-2 sm:mb-2.5">
           <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 text-primary-blue flex-shrink-0" />
           <span className="line-clamp-1">{ac.location}</span>
-        </div>
-        <div className="flex items-baseline justify-between mb-2.5 sm:mb-3 pb-2 sm:pb-2.5 border-b border-gray-100">
+        </div> */}
+        {/* Price - Commented out for browsing view */}
+        {/* <div className="flex items-baseline justify-between mb-2.5 sm:mb-3 pb-2 sm:pb-2.5 border-b border-gray-100">
           <div>
             <span className="text-lg sm:text-xl md:text-2xl font-bold text-primary-blue">
               ₹{ac.price?.monthly?.toLocaleString() || 'N/A'}
             </span>
             <span className="text-xs sm:text-sm text-text-light ml-1">/month</span>
           </div>
-        </div>
+        </div> */}
         <Link
           to={`/ac/${ac._id || ac.id}`}
           className="block w-full text-center bg-gradient-to-r from-primary-blue to-primary-blue-light text-white py-2 sm:py-2.5 md:py-3 rounded-lg hover:shadow-lg transition-all duration-300 text-xs sm:text-sm md:text-base font-semibold hover:scale-[1.02] mt-auto"

@@ -31,6 +31,7 @@ import EditProduct from './pages/admin/EditProduct';
 import ManageACs from './pages/admin/ManageACs';
 import Leads from './pages/admin/Leads';
 import ManageServices from './pages/admin/ManageServices';
+import Tickets from './pages/admin/Tickets';
 
 function App() {
   return (
@@ -149,6 +150,14 @@ function App() {
                 element={
                   <ProtectedRoute requireAdmin={true}>
                     <ManageServices />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/tickets"
+                element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <Tickets />
                   </ProtectedRoute>
                 }
               />

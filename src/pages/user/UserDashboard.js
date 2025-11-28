@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { apiService } from '../../services/api';
-import { ShoppingBag, Wrench, Clock, CheckCircle, XCircle, ShoppingCart, Heart, Package, MapPin, Edit2, X, Save, Phone, MapPinned } from 'lucide-react';
+import { ShoppingBag, Wrench, Clock, CheckCircle, XCircle, ShoppingCart, Heart, Package, MapPin, Edit2, X, Save, Phone, MapPinned, Ticket, Plus } from 'lucide-react';
 import { FiShoppingCart, FiHeart, FiPackage, FiAlertCircle } from 'react-icons/fi';
 import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import TicketModal from '../../components/TicketModal';
 
 const UserDashboard = () => {
   const { user } = useAuth();
@@ -25,10 +26,14 @@ const UserDashboard = () => {
   });
   const [savingAddress, setSavingAddress] = useState(false);
   const [addressSuccess, setAddressSuccess] = useState(false);
+  const [tickets, setTickets] = useState([]);
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  const [loadingTickets, setLoadingTickets] = useState(false);
 
   useEffect(() => {
     loadData();
     loadLocalData();
+    loadTickets();
     // Load address data from user object
     if (user) {
       setAddressData({
@@ -123,15 +128,52 @@ const UserDashboard = () => {
     }
   };
 
+  const loadTickets = async () => {
+    try {
+      setLoadingTickets(true);
+      if (apiService.getUserTickets) {
+        const response = await apiService.getUserTickets();
+        if (response.success) {
+          setTickets(response.data || []);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading tickets:', error);
+    } finally {
+      setLoadingTickets(false);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'Active':
       case 'Completed':
+      case 'Resolved':
         return 'text-green-600 bg-green-100';
       case 'Pending':
+      case 'Open':
+      case 'In Progress':
         return 'text-yellow-600 bg-yellow-100';
       case 'Cancelled':
+      case 'Closed':
         return 'text-red-600 bg-red-100';
+      case 'New':
+        return 'text-blue-600 bg-blue-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
+    }
+  };
+
+  const getPriorityColor = (priority) => {
+    switch (priority?.toLowerCase()) {
+      case 'urgent':
+        return 'text-red-600 bg-red-100';
+      case 'high':
+        return 'text-orange-600 bg-orange-100';
+      case 'medium':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'low':
+        return 'text-blue-600 bg-blue-100';
       default:
         return 'text-gray-600 bg-gray-100';
     }
@@ -513,6 +555,13 @@ const UserDashboard = () => {
             >
               Request Service
             </Link>
+            <button
+              onClick={() => setShowTicketModal(true)}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Raise Ticket
+            </button>
           </div>
         </div>
 
@@ -590,6 +639,81 @@ const UserDashboard = () => {
             )}
           </div>
         </div>
+
+        {/* Support Tickets */}
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-md mt-4 md:mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-text-dark flex items-center gap-2">
+              <Ticket className="w-6 h-6 text-primary-blue" />
+              Support Tickets
+            </h2>
+            <button
+              onClick={() => setShowTicketModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              <span>New Ticket</span>
+            </button>
+          </div>
+          
+          {loadingTickets ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-primary-blue" />
+            </div>
+          ) : tickets.length > 0 ? (
+            <div className="space-y-4">
+              {tickets.map((ticket) => (
+                <div key={ticket._id || ticket.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-semibold text-text-dark">{ticket.subject}</h3>
+                        <span className={`px-2 py-1 rounded text-xs font-semibold ${getPriorityColor(ticket.priority)}`}>
+                          {ticket.priority || 'medium'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-text-light mb-2 line-clamp-2">{ticket.description}</p>
+                      <div className="flex items-center gap-4 text-xs text-text-light">
+                        <span>Category: {ticket.category || 'general'}</span>
+                        <span>•</span>
+                        <span>Created: {new Date(ticket.createdAt || ticket.created_at).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                    <span className={`px-3 py-1 rounded text-sm font-semibold ${getStatusColor(ticket.status)}`}>
+                      {ticket.status || 'New'}
+                    </span>
+                  </div>
+                  {ticket.adminRemark && (
+                    <div className="mt-3 pt-3 border-t border-gray-200">
+                      <p className="text-xs font-semibold text-text-dark mb-1">Admin Remark:</p>
+                      <p className="text-sm text-text-light">{ticket.adminRemark}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Ticket className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-text-light mb-4">No tickets yet. Raise a ticket if you need assistance.</p>
+              <button
+                onClick={() => setShowTicketModal(true)}
+                className="px-6 py-2 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition-colors"
+              >
+                Raise Your First Ticket
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Ticket Modal */}
+        <TicketModal
+          isOpen={showTicketModal}
+          onClose={() => setShowTicketModal(false)}
+          onSuccess={() => {
+            loadTickets();
+          }}
+        />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, Wrench, Plus, List, Users, LayoutDashboard } from 'lucide-react';
+import { LogOut, Wrench, Plus, List, Users, LayoutDashboard, Ticket } from 'lucide-react';
 import { FiShoppingCart, FiHeart, FiUser, FiMenu, FiX } from 'react-icons/fi';
 
 const Header = () => {
@@ -96,6 +96,10 @@ const Header = () => {
                 <Link to="/admin/manage-services" className="flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
                   <Wrench className="w-4 h-4" />
                   <span>Services</span>
+                </Link>
+                <Link to="/admin/tickets" className="flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
+                  <Ticket className="w-4 h-4" />
+                  <span>Tickets</span>
                 </Link>
                 <button onClick={handleLogout} className="ml-2 flex items-center space-x-2 px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 transition-all rounded-lg font-medium">
                   <LogOut className="w-4 h-4" />
