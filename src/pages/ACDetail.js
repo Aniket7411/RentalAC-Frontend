@@ -16,6 +16,18 @@ const ACDetail = () => {
   const [ac, setAc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const prevImage = () => {
+    if (ac?.images && ac.images.length > 0) {
+      setCurrentImageIndex((prev) => (prev - 1 + ac.images.length) % ac.images.length);
+    }
+  };
+
+  const nextImage = () => {
+    if (ac?.images && ac.images.length > 0) {
+      setCurrentImageIndex((prev) => (prev + 1) % ac.images.length);
+    }
+  };
   const [selectedDuration, setSelectedDuration] = useState('3'); // '3', '6', '9', '11'
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [inquiryData, setInquiryData] = useState({
@@ -120,18 +132,6 @@ const ACDetail = () => {
       } catch (fallbackErr) {
         console.error('Fallback failed:', fallbackErr);
       }
-    }
-  };
-
-  const nextImage = () => {
-    if (ac?.images && ac.images.length > 0) {
-      setCurrentImageIndex((prev) => (prev + 1) % ac.images.length);
-    }
-  };
-
-  const prevImage = () => {
-    if (ac?.images && ac.images.length > 0) {
-      setCurrentImageIndex((prev) => (prev - 1 + ac.images.length) % ac.images.length);
     }
   };
 
@@ -275,7 +275,6 @@ const ACDetail = () => {
     if (!ac.price) return 0;
     // Default to 3 months if selectedDuration is not valid
     return ac.price[selectedDuration] || ac.price[3] || 0;
-    return ac.price[selectedDuration] || 0;
   };
   const price = getPrice();
   const hasImages = ac.images && ac.images.length > 0;
@@ -305,54 +304,52 @@ const ACDetail = () => {
             className="bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden border border-gray-100"
           >
             {hasImages ? (
-              <div className="relative w-full aspect-square sm:aspect-[4/3] md:aspect-[3/2] bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                <img
-                  src={ac.images[currentImageIndex]}
-                  alt={`${ac.brand} ${ac.model}`}
-                  className="w-full h-full object-contain p-4 sm:p-6 md:p-8"
-                  onError={(e) => {
-                    e.target.src = 'https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=800&q=80';
-                  }}
-                />
+              <div className="flex flex-col md:flex-row gap-2 sm:gap-3 p-2 sm:p-3">
+                {/* Thumbnail Images Column (Left) */}
                 {ac.images.length > 1 && (
-                  <>
-                    <button
-                      onClick={prevImage}
-                      aria-label="Previous image"
-                      className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm text-gray-700 hover:text-primary-blue shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110 z-10"
-                    >
-                      <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    <button
-                      onClick={nextImage}
-                      aria-label="Next image"
-                      className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm text-gray-700 hover:text-primary-blue shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110 z-10"
-                    >
-                      <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                    <div className="absolute bottom-2 sm:bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-1.5 sm:space-x-2 bg-white/80 backdrop-blur-sm px-2 sm:px-3 py-1.5 sm:py-2 rounded-full">
-                      {ac.images.map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentImageIndex(index)}
-                          className={`transition-all duration-300 rounded-full ${index === currentImageIndex
-                            ? 'w-8 h-2 bg-primary-blue'
-                            : 'w-2 h-2 bg-gray-400 hover:bg-gray-500'
-                            }`}
-                          aria-label={`Go to image ${index + 1}`}
+                  <div className="flex md:flex-col gap-1.5 sm:gap-2 order-2 md:order-1 md:max-h-[450px] scrollbar-hide">
+                    {ac.images.map((image, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentImageIndex(index)}
+                        className={`flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border-2 transition-all duration-300 ${index === currentImageIndex
+                          ? 'border-primary-blue shadow-md scale-105'
+                          : 'border-gray-200 hover:border-primary-blue/50 opacity-70 hover:opacity-100'
+                          }`}
+                        aria-label={`View image ${index + 1}`}
+                      >
+                        <img
+                          src={image}
+                          alt={`${ac.brand} ${ac.model} - Image ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.src = 'https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=200&q=80';
+                          }}
                         />
-                      ))}
-                    </div>
-                  </>
-                )}
-                {ac.status && (
-                  <div className={`absolute top-2 sm:top-3 right-2 sm:right-3 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold backdrop-blur-md shadow-md ${ac.status === 'Available' ? 'bg-green-500/90 text-white' :
-                    ac.status === 'Rented Out' ? 'bg-red-500/90 text-white' :
-                      'bg-yellow-500/90 text-white'
-                    }`}>
-                    {ac.status}
+                      </button>
+                    ))}
                   </div>
                 )}
+
+                {/* Main Hero Image */}
+                <div className="relative flex-1 order-1 md:order-2 aspect-square sm:aspect-[4/3] md:aspect-[3/2] lg:aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden">
+                  <img
+                    src={ac.images[currentImageIndex]}
+                    alt={`${ac.brand} ${ac.model}`}
+                    className="w-full h-full object-contain p-3 sm:p-4 md:p-6"
+                    onError={(e) => {
+                      e.target.src = 'https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=800&q=80';
+                    }}
+                  />
+                  {ac.status && (
+                    <div className={`absolute top-2 sm:top-3 right-2 sm:right-3 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold backdrop-blur-md shadow-md ${ac.status === 'Available' ? 'bg-green-500/90 text-white' :
+                      ac.status === 'Rented Out' ? 'bg-red-500/90 text-white' :
+                        'bg-yellow-500/90 text-white'
+                      }`}>
+                      {ac.status}
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="w-full aspect-square sm:aspect-[4/3] md:aspect-[3/2] flex items-center justify-center text-gray-400 bg-gradient-to-br from-gray-100 to-gray-200">
@@ -368,76 +365,59 @@ const ACDetail = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 border border-gray-100"
+            className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-5 lg:p-6 border border-gray-100"
           >
-            <div className="flex items-start justify-between mb-4 sm:mb-5">
+            <div className="flex items-start justify-between mb-2 sm:mb-3">
               <div className="flex-1">
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-text-dark mb-1.5 sm:mb-2">
+                <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-text-dark mb-1">
                   {ac.brand} {ac.model}
                 </h1>
-                <p className="text-sm sm:text-base text-text-light">
+                <p className="text-xs sm:text-sm text-text-light">
                   {ac.capacity} • {ac.type}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center text-text-light mb-4 sm:mb-5 pb-4 sm:pb-5 border-b border-gray-200">
-              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2 text-primary-blue flex-shrink-0" />
-              <span className="text-xs sm:text-sm md:text-base truncate">{ac.location}</span>
+            <div className="flex items-center text-text-light mb-2 sm:mb-3 pb-2 sm:pb-3 border-b border-gray-200">
+              <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 text-primary-blue flex-shrink-0" />
+              <span className="text-xs sm:text-sm truncate">{ac.location}</span>
             </div>
 
             {ac.description && (
-              <div className="mb-4 sm:mb-5 pb-4 sm:pb-5 border-b border-gray-200">
-                <h3 className="font-semibold text-text-dark mb-2 sm:mb-3 text-base sm:text-lg">Description</h3>
-                <p className="text-text-light leading-relaxed text-xs sm:text-sm md:text-base">{ac.description}</p>
+              <div className="mb-2 sm:mb-3 pb-2 sm:pb-3 border-b border-gray-200">
+                <h3 className="font-semibold text-text-dark mb-1 sm:mb-2 text-sm sm:text-base">Description</h3>
+                <p className="text-text-light leading-relaxed text-xs sm:text-sm line-clamp-3 md:line-clamp-none">{ac.description}</p>
               </div>
             )}
 
-            {/* Features & Specs */}
+            {/* Features & Specs - Compact */}
             {(ac.features?.specs?.length > 0 || ac.features?.dimensions || ac.features?.safety?.length > 0 || ac.energyRating || ac.operationType || ac.loadType) && (
-              <div className="mb-4 sm:mb-5 pb-4 sm:pb-5 border-b border-gray-200">
-                <h3 className="font-semibold text-text-dark mb-2 sm:mb-3 text-base sm:text-lg">Features & Specifications</h3>
-                <div className="space-y-2 sm:space-y-3">
+              <div className="mb-2 sm:mb-3 pb-2 sm:pb-3 border-b border-gray-200">
+                <h3 className="font-semibold text-text-dark mb-1.5 sm:mb-2 text-sm sm:text-base">Features & Specifications</h3>
+                <div className="space-y-1.5 sm:space-y-2">
                   {ac.features?.specs?.length > 0 && (
                     <div>
-                      <h4 className="text-xs sm:text-sm font-medium text-text-dark mb-1.5">Specifications</h4>
-                      <ul className="list-disc list-inside text-xs sm:text-sm text-text-light space-y-1">
-                        {ac.features.specs.map((spec, idx) => (
+                      <h4 className="text-xs font-medium text-text-dark mb-0.5">Specifications</h4>
+                      <ul className="list-disc list-inside text-xs text-text-light space-y-0.5 line-clamp-2 md:line-clamp-none">
+                        {ac.features.specs.slice(0, 3).map((spec, idx) => (
                           <li key={idx}>{spec}</li>
                         ))}
+                        {ac.features.specs.length > 3 && (
+                          <li className="text-primary-blue cursor-pointer">+{ac.features.specs.length - 3} more</li>
+                        )}
                       </ul>
                     </div>
                   )}
                   {ac.features?.dimensions && (
                     <div>
-                      <h4 className="text-xs sm:text-sm font-medium text-text-dark mb-1">Dimensions</h4>
-                      <p className="text-xs sm:text-sm text-text-light">{ac.features.dimensions}</p>
-                    </div>
-                  )}
-                  {ac.features?.safety?.length > 0 && (
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-medium text-text-dark mb-1.5">Safety & Usage</h4>
-                      <ul className="list-disc list-inside text-xs sm:text-sm text-text-light space-y-1">
-                        {ac.features.safety.map((safety, idx) => (
-                          <li key={idx}>{safety}</li>
-                        ))}
-                      </ul>
+                      <h4 className="text-xs font-medium text-text-dark mb-0.5">Dimensions</h4>
+                      <p className="text-xs text-text-light">{ac.features.dimensions}</p>
                     </div>
                   )}
                   {ac.energyRating && (
                     <div>
-                      <h4 className="text-xs sm:text-sm font-medium text-text-dark mb-1">Energy Rating</h4>
-                      <p className="text-xs sm:text-sm text-text-light">{ac.energyRating}</p>
-                    </div>
-                  )}
-                  {(ac.operationType || ac.loadType) && (
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-medium text-text-dark mb-1">Operation Details</h4>
-                      <p className="text-xs sm:text-sm text-text-light">
-                        {ac.operationType && `Type: ${ac.operationType}`}
-                        {ac.operationType && ac.loadType && ' • '}
-                        {ac.loadType && `Load: ${ac.loadType}`}
-                      </p>
+                      <h4 className="text-xs font-medium text-text-dark mb-0.5">Energy Rating</h4>
+                      <p className="text-xs text-text-light">{ac.energyRating}</p>
                     </div>
                   )}
                 </div>
@@ -445,9 +425,9 @@ const ACDetail = () => {
             )}
 
             {/* Pricing */}
-            <div className="mb-4 sm:mb-5">
-              <h3 className="font-semibold text-text-dark mb-3 sm:mb-4 text-base sm:text-lg">Rental Pricing</h3>
-              <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
+            <div className="mb-2 sm:mb-3">
+              <h3 className="font-semibold text-text-dark mb-2 sm:mb-3 text-sm sm:text-base">Rental Pricing</h3>
+              <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-2 sm:mb-3">
                 {[
                   { key: '3', label: '3 Months' },
                   { key: '6', label: '6 Months' },
@@ -457,7 +437,7 @@ const ACDetail = () => {
                   <button
                     key={duration.key}
                     onClick={() => setSelectedDuration(duration.key)}
-                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-medium transition-all duration-300 text-xs sm:text-sm ${selectedDuration === duration.key
+                    className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-300 text-xs ${selectedDuration === duration.key
                       ? 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white shadow-md'
                       : 'bg-gray-100 text-text-dark hover:bg-gray-200'
                       }`}
@@ -466,9 +446,9 @@ const ACDetail = () => {
                   </button>
                 ))}
               </div>
-              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-blue mb-1">
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-primary-blue">
                 ₹{price.toLocaleString()}
-                <span className="text-sm sm:text-base md:text-lg text-text-light font-normal ml-1 sm:ml-2">
+                <span className="text-xs sm:text-sm md:text-base text-text-light font-normal ml-1">
                   /{selectedDuration === '3' ? '3 months' : selectedDuration === '6' ? '6 months' : selectedDuration === '9' ? '9 months' : '11 months'}
                 </span>
               </div>
@@ -483,11 +463,10 @@ const ACDetail = () => {
                     whileTap={{ scale: 0.98 }}
                     onClick={addToCart}
                     disabled={addedToCart}
-                    className={`w-full py-2.5 sm:py-3 md:py-3.5 rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-300 font-semibold text-sm sm:text-base md:text-lg ${
-                      addedToCart
-                        ? 'bg-green-500 text-white cursor-not-allowed'
-                        : 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white'
-                    }`}
+                    className={`w-full py-2.5 sm:py-3 md:py-3.5 rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-300 font-semibold text-sm sm:text-base md:text-lg ${addedToCart
+                      ? 'bg-green-500 text-white cursor-not-allowed'
+                      : 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white'
+                      }`}
                   >
                     {addedToCart ? 'Added to Cart ✓' : 'Add to Cart'}
                   </motion.button>
@@ -496,7 +475,7 @@ const ACDetail = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setShowInquiryForm(true)}
-                    className="w-full bg-gradient-to-r from-primary-blue to-primary-blue-light text-white py-2.5 sm:py-3 md:py-3.5 rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-300 font-semibold text-sm sm:text-base md:text-lg"
+                    className="w-full bg-gradient-to-r from-primary-blue to-primary-blue-light text-white py-2 sm:py-2.5 md:py-3 rounded-lg hover:shadow-lg transition-all duration-300 font-semibold text-xs sm:text-sm md:text-base"
                   >
                     Inquire About Rental
                   </motion.button>
