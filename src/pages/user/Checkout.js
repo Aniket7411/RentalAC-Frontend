@@ -77,7 +77,15 @@ const Checkout = () => {
             })),
           ];
 
+          // Generate orderId (format: ORD-YYYY-XXX)
+          const generateOrderId = () => {
+            const year = new Date().getFullYear();
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            return `ORD-${year}-${random}`;
+          };
+
           const orderData = {
+            orderId: generateOrderId(), // Generate orderId on frontend
             items: orderItems,
             total: totals.total,
             discount: discount,
@@ -169,8 +177,8 @@ const Checkout = () => {
                 {/* Pay Now Option */}
                 <label
                   className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition ${selectedPaymentOption === 'payNow'
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-green-500 bg-green-50'
+                    : 'border-gray-200 hover:border-gray-300'
                     }`}
                 >
                   <input
@@ -208,8 +216,8 @@ const Checkout = () => {
                 {/* Pay Later Option */}
                 <label
                   className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition ${selectedPaymentOption === 'payLater'
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
                     }`}
                 >
                   <input
