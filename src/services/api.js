@@ -604,6 +604,68 @@ export const apiService = {
     }
   },
 
+  // Wishlist Management
+  getWishlist: async () => {
+    try {
+      const response = await api.get('/wishlist');
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch wishlist',
+      };
+    }
+  },
+
+  addToWishlist: async (productId) => {
+    try {
+      const response = await api.post('/wishlist', { productId });
+      return {
+        success: true,
+        message: response.data.message || 'Added to wishlist',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to add to wishlist',
+      };
+    }
+  },
+
+  removeFromWishlist: async (productId) => {
+    try {
+      const response = await api.delete(`/wishlist/${productId}`);
+      return {
+        success: true,
+        message: response.data.message || 'Removed from wishlist',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to remove from wishlist',
+      };
+    }
+  },
+
+  checkWishlistStatus: async (productId) => {
+    try {
+      const response = await api.get(`/wishlist/check/${productId}`);
+      return {
+        success: true,
+        isInWishlist: response.data.isInWishlist || false,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        isInWishlist: false,
+      };
+    }
+  },
+
   // User Service Bookings
   getUserServiceBookings: async () => {
     try {

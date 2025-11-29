@@ -1,46 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import { LogOut, Wrench, Plus, List, Users, LayoutDashboard, Ticket } from 'lucide-react';
 import { FiShoppingCart, FiHeart, FiUser, FiMenu, FiX } from 'react-icons/fi';
 
 const Header = () => {
   const { user, logout, isAdmin, isUser } = useAuth();
+  const { cartItems } = useCart();
+  const { wishlistCount } = useWishlist();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-  const [wishlistCount, setWishlistCount] = useState(0);
 
   useEffect(() => {
-    // Load cart and wishlist counts from localStorage
-    const updateCounts = () => {
-      try {
-        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        // Filter out invalid items
-        const validCart = cart.filter(item => item && (item.id || item._id));
-        const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-        setCartCount(validCart.length);
-        setWishlistCount(wishlist.length);
-      } catch (error) {
-        console.error('Error loading cart/wishlist:', error);
-        setCartCount(0);
-        setWishlistCount(0);
-      }
-    };
-
-    updateCounts();
-    // Update counts when storage changes
-    window.addEventListener('storage', updateCounts);
-    // Custom event for same-tab updates
-    window.addEventListener('cartUpdated', updateCounts);
-    window.addEventListener('wishlistUpdated', updateCounts);
-
-    return () => {
-      window.removeEventListener('storage', updateCounts);
-      window.removeEventListener('cartUpdated', updateCounts);
-      window.removeEventListener('wishlistUpdated', updateCounts);
-    };
-  }, []);
+    // Update cart count from cart context
+    setCartCount(cartItems.length);
+  }, [cartItems]);
 
   const handleLogout = () => {
     logout();

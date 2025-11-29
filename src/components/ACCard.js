@@ -1,13 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useWishlist } from '../context/WishlistContext';
 import { FiHeart } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
 const ACCard = ({ ac }) => {
   const { isAuthenticated } = useAuth();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const navigate = useNavigate();
-  const [addedToWishlist, setAddedToWishlist] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const productId = ac._id || ac.id;
+
+  useEffect(() => {
+    if (isAuthenticated && productId) {
+      setIsWishlisted(isInWishlist(productId));
+    }
+  }, [isAuthenticated, productId, isInWishlist]);
 
   // Calculate per month price for 11 months (to show attractive pricing)
   const calculatePerMonthPrice = () => {
@@ -23,7 +34,7 @@ const ACCard = ({ ac }) => {
     return typeof ac.price === 'number' ? ac.price : 0;
   };
 
-  const addToWishlist = (e) => {
+  const handleWishlistToggle = async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -32,29 +43,23 @@ const ACCard = ({ ac }) => {
       return;
     }
 
+    setLoading(true);
     try {
-      const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-      const existingItem = wishlist.find(item => item.id === (ac._id || ac.id));
-
-      if (!existingItem) {
-        const newItem = {
-          id: ac._id || ac.id,
-          brand: ac.brand,
-          model: ac.model,
-          name: `${ac.brand} ${ac.model}`,
-          capacity: ac.capacity,
-          type: ac.type,
-          location: ac.location,
-          price: ac.price,
-          images: ac.images,
-        };
-        localStorage.setItem('wishlist', JSON.stringify([...wishlist, newItem]));
-        setAddedToWishlist(true);
-        window.dispatchEvent(new Event('wishlistUpdated'));
-        setTimeout(() => setAddedToWishlist(false), 2000);
+      if (isWishlisted) {
+        const result = await removeFromWishlist(productId);
+        if (result.success) {
+          setIsWishlisted(false);
+        }
+      } else {
+        const result = await addToWishlist(productId);
+        if (result.success) {
+          setIsWishlisted(true);
+        }
       }
     } catch (error) {
-      console.error('Error adding to wishlist:', error);
+      console.error('Error toggling wishlist:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -83,16 +88,12 @@ const ACCard = ({ ac }) => {
         {/* Wishlist Icon Only (no button background) */}
         <div className="absolute top-2 right-2 z-20">
           <FiHeart
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              addToWishlist(e);
-            }}
-            className={`w-5 h-5 sm:w-6 sm:h-6 cursor-pointer transition-all duration-300 ${addedToWishlist
+            onClick={handleWishlistToggle}
+            className={`w-5 h-5 sm:w-6 sm:h-6 cursor-pointer transition-all duration-300 ${isWishlisted
               ? 'text-red-500 fill-red-500'
               : 'text-white drop-shadow-lg hover:text-red-500'
-              }`}
-            title={addedToWishlist ? 'Added to wishlist' : 'Add to wishlist'}
+              } ${loading ? 'opacity-50 cursor-wait' : ''}`}
+            title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           />
         </div>
         {ac.status && (

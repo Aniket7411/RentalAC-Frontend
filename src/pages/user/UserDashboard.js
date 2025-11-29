@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useWishlist } from '../../context/WishlistContext';
 import { apiService } from '../../services/api';
 import { ShoppingBag, Wrench, Clock, CheckCircle, XCircle, ShoppingCart, Heart, Package, MapPin, Edit2, X, Save, Phone, MapPinned, Ticket, Plus } from 'lucide-react';
 import { FiShoppingCart, FiHeart, FiPackage, FiAlertCircle } from 'react-icons/fi';
@@ -13,7 +14,7 @@ const UserDashboard = () => {
   const [rentals, setRentals] = useState([]);
   const [serviceRequests, setServiceRequests] = useState([]);
   const [cartCount, setCartCount] = useState(0);
-  const [wishlistCount, setWishlistCount] = useState(0);
+  const { wishlistCount } = useWishlist();
   const [ordersCount, setOrdersCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -43,7 +44,7 @@ const UserDashboard = () => {
         pincode: user?.address?.pincode || user?.pincode || '',
       });
     }
-    
+
     // Listen for cart/wishlist updates
     const handleCartUpdate = () => {
       try {
@@ -53,37 +54,19 @@ const UserDashboard = () => {
         console.error('Error loading cart:', e);
       }
     };
-    
-    const handleWishlistUpdate = () => {
-      try {
-        const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-        setWishlistCount(wishlist.length);
-      } catch (e) {
-        console.error('Error loading wishlist:', e);
-      }
-    };
 
     window.addEventListener('cartUpdated', handleCartUpdate);
-    window.addEventListener('wishlistUpdated', handleWishlistUpdate);
-    window.addEventListener('storage', () => {
-      handleCartUpdate();
-      handleWishlistUpdate();
-    });
-
     return () => {
       window.removeEventListener('cartUpdated', handleCartUpdate);
-      window.removeEventListener('wishlistUpdated', handleWishlistUpdate);
     };
   }, []);
 
   const loadLocalData = () => {
     try {
       const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
       const orders = JSON.parse(localStorage.getItem(`orders_${user?.id}`) || '[]');
-      
+
       setCartCount(cart.length);
-      setWishlistCount(wishlist.length);
       setOrdersCount(orders.length);
     } catch (error) {
       console.error('Error loading local data:', error);
@@ -94,7 +77,7 @@ const UserDashboard = () => {
     try {
       setLoading(true);
       setError('');
-      
+
       // Load orders if API method exists
       if (apiService.getUserOrders) {
         try {
@@ -112,7 +95,7 @@ const UserDashboard = () => {
           console.error('Error loading orders:', e);
         }
       }
-      
+
       // Try to load service requests from localStorage or API
       try {
         const storedServices = JSON.parse(localStorage.getItem(`serviceRequests_${user?.id}`) || '[]');
@@ -217,14 +200,14 @@ const UserDashboard = () => {
       };
 
       const response = await apiService.updateUserProfile(addressUpdate);
-      
+
       if (response?.success) {
         setAddressSuccess(true);
         setShowAddressEdit(false);
         // Update user context if available
         if (window.updateUserContext) {
-          window.updateUserContext({ 
-            ...user, 
+          window.updateUserContext({
+            ...user,
             homeAddress: addressData.homeAddress.trim(),
             address: {
               homeAddress: addressData.homeAddress.trim(),
@@ -309,7 +292,7 @@ const UserDashboard = () => {
               </button>
             )}
           </div>
-          
+
           {showAddressEdit ? (
             <div className="space-y-4">
               {/* Home Address */}
@@ -655,7 +638,7 @@ const UserDashboard = () => {
               <span>New Ticket</span>
             </button>
           </div>
-          
+
           {loadingTickets ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-6 h-6 animate-spin text-primary-blue" />

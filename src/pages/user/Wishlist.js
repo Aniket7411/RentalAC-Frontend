@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useWishlist } from '../../context/WishlistContext';
+import { useCart } from '../../context/CartContext';
 import { FiHeart, FiShoppingCart, FiTrash2, FiAlertCircle } from 'react-icons/fi';
 import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Wishlist = () => {
   const { user, isAuthenticated } = useAuth();
+  const { wishlistItems, loading, removeFromWishlist, loadWishlist } = useWishlist();
+  const { addRentalToCart } = useCart();
   const navigate = useNavigate();
-  const [wishlistItems, setWishlistItems] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [removingId, setRemovingId] = useState(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -18,67 +21,40 @@ const Wishlist = () => {
       return;
     }
     loadWishlist();
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, loadWishlist]);
 
-  const loadWishlist = () => {
+  const handleRemoveFromWishlist = async (productId) => {
+    setRemovingId(productId);
+    setError('');
     try {
-      setLoading(true);
-      const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-      setWishlistItems(wishlist);
-      setError('');
-    } catch (error) {
-      console.error('Error loading wishlist:', error);
-      setError('Failed to load wishlist items');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateWishlist = (updatedWishlist) => {
-    try {
-      localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
-      setWishlistItems(updatedWishlist);
-      window.dispatchEvent(new Event('wishlistUpdated'));
-    } catch (error) {
-      console.error('Error updating wishlist:', error);
-      setError('Failed to update wishlist');
-    }
-  };
-
-  const removeFromWishlist = (productId) => {
-    try {
-      const updatedWishlist = wishlistItems.filter(item => item.id !== productId);
-      updateWishlist(updatedWishlist);
+      const result = await removeFromWishlist(productId);
+      if (!result.success) {
+        setError(result.message || 'Failed to remove item');
+      }
     } catch (error) {
       console.error('Error removing item:', error);
       setError('Failed to remove item');
+    } finally {
+      setRemovingId(null);
     }
   };
 
-  const addToCart = (item) => {
+  const handleAddToCart = (item) => {
     try {
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      const existingItem = cart.find(cartItem => cartItem.id === item.id);
-      
-      if (existingItem) {
-        const updatedCart = cart.map(cartItem =>
-          cartItem.id === item.id
-            ? { ...cartItem, quantity: (cartItem.quantity || 1) + 1 }
-            : cartItem
-        );
-        localStorage.setItem('cart', JSON.stringify(updatedCart));
-      } else {
-        const newCart = [...cart, { ...item, quantity: 1 }];
-        localStorage.setItem('cart', JSON.stringify(newCart));
-      }
-      
-      window.dispatchEvent(new Event('cartUpdated'));
-      // Optionally remove from wishlist after adding to cart
-      // removeFromWishlist(item.id);
+      const product = item.product || item;
+      addRentalToCart(product);
     } catch (error) {
       console.error('Error adding to cart:', error);
       setError('Failed to add item to cart');
     }
+  };
+
+  const getProductData = (item) => {
+    // Handle both nested product structure and flat structure
+    if (item.product) {
+      return item.product;
+    }
+    return item;
   };
 
   if (loading) {
@@ -115,57 +91,68 @@ const Wishlist = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-            {wishlistItems.map((item, index) => (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 border-2 border-gray-200 hover:border-primary-blue/30 group"
-              >
-                <Link to={`/ac/${item.id}`} className="relative block h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                  <img
-                    src={item.images?.[0] || 'https://via.placeholder.com/300'}
-                    alt={item.name || 'Product'}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/300';
-                    }}
-                  />
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      removeFromWishlist(item.id);
-                    }}
-                    className="absolute top-2 right-2 p-2 bg-white/90 backdrop-blur-sm rounded-full text-red-600 hover:bg-red-50 transition-colors shadow-lg"
-                  >
-                    <FiTrash2 className="w-4 h-4" />
-                  </button>
-                </Link>
-                
-                <div className="p-4">
-                  <Link to={`/ac/${item.id}`}>
-                    <h3 className="font-semibold text-text-dark mb-2 hover:text-primary-blue transition-colors line-clamp-1">
-                      {item.brand} {item.model || item.name}
-                    </h3>
+            {wishlistItems.map((item, index) => {
+              const product = getProductData(item);
+              const productId = product._id || product.id || item.productId;
+              const isRemoving = removingId === productId;
+
+              return (
+                <motion.div
+                  key={productId || index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 border-2 border-gray-200 hover:border-primary-blue/30 group"
+                >
+                  <Link to={`/ac/${productId}`} className="relative block h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                    <img
+                      src={product.images?.[0] || 'https://via.placeholder.com/300'}
+                      alt={product.name || `${product.brand} ${product.model}` || 'Product'}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      onError={(e) => {
+                        e.target.src = 'https://via.placeholder.com/300';
+                      }}
+                    />
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleRemoveFromWishlist(productId);
+                      }}
+                      disabled={isRemoving}
+                      className="absolute top-2 right-2 p-2 bg-white/90 backdrop-blur-sm rounded-full text-red-600 hover:bg-red-50 transition-colors shadow-lg disabled:opacity-50"
+                    >
+                      {isRemoving ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <FiTrash2 className="w-4 h-4" />
+                      )}
+                    </button>
                   </Link>
-                  <p className="text-sm text-text-light mb-2">
-                    {item.capacity} • {item.type}
-                  </p>
-                  <p className="text-xl font-bold text-primary-blue mb-4">
-                    ₹{(item.price?.[3] || item.price || 0).toLocaleString()}/3 months
-                  </p>
-                  <button
-                    onClick={() => addToCart(item)}
-                    className="w-full flex items-center justify-center space-x-2 py-2 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition-all font-medium"
-                  >
-                    <FiShoppingCart className="w-4 h-4" />
-                    <span>Add to Cart</span>
-                  </button>
-                </div>
-              </motion.div>
-            ))}
+                  
+                  <div className="p-4">
+                    <Link to={`/ac/${productId}`}>
+                      <h3 className="font-semibold text-text-dark mb-2 hover:text-primary-blue transition-colors line-clamp-1">
+                        {product.brand} {product.model || product.name}
+                      </h3>
+                    </Link>
+                    <p className="text-sm text-text-light mb-2">
+                      {product.capacity} • {product.type}
+                    </p>
+                    <p className="text-xl font-bold text-primary-blue mb-4">
+                      ₹{(product.price?.[3] || product.price || 0).toLocaleString()}/3 months
+                    </p>
+                    <button
+                      onClick={() => handleAddToCart(product)}
+                      className="w-full flex items-center justify-center space-x-2 py-2 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition-all font-medium"
+                    >
+                      <FiShoppingCart className="w-4 h-4" />
+                      <span>Add to Cart</span>
+                    </button>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </div>
