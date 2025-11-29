@@ -82,7 +82,6 @@ const ManageACs = () => {
         6: product.price?.[6],
         9: product.price?.[9],
         11: product.price?.[11],
-        monthly: product.price?.monthly,
       },
     });
   };
@@ -276,7 +275,7 @@ const ManageACs = () => {
 
                     <p className="text-sm text-text-light mb-2">{product.location}</p>
                     <p className="text-lg font-bold text-primary-blue mb-4">
-                      ₹{product.price?.monthly?.toLocaleString()}/month
+                      ₹{(product.price?.[3] || product.price || 0).toLocaleString()}/3 months
                     </p>
 
                     {editingProduct === productId ? (

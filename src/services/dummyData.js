@@ -265,13 +265,13 @@ export const apiService = {
     }
     if (filters.minPrice) {
       filtered = filtered.filter(ac => {
-        const price = ac.price[filters.duration?.toLowerCase() || 'monthly'] || ac.price.monthly;
+        const price = ac.price[filters.duration || '3'] || ac.price[3] || 0;
         return price >= filters.minPrice;
       });
     }
     if (filters.maxPrice) {
       filtered = filtered.filter(ac => {
-        const price = ac.price[filters.duration?.toLowerCase() || 'monthly'] || ac.price.monthly;
+        const price = ac.price[filters.duration || '3'] || ac.price[3] || 0;
         return price <= filters.maxPrice;
       });
     }

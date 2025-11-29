@@ -154,7 +154,7 @@ const Wishlist = () => {
                     {item.capacity} • {item.type}
                   </p>
                   <p className="text-xl font-bold text-primary-blue mb-4">
-                    ₹{(item.price?.monthly || item.price || 0).toLocaleString()}/month
+                    ₹{(item.price?.[3] || item.price || 0).toLocaleString()}/3 months
                   </p>
                   <button
                     onClick={() => addToCart(item)}

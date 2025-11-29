@@ -16,9 +16,10 @@ const AddAC = () => {
     description: '',
     location: '',
     price: {
-      monthly: '',
-      quarterly: '',
-      yearly: '',
+      3: '',
+      6: '',
+      9: '',
+      11: '',
     },
     status: 'Available',
     images: [],
@@ -83,7 +84,7 @@ const AddAC = () => {
       return;
     }
 
-    if (!formData.price.monthly || !formData.price.quarterly || !formData.price.yearly) {
+    if (!formData.price[3] || !formData.price[6] || !formData.price[9] || !formData.price[11]) {
       setError('Please fill all price fields');
       return;
     }
@@ -95,9 +96,10 @@ const AddAC = () => {
       vendorId: user?.id,
       vendorName: user?.name,
       price: {
-        monthly: parseFloat(formData.price.monthly),
-        quarterly: parseFloat(formData.price.quarterly),
-        yearly: parseFloat(formData.price.yearly),
+        3: parseFloat(formData.price[3]),
+        6: parseFloat(formData.price[6]),
+        9: parseFloat(formData.price[9]),
+        11: parseFloat(formData.price[11]),
       },
     };
 
@@ -258,13 +260,13 @@ const AddAC = () => {
               <label className="block text-sm font-medium text-text-dark mb-2">
                 Rental Prices (₹) <span className="text-red-500">*</span>
               </label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <label className="block text-xs text-text-light mb-1">Monthly</label>
+                  <label className="block text-xs text-text-light mb-1">3 Months</label>
                   <input
                     type="number"
-                    name="price.monthly"
-                    value={formData.price.monthly}
+                    name="price.3"
+                    value={formData.price[3] || ''}
                     onChange={handleChange}
                     required
                     min="0"
@@ -272,11 +274,11 @@ const AddAC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-text-light mb-1">Quarterly</label>
+                  <label className="block text-xs text-text-light mb-1">6 Months</label>
                   <input
                     type="number"
-                    name="price.quarterly"
-                    value={formData.price.quarterly}
+                    name="price.6"
+                    value={formData.price[6] || ''}
                     onChange={handleChange}
                     required
                     min="0"
@@ -284,11 +286,23 @@ const AddAC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-text-light mb-1">Yearly</label>
+                  <label className="block text-xs text-text-light mb-1">9 Months</label>
                   <input
                     type="number"
-                    name="price.yearly"
-                    value={formData.price.yearly}
+                    name="price.9"
+                    value={formData.price[9] || ''}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-text-light mb-1">11 Months</label>
+                  <input
+                    type="number"
+                    name="price.11"
+                    value={formData.price[11] || ''}
                     onChange={handleChange}
                     required
                     min="0"

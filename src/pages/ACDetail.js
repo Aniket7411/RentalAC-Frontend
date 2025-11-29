@@ -16,7 +16,7 @@ const ACDetail = () => {
   const [ac, setAc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [selectedDuration, setSelectedDuration] = useState('monthly'); // 'monthly', '3', '6', '9', '11'
+  const [selectedDuration, setSelectedDuration] = useState('3'); // '3', '6', '9', '11'
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [inquiryData, setInquiryData] = useState({
     name: '',
@@ -273,7 +273,8 @@ const ACDetail = () => {
   // Get price based on selected duration
   const getPrice = () => {
     if (!ac.price) return 0;
-    if (selectedDuration === 'monthly') return ac.price.monthly || 0;
+    // Default to 3 months if selectedDuration is not valid
+    return ac.price[selectedDuration] || ac.price[3] || 0;
     return ac.price[selectedDuration] || 0;
   };
   const price = getPrice();
@@ -448,7 +449,6 @@ const ACDetail = () => {
               <h3 className="font-semibold text-text-dark mb-3 sm:mb-4 text-base sm:text-lg">Rental Pricing</h3>
               <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
                 {[
-                  { key: 'monthly', label: 'Monthly' },
                   { key: '3', label: '3 Months' },
                   { key: '6', label: '6 Months' },
                   { key: '9', label: '9 Months' },
@@ -469,7 +469,7 @@ const ACDetail = () => {
               <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-blue mb-1">
                 ₹{price.toLocaleString()}
                 <span className="text-sm sm:text-base md:text-lg text-text-light font-normal ml-1 sm:ml-2">
-                  /{selectedDuration === 'monthly' ? 'month' : selectedDuration === '3' ? '3 months' : selectedDuration === '6' ? '6 months' : selectedDuration === '9' ? '9 months' : '11 months'}
+                  /{selectedDuration === '3' ? '3 months' : selectedDuration === '6' ? '6 months' : selectedDuration === '9' ? '9 months' : '11 months'}
                 </span>
               </div>
             </div>

@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { FiShoppingCart, FiHeart, FiCheck } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
 const ACCard = ({ ac }) => {
   const { isAuthenticated } = useAuth();
+  const { addRentalToCart } = useCart();
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [addedToCart, setAddedToCart] = useState(false);
@@ -36,37 +38,12 @@ const ACCard = ({ ac }) => {
     }
 
     try {
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      const existingItem = cart.find(item => item.id === (ac._id || ac.id));
-
-      if (existingItem) {
-        const updatedCart = cart.map(item =>
-          item.id === (ac._id || ac.id)
-            ? { ...item, quantity: (item.quantity || 1) + 1 }
-            : item
-        );
-        localStorage.setItem('cart', JSON.stringify(updatedCart));
-      } else {
-        const newItem = {
-          id: ac._id || ac.id,
-          brand: ac.brand,
-          model: ac.model,
-          name: `${ac.brand} ${ac.model}`,
-          capacity: ac.capacity,
-          type: ac.type,
-          location: ac.location,
-          price: ac.price,
-          images: ac.images,
-          quantity: 1,
-        };
-        localStorage.setItem('cart', JSON.stringify([...cart, newItem]));
-      }
-
+      addRentalToCart(ac);
       setAddedToCart(true);
-      window.dispatchEvent(new Event('cartUpdated'));
       setTimeout(() => setAddedToCart(false), 2000);
     } catch (error) {
       console.error('Error adding to cart:', error);
+      // Error is already handled in cart context
     }
   };
 
@@ -210,7 +187,7 @@ const ACCard = ({ ac }) => {
         {/* <div className="flex items-baseline justify-between mb-2.5 sm:mb-3 pb-2 sm:pb-2.5 border-b border-gray-100">
           <div>
             <span className="text-lg sm:text-xl md:text-2xl font-bold text-primary-blue">
-              ₹{ac.price?.monthly?.toLocaleString() || 'N/A'}
+              ₹{(ac.price?.[3] || ac.price || 0).toLocaleString() || 'N/A'}
             </span>
             <span className="text-xs sm:text-sm text-text-light ml-1">/month</span>
           </div>

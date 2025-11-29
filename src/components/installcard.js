@@ -30,7 +30,7 @@ const InstallCard = () => {
             features: [
                 'Top brands available',
                 'Flexible rental plans',
-                'Monthly, quarterly & yearly options',
+                '3, 6, 9, 11 months rental options',
                 'Maintenance included'
             ],
             icon: CheckCircle,

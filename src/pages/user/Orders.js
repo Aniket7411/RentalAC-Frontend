@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { apiService } from '../../services/api';
 import { FiPackage, FiCheckCircle, FiClock, FiXCircle, FiAlertCircle } from 'react-icons/fi';
+import { Wrench } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -10,6 +11,7 @@ const Orders = () => {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
+  const [serviceBookings, setServiceBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -26,15 +28,20 @@ const Orders = () => {
       setLoading(true);
       setError('');
       
-      // Try to load from API first
-      const response = await apiService.getUserOrders(user?.id);
-      
-      if (response.success) {
-        setOrders(response.data || []);
+      // Load product orders
+      const ordersResponse = await apiService.getUserOrders(user?.id);
+      if (ordersResponse.success) {
+        setOrders(ordersResponse.data || []);
       } else {
         // Fallback to localStorage
         const storedOrders = JSON.parse(localStorage.getItem(`orders_${user?.id}`) || '[]');
         setOrders(storedOrders);
+      }
+
+      // Load service bookings
+      const serviceBookingsResponse = await apiService.getUserServiceBookings();
+      if (serviceBookingsResponse.success) {
+        setServiceBookings(serviceBookingsResponse.data || []);
       }
     } catch (error) {
       console.error('Error loading orders:', error);
@@ -100,7 +107,7 @@ const Orders = () => {
           </div>
         )}
 
-        {orders.length === 0 ? (
+        {orders.length === 0 && serviceBookings.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
             <FiPackage className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h2 className="text-2xl font-semibold text-text-dark mb-2">No orders yet</h2>
@@ -114,6 +121,77 @@ const Orders = () => {
           </div>
         ) : (
           <div className="space-y-4">
+            {/* Service Bookings */}
+            {serviceBookings.map((booking, index) => (
+              <motion.div
+                key={booking._id || booking.id || `service-${index}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500"
+              >
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  {/* Booking Info */}
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <Wrench className="w-5 h-5 text-blue-600" />
+                      <div>
+                        <h3 className="text-lg font-semibold text-text-dark">
+                          Service Booking #{booking.bookingId || booking._id || booking.id || 'N/A'}
+                        </h3>
+                        <p className="text-sm text-text-light">
+                          {booking.serviceTitle || booking.service?.title || 'Service Request'}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 space-y-2">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex-1">
+                          <p className="font-medium text-text-dark">
+                            {booking.serviceTitle || booking.service?.title || 'AC Service'}
+                          </p>
+                          <div className="text-sm text-text-light mt-1 space-y-1">
+                            {booking.date && (
+                              <p>📅 Date: {new Date(booking.date).toLocaleDateString()}</p>
+                            )}
+                            {booking.time && (
+                              <p>🕐 Time: {booking.time}</p>
+                            )}
+                            {booking.address && (
+                              <p>📍 Address: {booking.address.substring(0, 50)}{booking.address.length > 50 ? '...' : ''}</p>
+                            )}
+                            {booking.contactName && (
+                              <p>👤 Contact: {booking.contactName}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Booking Status & Price */}
+                  <div className="flex flex-col items-end space-y-3">
+                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(booking.status)}`}>
+                      {booking.status || 'Pending'}
+                    </span>
+                    <div className="text-right">
+                      <p className="text-sm text-text-light">Service Price</p>
+                      <p className="text-2xl font-bold text-primary-blue">
+                        ₹{(booking.servicePrice || booking.price || 0).toLocaleString()}
+                      </p>
+                    </div>
+                    {booking.paymentOption && (
+                      <p className="text-xs text-text-light">
+                        Payment: {booking.paymentOption === 'payNow' ? 'Paid' : 'Pay After Service'}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+
+            {/* Product Orders */}
             {orders.map((order, index) => (
               <motion.div
                 key={order.id || order._id || index}

@@ -16,11 +16,15 @@ const Header = () => {
     const updateCounts = () => {
       try {
         const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        // Filter out invalid items
+        const validCart = cart.filter(item => item && (item.id || item._id));
         const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-        setCartCount(cart.length);
+        setCartCount(validCart.length);
         setWishlistCount(wishlist.length);
       } catch (error) {
         console.error('Error loading cart/wishlist:', error);
+        setCartCount(0);
+        setWishlistCount(0);
       }
     };
 

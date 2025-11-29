@@ -34,7 +34,7 @@ const BrowseACs = () => {
     capacity: '',
     type: '',
     location: '',
-    duration: 'monthly',
+    duration: '3',
     condition: '',
     priceSort: '',
   });
@@ -151,14 +151,16 @@ const BrowseACs = () => {
     // Apply price sorting
     if (filters.priceSort === 'low-to-high') {
       filtered.sort((a, b) => {
-        const priceA = a?.price?.monthly || a?.price || 0;
-        const priceB = b?.price?.monthly || b?.price || 0;
+        const duration = filters.duration || '3';
+        const priceA = a?.price?.[duration] || a?.price?.[3] || a?.price || 0;
+        const priceB = b?.price?.[duration] || b?.price?.[3] || b?.price || 0;
         return priceA - priceB;
       });
     } else if (filters.priceSort === 'high-to-low') {
       filtered.sort((a, b) => {
-        const priceA = a?.price?.monthly || a?.price || 0;
-        const priceB = b?.price?.monthly || b?.price || 0;
+        const duration = filters.duration || '3';
+        const priceA = a?.price?.[duration] || a?.price?.[3] || a?.price || 0;
+        const priceB = b?.price?.[duration] || b?.price?.[3] || b?.price || 0;
         return priceB - priceA;
       });
     }
@@ -197,7 +199,7 @@ const BrowseACs = () => {
       capacity: '',
       type: '',
       location: '',
-      duration: 'monthly',
+      duration: '3',
       condition: '',
       priceSort: '',
     });
@@ -342,7 +344,7 @@ const BrowseACs = () => {
                     {['3', '6', '9', '11'].map((dur) => (
                       <button
                         key={dur}
-                        onClick={() => handleFilterChange('duration', filters.duration === dur ? 'monthly' : dur)}
+                        onClick={() => handleFilterChange('duration', filters.duration === dur ? '3' : dur)}
                         className={`px-2.5 py-2 rounded-lg text-xs font-semibold transition-all text-center ${filters.duration === dur
                           ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
                           : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
@@ -352,13 +354,13 @@ const BrowseACs = () => {
                       </button>
                     ))}
                     <button
-                      onClick={() => handleFilterChange('duration', filters.duration === 'monthly' ? '3' : 'monthly')}
-                      className={`col-span-2 px-2.5 py-2 rounded-lg text-xs font-semibold transition-all text-center ${filters.duration === 'monthly'
+                      onClick={() => handleFilterChange('duration', filters.duration === '3' ? '6' : '3')}
+                      className={`col-span-2 px-2.5 py-2 rounded-lg text-xs font-semibold transition-all text-center ${filters.duration === '3'
                         ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
                         : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                         }`}
                     >
-                      Monthly
+                      3 Months
                     </button>
                   </div>
                 </div>
@@ -660,7 +662,7 @@ const BrowseACs = () => {
                   {['3', '6', '9', '11'].map((dur) => (
                     <button
                       key={dur}
-                      onClick={() => handleFilterChange('duration', filters.duration === dur ? 'monthly' : dur)}
+                      onClick={() => handleFilterChange('duration', filters.duration === dur ? '3' : dur)}
                       className={`px-2.5 py-2 rounded-lg text-xs font-semibold transition-all text-center ${filters.duration === dur
                         ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
                         : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
@@ -669,15 +671,6 @@ const BrowseACs = () => {
                       {dur}M
                     </button>
                   ))}
-                  <button
-                    onClick={() => handleFilterChange('duration', filters.duration === 'monthly' ? '3' : 'monthly')}
-                    className={`col-span-2 px-2.5 py-2 rounded-lg text-xs font-semibold transition-all text-center ${filters.duration === 'monthly'
-                      ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
-                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
-                      }`}
-                  >
-                    Monthly
-                  </button>
                 </div>
               </div>
 

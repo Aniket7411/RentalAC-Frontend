@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect as ReactUseEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, Clock, MapPin, User, CreditCard, Edit2, Check, ArrowRight, ArrowLeft } from 'lucide-react';
 import { formatPhoneNumber, getFormattedPhone, validatePhoneNumber } from '../utils/phoneFormatter';
@@ -6,16 +6,16 @@ import { useToast } from '../hooks/useToast';
 import { Loader2 } from 'lucide-react';
 import SuccessModal from './SuccessModal';
 
-const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
+const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit, initialData }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    date: '',
-    time: '',
-    addressType: 'myself',
-    address: '',
-    contactName: '',
-    contactPhone: '',
-    paymentOption: 'payLater',
+    date: initialData?.date || '',
+    time: initialData?.time || '',
+    addressType: initialData?.addressType || 'myself',
+    address: initialData?.address || '',
+    contactName: initialData?.contactName || '',
+    contactPhone: initialData?.contactPhone || '',
+    paymentOption: initialData?.paymentOption || 'payLater',
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,9 +23,11 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
   const { success: showSuccess, error: showError } = useToast();
 
   const timeSlots = [
-    '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
-    '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM',
-    '05:00 PM', '06:00 PM', '07:00 PM', '08:00 PM',
+    { value: '10-12', label: '10 AM - 12 PM' },
+    { value: '12-2', label: '12 PM - 2 PM' },
+    { value: '2-4', label: '2 PM - 4 PM' },
+    { value: '4-6', label: '4 PM - 6 PM' },
+    { value: '6-8', label: '6 PM - 8 PM' },
   ];
 
   const handleChange = (field, value) => {
@@ -114,17 +116,32 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
   const handleClose = () => {
     setStep(1);
     setFormData({
-      date: '',
-      time: '',
-      addressType: 'myself',
-      address: '',
-      contactName: '',
-      contactPhone: '',
-      paymentOption: 'payLater',
+      date: initialData?.date || '',
+      time: initialData?.time || '',
+      addressType: initialData?.addressType || 'myself',
+      address: initialData?.address || '',
+      contactName: initialData?.contactName || '',
+      contactPhone: initialData?.contactPhone || '',
+      paymentOption: initialData?.paymentOption || 'payLater',
     });
     setErrors({});
     onClose();
   };
+
+  // Update form data when initialData changes
+  ReactUseEffect(() => {
+    if (initialData) {
+      setFormData({
+        date: initialData.date || '',
+        time: initialData.time || '',
+        addressType: initialData.addressType || 'myself',
+        address: initialData.address || '',
+        contactName: initialData.contactName || '',
+        contactPhone: initialData.contactPhone || '',
+        paymentOption: initialData.paymentOption || 'payLater',
+      });
+    }
+  }, [initialData]);
 
   const getMinDate = () => {
     const today = new Date();
@@ -227,18 +244,18 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
                     <label className="block text-sm font-medium text-neutral-900 mb-2">
                       Select Time <span className="text-red-500">*</span>
                     </label>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {timeSlots.map((slot) => (
                         <button
-                          key={slot}
+                          key={slot.value}
                           type="button"
-                          onClick={() => handleChange('time', slot)}
-                          className={`py-2 px-4 rounded-lg border-2 transition ${formData.time === slot
+                          onClick={() => handleChange('time', slot.value)}
+                          className={`py-3 px-4 rounded-lg border-2 transition font-medium ${formData.time === slot.value
                             ? 'border-sky-500 bg-sky-50 text-sky-700'
                             : 'border-gray-200 hover:border-gray-300'
                             }`}
                         >
-                          {slot}
+                          {slot.label}
                         </button>
                       ))}
                     </div>
@@ -450,7 +467,9 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit }) => {
                       </div>
                       <div>
                         <span className="text-slate-500">Time:</span>
-                        <p className="font-medium text-neutral-900">{formData.time}</p>
+                        <p className="font-medium text-neutral-900">
+                          {timeSlots.find(s => s.value === formData.time)?.label || formData.time}
+                        </p>
                       </div>
                       <div className="col-span-2">
                         <span className="text-slate-500">Address:</span>

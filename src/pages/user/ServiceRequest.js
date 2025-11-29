@@ -75,13 +75,13 @@ const ServiceRequest = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8 md:mb-12">
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="inline-flex items-center justify-center w-16 h-16 bg-sky-500 rounded-full mb-4"
           >
             <Wrench className="w-8 h-8 text-white" />
-          </motion.div>
+          </motion.div> */}
           <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 mb-4">AC Repair & Maintenance Services</h1>
           <p className="text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto">
             Choose from our premium service packages. Book your preferred service and get professional AC repair and maintenance.

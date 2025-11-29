@@ -1,8 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Clock, Zap, ShoppingCart, User, Wrench } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
+import ServiceBookingModal from './ServiceBookingModal';
 
 const ServiceCard = ({ service, onAddClick, onView }) => {
+  const { isAuthenticated } = useAuth();
+  const { addServiceToCart } = useCart();
+  const navigate = useNavigate();
+  const [showBookingModal, setShowBookingModal] = useState(false);
   const badgeIcons = {
     'Visit Within 1 Hour': <User className="w-3 h-3" />,
     'Most Booked': <ShoppingCart className="w-3 h-3" />,
@@ -14,7 +22,35 @@ const ServiceCard = ({ service, onAddClick, onView }) => {
 
   const handleBookClick = (e) => {
     e.stopPropagation();
-    onAddClick && onAddClick(service);
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    // Show booking modal to collect booking details before adding to cart
+    setShowBookingModal(true);
+  };
+
+  const handleBookingSubmit = async (bookingData) => {
+    try {
+      // Add service to cart with booking details
+      addServiceToCart(service, {
+        date: bookingData.date,
+        time: bookingData.time,
+        address: bookingData.address,
+        addressType: bookingData.addressType,
+        contactName: bookingData.contactName,
+        contactPhone: bookingData.contactPhone,
+        paymentOption: bookingData.paymentOption,
+      });
+      setShowBookingModal(false);
+      // Optionally call onAddClick for backward compatibility
+      if (onAddClick) {
+        onAddClick(service);
+      }
+    } catch (error) {
+      console.error('Error adding service to cart:', error);
+      throw error;
+    }
   };
 
   const handleCardClick = () => {
@@ -100,6 +136,16 @@ const ServiceCard = ({ service, onAddClick, onView }) => {
             Book Service
           </button>
       </div>
+
+      {/* Booking Modal */}
+      {showBookingModal && (
+        <ServiceBookingModal
+          service={service}
+          isOpen={showBookingModal}
+          onClose={() => setShowBookingModal(false)}
+          onSubmit={handleBookingSubmit}
+        />
+      )}
     </motion.div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import PasswordInput from '../components/PasswordInput';
@@ -13,8 +13,19 @@ const Login = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated, isAdmin, isUser, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+
+  // If already authenticated, redirect away from login page
+  useEffect(() => {
+    if (!authLoading) {
+      if (isAuthenticated && isAdmin) {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (isAuthenticated && isUser) {
+        navigate('/user/dashboard', { replace: true });
+      }
+    }
+  }, [isAuthenticated, isAdmin, isUser, authLoading, navigate]);
 
   const handleChange = (e) => {
     setFormData({
@@ -49,6 +60,20 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-blue"></div>
+      </div>
+    );
+  }
+
+  // Don't render login form if already authenticated (redirect will happen)
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">

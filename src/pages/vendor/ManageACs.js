@@ -43,7 +43,6 @@ const ManageACs = () => {
       description: ac.description,
       status: ac.status,
       price: {
-        monthly: ac.price.monthly,
         quarterly: ac.price.quarterly,
         yearly: ac.price.yearly,
       },
@@ -137,7 +136,7 @@ const ManageACs = () => {
 
                   <p className="text-sm text-text-light mb-2">{ac.location}</p>
                   <p className="text-lg font-bold text-primary-blue mb-4">
-                    ₹{ac.price?.monthly?.toLocaleString()}/month
+                    ₹{(ac.price?.[3] || ac.price || 0).toLocaleString()}/3 months
                   </p>
 
                   {editingAC === ac.id ? (

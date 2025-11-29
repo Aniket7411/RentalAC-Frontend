@@ -26,7 +26,6 @@ const EditProduct = () => {
       6: '',
       9: '',
       11: '',
-      monthly: '',
     },
     discount: 0,
     status: 'Available',
@@ -88,7 +87,6 @@ const EditProduct = () => {
               6: product.price?.[6] || '',
               9: product.price?.[9] || '',
               11: product.price?.[11] || '',
-              monthly: product.price?.monthly || '',
             },
             discount: product.discount || 0,
             status: product.status || 'Available',
@@ -299,7 +297,7 @@ const EditProduct = () => {
       return;
     }
 
-    if (!formData.price.monthly || !formData.price[3] || !formData.price[6] || !formData.price[9] || !formData.price[11]) {
+    if (!formData.price[3] || !formData.price[6] || !formData.price[9] || !formData.price[11]) {
       setError('Please fill all rental tenure price fields');
       return;
     }
@@ -332,7 +330,6 @@ const EditProduct = () => {
           6: parseFloat(formData.price[6]),
           9: parseFloat(formData.price[9]),
           11: parseFloat(formData.price[11]),
-          monthly: parseFloat(formData.price.monthly),
         },
         images: allImages,
         features: formData.features,
@@ -753,18 +750,6 @@ const EditProduct = () => {
                     type="number"
                     name="price.11"
                     value={formData.price[11]}
-                    onChange={handleChange}
-                    required
-                    min="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-text-light mb-1">Monthly</label>
-                  <input
-                    type="number"
-                    name="price.monthly"
-                    value={formData.price.monthly}
                     onChange={handleChange}
                     required
                     min="0"

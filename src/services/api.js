@@ -2,8 +2,8 @@ import axios from 'axios';
 import { uploadMultipleFilesToCloudinary } from '../utils/cloudinary';
 
 // Configure base URL - Update this with your backend URL
-// const API_BASE_URL = 'http://localhost:5000/api';
-const API_BASE_URL = "https://rental-backend-new.onrender.com/api"
+const API_BASE_URL = 'http://localhost:5000/api';
+// const API_BASE_URL = "https://rental-backend-new.onrender.com/api"
 
 // Create axios instance with default config
 const api = axios.create({
@@ -582,6 +582,40 @@ export const apiService = {
       return {
         success: false,
         message: error.response?.data?.message || 'Failed to fetch orders',
+        data: [],
+      };
+    }
+  },
+
+  // Create Order
+  createOrder: async (orderData) => {
+    try {
+      const response = await api.post('/orders', orderData);
+      return {
+        success: true,
+        message: response.data.message || 'Order created successfully',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to create order',
+      };
+    }
+  },
+
+  // User Service Bookings
+  getUserServiceBookings: async () => {
+    try {
+      const response = await api.get('/service-bookings/my-bookings');
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch service bookings',
         data: [],
       };
     }

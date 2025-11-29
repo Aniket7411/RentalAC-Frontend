@@ -12,15 +12,20 @@ const AdminLogin = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, isAuthenticated, isAdmin } = useAuth();
+  const { login, isAuthenticated, isAdmin, isUser, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // If already authenticated as admin, redirect away from login
+  // If already authenticated, redirect away from login page
   useEffect(() => {
-    if (isAuthenticated && isAdmin) {
-      navigate('/admin/dashboard', { replace: true });
+    if (!authLoading) {
+      if (isAuthenticated && isAdmin) {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (isAuthenticated && isUser) {
+        // If regular user tries to access admin login, redirect to user dashboard
+        navigate('/user/dashboard', { replace: true });
+      }
     }
-  }, [isAuthenticated, isAdmin, navigate]);
+  }, [isAuthenticated, isAdmin, isUser, authLoading, navigate]);
 
   const handleChange = (e) => {
     setFormData({
@@ -50,6 +55,20 @@ const AdminLogin = () => {
       setLoading(false);
     }
   };
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-blue"></div>
+      </div>
+    );
+  }
+
+  // Don't render login form if already authenticated (redirect will happen)
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
