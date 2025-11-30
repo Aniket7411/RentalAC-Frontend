@@ -124,12 +124,9 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Add rental product to cart
-  const addRentalToCart = (product) => {
-    if (!isAuthenticated) {
-      throw new Error('Please login to add items to cart');
-    }
-
+  // Add rental product to cart (works for both logged-in and non-logged-in users)
+  const addRentalToCart = (product, selectedDuration = '3') => {
+    // No authentication check - allow cart for all users
     try {
       const cart = [...cartItems];
       const productId = product._id || product.id;
@@ -157,8 +154,8 @@ export const CartProvider = ({ children }) => {
         operationType: product.operationType,
         loadType: product.loadType,
         quantity: 1, // Always 1, no quantity increase
-        selectedDuration: 3, // Default to 3 months
-        paymentOption: 'payLater', // Default payment option
+        selectedDuration: selectedDuration || '3', // Use provided duration or default to 3 months
+        paymentOption: 'payLater', // Default payment option (will be set at checkout)
       };
 
       if (existingItem) {
@@ -179,12 +176,9 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Add service to cart (with booking details)
+  // Add service to cart (with booking details) - works for both logged-in and non-logged-in users
   const addServiceToCart = (service, bookingDetails = {}) => {
-    if (!isAuthenticated) {
-      throw new Error('Please login to add items to cart');
-    }
-
+    // No authentication check - allow cart for all users
     try {
       const cart = [...cartItems];
       const serviceId = service._id || service.id;

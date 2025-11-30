@@ -605,7 +605,8 @@ const AddAC = () => {
 
             <div>
               <label className="block text-sm font-medium text-text-dark mb-2">
-                Location <span className="text-red-500">*</span>
+                Storage Location <span className="text-red-500">*</span>
+                <span className="text-xs text-gray-500 font-normal ml-1">(Where product is stored/available)</span>
               </label>
               <input
                 type="text"

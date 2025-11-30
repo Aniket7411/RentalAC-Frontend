@@ -244,7 +244,7 @@ const Leads = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10">
+    <div className="min-h-screen bg-slate-50 py-4 md:py-6">
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <div className={containerClasses}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">

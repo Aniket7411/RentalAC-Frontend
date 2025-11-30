@@ -9,6 +9,8 @@ import { motion } from 'framer-motion';
 import { useToast } from '../../hooks/useToast';
 import { ToastContainer } from '../../components/Toast';
 import { Link } from 'react-router-dom';
+import LoginPromptModal from '../../components/LoginPromptModal';
+import SuccessModal from '../../components/SuccessModal';
 
 const Checkout = () => {
   const { user, isAuthenticated } = useAuth();
@@ -17,6 +19,9 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedPaymentOption, setSelectedPaymentOption] = useState('payLater');
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [orderId, setOrderId] = useState(null);
   const { toasts, removeToast, success: showSuccess, error: showError } = useToast();
 
   const totals = calculateTotals();
@@ -26,7 +31,7 @@ const Checkout = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/login');
+      setShowLoginModal(true);
       return;
     }
     if (cartItems.length === 0) {
@@ -38,6 +43,11 @@ const Checkout = () => {
   const handlePlaceOrder = async () => {
     if (cartItems.length === 0) {
       setError('Your cart is empty');
+      return;
+    }
+
+    if (!user) {
+      setError('User information is missing. Please login again.');
       return;
     }
 
@@ -54,18 +64,48 @@ const Checkout = () => {
       // Create order for all rentals and services
       if (rentals.length > 0 || services.length > 0) {
         try {
+          // Prepare order items with complete information
           const orderItems = [
             ...rentals.map(rental => {
-              const selectedDuration = rental.selectedDuration || 3;
+              // Convert duration to number (handle both string and number)
+              let selectedDuration = rental.selectedDuration || 3;
+              if (typeof selectedDuration === 'string') {
+                selectedDuration = parseInt(selectedDuration, 10);
+              }
+              // Ensure duration is valid (3, 6, 9, or 11)
+              if (![3, 6, 9, 11].includes(selectedDuration)) {
+                selectedDuration = 3; // Default to 3 months if invalid
+              }
+
               const price = rental.price && typeof rental.price === 'object'
                 ? (rental.price[selectedDuration] || rental.price[3] || 0)
                 : (rental.price || 0);
+
               return {
                 type: 'rental',
                 productId: rental.id,
                 quantity: 1, // Always 1 per product
                 price: price,
-                duration: selectedDuration, // Include selected duration
+                duration: selectedDuration, // Number: 3, 6, 9, or 11
+                // Include product details for admin reference
+                productDetails: {
+                  brand: rental.brand,
+                  model: rental.model,
+                  capacity: rental.capacity,
+                  productType: rental.productType || rental.type,
+                  location: rental.location,
+                  description: rental.description,
+                  images: rental.images || [],
+                },
+                // Include delivery information for this rental
+                deliveryInfo: {
+                  address: user?.homeAddress || user?.address?.homeAddress || '',
+                  nearLandmark: user?.address?.nearLandmark || user?.nearLandmark || '',
+                  pincode: user?.address?.pincode || user?.pincode || '',
+                  contactName: user?.name || '',
+                  contactPhone: user?.phone || '',
+                  alternatePhone: user?.address?.alternateNumber || user?.alternateNumber || '',
+                },
               };
             }),
             ...services.map(service => ({
@@ -73,7 +113,23 @@ const Checkout = () => {
               serviceId: service.serviceId,
               quantity: 1, // Always 1 per service
               price: service.servicePrice,
-              bookingDetails: service.bookingDetails,
+              // Include complete service details for admin reference
+              serviceDetails: {
+                title: service.serviceTitle,
+                description: service.serviceDescription,
+                image: service.serviceImage,
+              },
+              // Include complete booking details
+              bookingDetails: {
+                name: service.bookingDetails?.name || service.bookingDetails?.contactName || user.name || '',
+                phone: service.bookingDetails?.phone || service.bookingDetails?.contactPhone || user.phone || '',
+                preferredDate: service.bookingDetails?.preferredDate || service.bookingDetails?.date || '',
+                preferredTime: service.bookingDetails?.preferredTime || service.bookingDetails?.time || '',
+                address: service.bookingDetails?.address || '',
+                addressType: service.bookingDetails?.addressType || 'myself',
+                contactName: service.bookingDetails?.contactName || service.bookingDetails?.name || user.name || '',
+                contactPhone: service.bookingDetails?.contactPhone || service.bookingDetails?.phone || user.phone || '',
+              },
             })),
           ];
 
@@ -84,6 +140,42 @@ const Checkout = () => {
             return `ORD-${year}-${random}`;
           };
 
+          // Collect delivery addresses
+          const deliveryAddresses = [];
+
+          // Add rental delivery addresses (from user's saved address)
+          if (rentals.length > 0) {
+            const userAddress = {
+              type: 'rental',
+              address: user?.homeAddress || user?.address?.homeAddress || '',
+              nearLandmark: user?.address?.nearLandmark || user?.nearLandmark || '',
+              pincode: user?.address?.pincode || user?.pincode || '',
+              contactName: user?.name || '',
+              contactPhone: user?.phone || '',
+              alternatePhone: user?.address?.alternateNumber || user?.alternateNumber || '',
+            };
+            // Only add if address exists
+            if (userAddress.address) {
+              deliveryAddresses.push(userAddress);
+            }
+          }
+
+          // Add service booking addresses
+          services
+            .filter(s => s.bookingDetails?.address)
+            .forEach(s => {
+              deliveryAddresses.push({
+                type: 'service',
+                address: s.bookingDetails.address,
+                contactName: s.bookingDetails.contactName || s.bookingDetails.name || user.name || '',
+                contactPhone: s.bookingDetails.contactPhone || s.bookingDetails.phone || user.phone || '',
+                preferredDate: s.bookingDetails.preferredDate || s.bookingDetails.date || '',
+                preferredTime: s.bookingDetails.preferredTime || s.bookingDetails.time || '',
+                addressType: s.bookingDetails.addressType || 'myself',
+              });
+            });
+
+          // Prepare comprehensive order data
           const orderData = {
             orderId: generateOrderId(), // Generate orderId on frontend
             items: orderItems,
@@ -92,35 +184,62 @@ const Checkout = () => {
             finalTotal: finalTotal,
             paymentOption: selectedPaymentOption,
             paymentStatus: selectedPaymentOption === 'payNow' ? 'paid' : 'pending',
+            // Include complete user information for admin reference
+            customerInfo: {
+              userId: user.id || user._id,
+              name: user.name || '',
+              email: user.email || '',
+              phone: user.phone || '',
+              alternatePhone: user?.address?.alternateNumber || user?.alternateNumber || '',
+              // Include user's saved address details
+              address: {
+                homeAddress: user?.homeAddress || user?.address?.homeAddress || '',
+                nearLandmark: user?.address?.nearLandmark || user?.nearLandmark || '',
+                pincode: user?.address?.pincode || user?.pincode || '',
+              },
+            },
+            // Include delivery/booking addresses (for both rentals and services)
+            deliveryAddresses: deliveryAddresses.length > 0 ? deliveryAddresses : undefined,
+            // Include order metadata with complete timestamp
+            orderDate: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            notes: rentals.length > 0 && services.length > 0
+              ? 'Order contains both rental products and services'
+              : rentals.length > 0
+                ? 'Order contains rental products'
+                : 'Order contains services',
           };
+
+          console.log('Placing order with data:', JSON.stringify(orderData, null, 2));
 
           const orderResponse = await apiService.createOrder(orderData);
           if (!orderResponse.success) {
             throw new Error(orderResponse.message || 'Failed to create order');
           }
+
+          // Store order ID for success message
+          const createdOrderId = orderResponse.data?.orderId || orderData.orderId;
+          setOrderId(createdOrderId);
+
+          // Clear cart after successful order placement
+          clearCart();
+
+          // Show success modal
+          setShowSuccessModal(true);
+          showSuccess('Order placed successfully!');
         } catch (err) {
           console.error('Error creating order:', err);
-          showError(err.message || 'Failed to place order');
+          const errorMessage = err.response?.data?.message || err.message || 'Failed to place order';
+          showError(errorMessage);
           throw err;
         }
       }
-
-      // Service bookings are now created as part of the order
-      // Individual service bookings can be created separately if needed
-      // This is handled by the backend when processing the order
-
-      // Clear cart after successful order placement
-      clearCart();
-      showSuccess('Order placed successfully!');
-
-      // Redirect to orders page after a short delay
-      setTimeout(() => {
-        navigate('/user/orders');
-      }, 2000);
     } catch (error) {
       console.error('Error placing order:', error);
-      setError(error.message || 'Failed to place order. Please try again.');
-      showError(error.message || 'Failed to place order. Please try again.');
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to place order. Please try again.';
+      setError(errorMessage);
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -395,6 +514,26 @@ const Checkout = () => {
           </div>
         </div>
       </div>
+
+      {/* Login Prompt Modal */}
+      <LoginPromptModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        message="Please login first, then you will be able to place order"
+        redirectDelay={3000}
+      />
+
+      {/* Success Modal */}
+      <SuccessModal
+        isOpen={showSuccessModal}
+        title="Order Placed Successfully!"
+        message={orderId ? `Your order #${orderId} has been placed successfully. You will be redirected to your orders page.` : 'Your order has been placed successfully. You will be redirected to your orders page.'}
+        onClose={() => {
+          setShowSuccessModal(false);
+          navigate('/user/orders');
+        }}
+        confirmText="View Orders"
+      />
     </div>
   );
 };

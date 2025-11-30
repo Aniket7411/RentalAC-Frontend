@@ -6,6 +6,7 @@ import { WishlistProvider } from './context/WishlistContext';
 import Header from './components/Header';
 import ScrollToTop from './components/ScrollToTop';
 import Footer from './components/Footer';
+import Chatbot from './components/Chatbot';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Public Pages
@@ -26,6 +27,7 @@ import Cart from './pages/user/Cart';
 import Checkout from './pages/user/Checkout';
 import Wishlist from './pages/user/Wishlist';
 import Orders from './pages/user/Orders';
+import OrderDetail from './pages/user/OrderDetail';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -33,8 +35,11 @@ import AddAC from './pages/admin/AddAC';
 import EditProduct from './pages/admin/EditProduct';
 import ManageACs from './pages/admin/ManageACs';
 import Leads from './pages/admin/Leads';
+import AdminOrders from './pages/admin/AdminOrders';
+import AdminOrderDetail from './pages/admin/AdminOrderDetail';
 import ManageServices from './pages/admin/ManageServices';
 import Tickets from './pages/admin/Tickets';
+import ManageFAQs from './pages/admin/ManageFAQs';
 
 function App() {
   return (
@@ -70,11 +75,7 @@ function App() {
                   />
                   <Route
                     path="/user/cart"
-                    element={
-                      <ProtectedRoute requireUser={true}>
-                        <Cart />
-                      </ProtectedRoute>
-                    }
+                    element={<Cart />}
                   />
                   <Route
                     path="/checkout"
@@ -97,6 +98,14 @@ function App() {
                     element={
                       <ProtectedRoute requireUser={true}>
                         <Orders />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/user/orders/:id"
+                    element={
+                      <ProtectedRoute requireUser={true}>
+                        <OrderDetail />
                       </ProtectedRoute>
                     }
                   />
@@ -159,6 +168,22 @@ function App() {
                     }
                   />
                   <Route
+                    path="/admin/orders"
+                    element={
+                      <ProtectedRoute requireAdmin={true}>
+                        <AdminOrders />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/orders/:id"
+                    element={
+                      <ProtectedRoute requireAdmin={true}>
+                        <AdminOrderDetail />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/admin/manage-services"
                     element={
                       <ProtectedRoute requireAdmin={true}>
@@ -174,9 +199,18 @@ function App() {
                       </ProtectedRoute>
                     }
                   />
+                  <Route
+                    path="/admin/manage-faqs"
+                    element={
+                      <ProtectedRoute requireAdmin={true}>
+                        <ManageFAQs />
+                      </ProtectedRoute>
+                    }
+                  />
                 </Routes>
               </main>
               <Footer />
+              <Chatbot />
             </div>
           </Router>
         </WishlistProvider>

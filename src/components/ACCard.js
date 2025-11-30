@@ -20,16 +20,11 @@ const ACCard = ({ ac }) => {
     }
   }, [isAuthenticated, productId, isInWishlist]);
 
-  // Calculate per month price for 11 months (to show attractive pricing)
-  const calculatePerMonthPrice = () => {
-    if (!ac.price) return 0;
-    if (typeof ac.price === 'object' && ac.price[11]) {
-      // If 11 months price exists, calculate per month: total / 11
-      return Math.round(ac.price[11] / 11);
-    }
-    // Fallback to 3 months price
+  // Get starting price for display (total for 3 months)
+  const getStartingPrice = () => {
+    if (!ac?.price) return 0;
     if (typeof ac.price === 'object' && ac.price[3]) {
-      return ac.price[3];
+      return ac.price[3]; // Total price for 3 months
     }
     return typeof ac.price === 'number' ? ac.price : 0;
   };
@@ -72,14 +67,14 @@ const ACCard = ({ ac }) => {
     >
       <Link to={`/ac/${ac._id || ac.id}`} className="relative block h-48 sm:h-56 md:h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden cursor-pointer">
         {ac.images && ac.images.length > 0 ? (
-          <img
+            <img
             src={ac.images[0]}
-            alt={`${ac.brand} ${ac.model}`}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-            onError={(e) => {
-              e.target.src = 'https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&q=80';
-            }}
-          />
+              alt={`${ac.brand} ${ac.model}`}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              onError={(e) => {
+                e.target.src = 'https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&q=80';
+              }}
+            />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400">
             No Image
@@ -113,17 +108,17 @@ const ACCard = ({ ac }) => {
         <h3 className="font-bold text-lg sm:text-xl text-gray-900 mb-1.5 line-clamp-2 leading-tight">{ac.brand} {ac.model}</h3>
         <p className="text-xs sm:text-sm text-gray-600 mb-3 font-medium">{ac.capacity} • {ac.type}</p>
 
-        {/* Per Month Price (calculated from 11 months) */}
+        {/* Starting Price Display */}
         <div className="mt-auto">
           <div className="flex items-baseline space-x-1">
-            <span className="text-2xl sm:text-3xl font-bold text-primary-blue">
-              ₹{calculatePerMonthPrice().toLocaleString()}
+            <span className="text-xl sm:text-2xl font-bold text-primary-blue">
+              ₹{getStartingPrice().toLocaleString()}
             </span>
-            <span className="text-sm text-gray-600">/month</span>
+            <span className="text-xs text-gray-600">starting</span>
           </div>
-          {ac.price && typeof ac.price === 'object' && ac.price[11] && (
+          {ac?.price && typeof ac.price === 'object' && (
             <p className="text-xs text-gray-500 mt-1">
-              For 11 months rental
+              For 3 months • View details for more options
             </p>
           )}
         </div>

@@ -30,28 +30,8 @@ const ServiceCard = ({ service, onAddClick, onView }) => {
     setShowBookingModal(true);
   };
 
-  const handleBookingSubmit = async (bookingData) => {
-    try {
-      // Add service to cart with booking details
-      addServiceToCart(service, {
-        date: bookingData.date,
-        time: bookingData.time,
-        address: bookingData.address,
-        addressType: bookingData.addressType,
-        contactName: bookingData.contactName,
-        contactPhone: bookingData.contactPhone,
-        paymentOption: bookingData.paymentOption,
-      });
-      setShowBookingModal(false);
-      // Optionally call onAddClick for backward compatibility
-      if (onAddClick) {
-        onAddClick(service);
-      }
-    } catch (error) {
-      console.error('Error adding service to cart:', error);
-      throw error;
-    }
-  };
+  // Note: ServiceBookingModal handles adding to cart automatically
+  // No need for handleBookingSubmit - service goes through cart → checkout → order flow
 
   const handleCardClick = () => {
     onView && onView(service);
@@ -87,54 +67,54 @@ const ServiceCard = ({ service, onAddClick, onView }) => {
       </div>
 
       {/* Content */}
-      <div className="p-4 md:p-5">
-          {/* Badge */}
-          {service.badge && (
-            <div className="inline-flex items-center space-x-1.5 bg-gradient-to-r from-sky-100 to-sky-50 text-sky-700 px-3 py-1.5 rounded-full text-xs font-semibold mb-4 shadow-sm">
-              {badgeIcons[service.badge] && badgeIcons[service.badge]}
-              <span>{service.badge}</span>
-            </div>
-          )}
-
-          {/* Title */}
-          <h3
-            className="text-lg sm:text-xl font-bold text-neutral-900 mb-2 hover:text-sky-700"
-          >
-            {service.title}
-          </h3>
-
-          {/* Description */}
-          <p className="text-slate-500 mb-3 text-sm sm:text-base line-clamp-2">{service.description}</p>
-
-          {/* Quick Features/Benefits preview */}
-          {(features.length > 0 || benefits.length > 0) && (
-            <div className="mb-4">
-              <ul className="list-disc list-inside text-xs sm:text-sm text-slate-500 space-y-1">
-                {(features.slice(0, 2)).map((f, i) => (
-                  <li key={`f-${i}`}>{f}</li>
-                ))}
-                {features.length === 0 && (benefits.slice(0, 2)).map((b, i) => (
-                  <li key={`b-${i}`}>{b}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Price */}
-          <div className="flex items-baseline space-x-2 mb-4 pb-3 border-b border-gray-100">
-            <span className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-sky-500 to-sky-600 bg-clip-text text-transparent">₹{service.price}</span>
-            {service.originalPrice && (
-              <span className="text-base md:text-lg text-slate-500 line-through">₹{service.originalPrice}</span>
-            )}
+      <div className="p-5 sm:p-6 md:p-7">
+        {/* Badge */}
+        {service.badge && (
+          <div className="inline-flex items-center space-x-1.5 bg-gradient-to-r from-sky-100 to-sky-50 text-sky-700 px-3 py-1.5 rounded-full text-xs font-semibold mb-5 shadow-sm">
+            {badgeIcons[service.badge] && badgeIcons[service.badge]}
+            <span>{service.badge}</span>
           </div>
+        )}
 
-          {/* Add Button */}
-          <button
-            onClick={handleBookClick}
-            className="w-full inline-flex items-center justify-center bg-sky-500 hover:bg-sky-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
-          >
-            Book Service
-          </button>
+        {/* Title */}
+        <h3
+          className="text-lg sm:text-xl md:text-2xl font-bold text-neutral-900 mb-3 hover:text-sky-700 transition-colors"
+        >
+          {service.title}
+        </h3>
+
+        {/* Description */}
+        <p className="text-slate-600 mb-4 text-sm sm:text-base leading-relaxed line-clamp-2">{service.description}</p>
+
+        {/* Quick Features/Benefits preview */}
+        {(features.length > 0 || benefits.length > 0) && (
+          <div className="mb-5">
+            <ul className="list-disc list-inside text-xs sm:text-sm text-slate-600 space-y-1.5">
+              {(features.slice(0, 2)).map((f, i) => (
+                <li key={`f-${i}`}>{f}</li>
+              ))}
+              {features.length === 0 && (benefits.slice(0, 2)).map((b, i) => (
+                <li key={`b-${i}`}>{b}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Price */}
+        <div className="flex items-baseline space-x-2 mb-5 pb-4 border-b border-gray-200">
+          <span className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-sky-500 to-sky-600 bg-clip-text text-transparent">₹{service.price}</span>
+          {service.originalPrice && (
+            <span className="text-base md:text-lg text-slate-500 line-through">₹{service.originalPrice}</span>
+          )}
+        </div>
+
+        {/* Add Button */}
+        <button
+          onClick={handleBookClick}
+          className="w-full inline-flex items-center justify-center bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-6 py-3.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-xl hover:scale-[1.02] text-base"
+        >
+          Book Service
+        </button>
       </div>
 
       {/* Booking Modal */}
@@ -143,7 +123,7 @@ const ServiceCard = ({ service, onAddClick, onView }) => {
           service={service}
           isOpen={showBookingModal}
           onClose={() => setShowBookingModal(false)}
-          onSubmit={handleBookingSubmit}
+        // onSubmit not needed - modal handles adding to cart automatically
         />
       )}
     </motion.div>

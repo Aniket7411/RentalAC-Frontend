@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
-import { LogOut, Wrench, Plus, List, Users, LayoutDashboard, Ticket } from 'lucide-react';
+import { LogOut, Wrench, Plus, List, Users, LayoutDashboard, Ticket, MessageSquare, Package } from 'lucide-react';
 import { FiShoppingCart, FiHeart, FiUser, FiMenu, FiX } from 'react-icons/fi';
 
 const Header = () => {
@@ -54,6 +54,15 @@ const Header = () => {
                 <Link to="/about" className="px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">About</Link>
                 <Link to="/contact" className="px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">Contact</Link>
                 <Link to="/service-request" className="px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">Services</Link>
+                <Link to="/user/cart" className="relative flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
+                  <FiShoppingCart className="w-5 h-5" />
+                  <span>Cart</span>
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {cartCount > 9 ? '9+' : cartCount}
+                    </span>
+                  )}
+                </Link>
                 <Link to="/login" className="ml-2 px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-700 transition-all font-semibold shadow-md hover:shadow-lg">Login</Link>
               </>
             ) : isAdmin ? (
@@ -74,6 +83,10 @@ const Header = () => {
                   <Users className="w-4 h-4" />
                   <span>Leads</span>
                 </Link>
+                <Link to="/admin/orders" className="flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
+                  <Package className="w-4 h-4" />
+                  <span>Orders</span>
+                </Link>
                 <Link to="/admin/manage-services" className="flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
                   <Wrench className="w-4 h-4" />
                   <span>Services</span>
@@ -81,6 +94,10 @@ const Header = () => {
                 <Link to="/admin/tickets" className="flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
                   <Ticket className="w-4 h-4" />
                   <span>Tickets</span>
+                </Link>
+                <Link to="/admin/manage-faqs" className="flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
+                  <MessageSquare className="w-4 h-4" />
+                  <span>FAQs</span>
                 </Link>
                 <button onClick={handleLogout} className="ml-2 flex items-center space-x-2 px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 transition-all rounded-lg font-medium">
                   <LogOut className="w-4 h-4" />
@@ -130,16 +147,16 @@ const Header = () => {
           {/* Mobile Menu Button - Always on the right */}
 
           {/* User Actions for Mobile - Show cart/wishlist even when menu is closed */}
-          {isUser && (
-            <div className="md:hidden flex items-center space-x-2 mr-2">
-              <Link to="/user/cart" className="relative p-2 text-neutral-900 hover:text-sky-500 transition-all">
-                <FiShoppingCart className="w-6 h-6" />
-                {cartCount > 0 && (
-                  <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                    {cartCount > 9 ? '9+' : cartCount}
-                  </span>
-                )}
-              </Link>
+          <div className="md:hidden flex items-center space-x-2 mr-2">
+            <Link to="/user/cart" className="relative p-2 text-neutral-900 hover:text-sky-500 transition-all">
+              <FiShoppingCart className="w-6 h-6" />
+              {cartCount > 0 && (
+                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {cartCount > 9 ? '9+' : cartCount}
+                </span>
+              )}
+            </Link>
+            {isUser && (
               <Link to="/user/wishlist" className="relative p-2 text-neutral-900 hover:text-sky-500 transition-all">
                 <FiHeart className="w-6 h-6" />
                 {wishlistCount > 0 && (
@@ -148,8 +165,8 @@ const Header = () => {
                   </span>
                 )}
               </Link>
-            </div>
-          )}
+            )}
+          </div>
 
           <button
             type="button"
@@ -177,6 +194,10 @@ const Header = () => {
                   <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">About</Link>
                   <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Contact</Link>
                   <Link to="/service-request" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Services</Link>
+                  <Link to="/user/cart" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all flex items-center space-x-2">
+                    <FiShoppingCart className="w-4 h-4" />
+                    <span>Cart {cartCount > 0 && `(${cartCount})`}</span>
+                  </Link>
                   <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Login</Link>
                   <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg bg-sky-500 text-white font-semibold text-center hover:bg-sky-700 transition-all">Sign Up</Link>
                 </>
@@ -187,6 +208,10 @@ const Header = () => {
                   <Link to="/admin/manage-products" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Manage Products</Link>
                   <Link to="/admin/leads" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Leads</Link>
                   <Link to="/admin/manage-services" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all">Services</Link>
+                  <Link to="/admin/manage-faqs" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 rounded-lg hover:bg-slate-50 text-neutral-900 font-medium transition-all flex items-center space-x-2">
+                    <MessageSquare className="w-4 h-4" />
+                    <span>FAQs</span>
+                  </Link>
                   <button onClick={handleLogout} className="px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 text-left font-medium transition-all">Logout</button>
                 </>
               ) : isUser ? (

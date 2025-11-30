@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { apiService } from '../../services/api';
-import { FiPackage, FiCheckCircle, FiClock, FiXCircle, FiAlertCircle } from 'react-icons/fi';
-import { Wrench } from 'lucide-react';
+import { FiPackage, FiCheckCircle, FiClock, FiXCircle, FiAlertCircle, FiDownload } from 'react-icons/fi';
+import { Wrench, X, Download, Printer } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import CancelOrderModal from '../../components/CancelOrderModal';
+import { useToast } from '../../hooks/useToast';
+import { ToastContainer } from '../../components/Toast';
+import { generateInvoice } from '../../utils/invoiceGenerator';
 
 const Orders = () => {
   const { user, isAuthenticated } = useAuth();
@@ -14,6 +18,10 @@ const Orders = () => {
   const [serviceBookings, setServiceBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [cancelling, setCancelling] = useState(false);
+  const { toasts, removeToast, success, error: showError } = useToast();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -27,7 +35,7 @@ const Orders = () => {
     try {
       setLoading(true);
       setError('');
-      
+
       // Load product orders
       const ordersResponse = await apiService.getUserOrders(user?.id);
       if (ordersResponse.success) {
@@ -87,6 +95,65 @@ const Orders = () => {
     }
   };
 
+  const handleCancelClick = (orderId) => {
+    setSelectedOrderId(orderId);
+    setCancelModalOpen(true);
+  };
+
+  const handleCancelConfirm = async (reason) => {
+    if (!selectedOrderId) return;
+
+    setCancelling(true);
+    try {
+      const response = await apiService.cancelOrder(selectedOrderId, reason);
+      if (response.success) {
+        success('Order cancelled successfully');
+        setCancelModalOpen(false);
+        setSelectedOrderId(null);
+        // Reload orders
+        loadOrders();
+      } else {
+        showError(response.message || 'Failed to cancel order');
+      }
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      showError('An error occurred while cancelling the order');
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  const canCancelOrder = (order) => {
+    const status = order.status?.toLowerCase();
+    return status !== 'cancelled' && status !== 'completed' && status !== 'delivered';
+  };
+
+  const handleDownloadInvoice = async (order) => {
+    try {
+      const result = generateInvoice(order, 'download');
+      if (result) {
+        success('Invoice downloaded successfully');
+      } else {
+        showError('Failed to generate invoice. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      showError(error.message || 'Failed to download invoice. Please try again.');
+    }
+  };
+
+  const handlePrintInvoice = async (order) => {
+    try {
+      const result = generateInvoice(order, 'print');
+      if (!result) {
+        showError('Failed to open print dialog. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error printing invoice:', error);
+      showError(error.message || 'Failed to print invoice. Please try again.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -97,6 +164,7 @@ const Orders = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 md:py-12">
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl md:text-4xl font-bold text-text-dark mb-8">My Orders</h1>
 
@@ -144,7 +212,7 @@ const Orders = () => {
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="mt-4 space-y-2">
                       <div className="flex items-center space-x-3">
                         <div className="flex-1">
@@ -214,7 +282,7 @@ const Orders = () => {
                         </p>
                       </div>
                     </div>
-                    
+
                     {order.items && order.items.length > 0 && (
                       <div className="mt-4 space-y-2">
                         {order.items.map((item, idx) => (
@@ -254,14 +322,53 @@ const Orders = () => {
                         ₹{(order.total || order.amount || 0).toLocaleString()}
                       </p>
                     </div>
-                    {order.status?.toLowerCase() !== 'cancelled' && (
-                      <Link
-                        to={`/user/orders/${order.id || order._id}`}
-                        className="text-primary-blue hover:text-primary-blue-light text-sm font-medium"
-                      >
-                        View Details
-                      </Link>
-                    )}
+                    <div className="flex flex-col items-end space-y-2">
+                      {order.status?.toLowerCase() !== 'cancelled' && (
+                        <Link
+                          to={`/user/orders/${order.id || order._id}`}
+                          className="text-primary-blue hover:text-primary-blue-light text-sm font-medium"
+                        >
+                          View Details
+                        </Link>
+                      )}
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleDownloadInvoice(order)}
+                          className="text-primary-blue hover:text-primary-blue-light text-sm font-medium flex items-center space-x-1 px-3 py-1 border border-primary-blue rounded hover:bg-primary-blue hover:text-white transition-colors"
+                          title="Download Invoice"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span>Invoice</span>
+                        </button>
+                        <button
+                          onClick={() => handlePrintInvoice(order)}
+                          className="text-gray-600 hover:text-gray-800 text-sm font-medium flex items-center space-x-1 px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 transition-colors"
+                          title="Print Invoice"
+                        >
+                          <Printer className="w-4 h-4" />
+                        </button>
+                      </div>
+                      {canCancelOrder(order) && (
+                        <button
+                          onClick={() => handleCancelClick(order.id || order._id)}
+                          className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center space-x-1"
+                        >
+                          <X className="w-4 h-4" />
+                          <span>Cancel Order</span>
+                        </button>
+                      )}
+                      {order.cancellationReason && (
+                        <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700 max-w-xs">
+                          <p className="font-semibold">Cancellation Reason:</p>
+                          <p>{order.cancellationReason}</p>
+                          {order.cancelledAt && (
+                            <p className="mt-1 text-red-600">
+                              Cancelled on: {new Date(order.cancelledAt).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -269,6 +376,17 @@ const Orders = () => {
           </div>
         )}
       </div>
+
+      <CancelOrderModal
+        isOpen={cancelModalOpen}
+        onClose={() => {
+          setCancelModalOpen(false);
+          setSelectedOrderId(null);
+        }}
+        onConfirm={handleCancelConfirm}
+        orderId={selectedOrderId}
+        isLoading={cancelling}
+      />
     </div>
   );
 };

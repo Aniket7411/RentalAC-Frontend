@@ -90,7 +90,7 @@ const Wishlist = () => {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
             {wishlistItems.map((item, index) => {
               const product = getProductData(item);
               const productId = product._id || product.id || item.productId;
@@ -120,12 +120,13 @@ const Wishlist = () => {
                         handleRemoveFromWishlist(productId);
                       }}
                       disabled={isRemoving}
-                      className="absolute top-2 right-2 p-2 bg-white/90 backdrop-blur-sm rounded-full text-red-600 hover:bg-red-50 transition-colors shadow-lg disabled:opacity-50"
+                      className="absolute top-3 right-3 z-10 flex items-center justify-center text-red-600 hover:text-red-700 transition-colors disabled:opacity-50"
+                      title="Remove from wishlist"
                     >
                       {isRemoving ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="w-5 h-5 animate-spin drop-shadow-lg" />
                       ) : (
-                        <FiTrash2 className="w-4 h-4" />
+                        <FiHeart className="w-5 h-5 fill-red-600 text-red-600 drop-shadow-lg" />
                       )}
                     </button>
                   </Link>

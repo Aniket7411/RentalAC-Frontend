@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import { useToast } from '../../hooks/useToast';
 import { ToastContainer } from '../../components/Toast';
 import ServiceBookingModal from '../../components/ServiceBookingModal';
+import LoginPromptModal from '../../components/LoginPromptModal';
 
 const Cart = () => {
   const { user, isAuthenticated } = useAuth();
@@ -18,16 +19,13 @@ const Cart = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [editingService, setEditingService] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const { toasts, removeToast, success: showSuccess, error: showError } = useToast();
   const totals = calculateTotals();
   const paymentBenefits = getPaymentBenefits();
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-  }, [isAuthenticated, navigate]);
+  // Cart is now accessible without login
+  // Login will be required at checkout
 
   // Force reload cart when cartItems change (from context)
   useEffect(() => {
@@ -57,6 +55,11 @@ const Cart = () => {
   };
 
   const handleCheckout = () => {
+    // Require login for checkout
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
     if (cartItems.length === 0) {
       setError('Your cart is empty');
       return;
@@ -293,25 +296,25 @@ const Cart = () => {
                                     }`}
                                 >
                                   {months} Months
-                                  {item.price && item.price[months] && (
+                                  {item?.price && item.price[months] && (
                                     <div className="text-xs mt-0.5">
-                                      ₹{item.price[months].toLocaleString()}/mo
+                                      ₹{item.price[months].toLocaleString()}
                                     </div>
                                   )}
                                 </button>
                               ))}
                             </div>
                             {/* Selected Price Display */}
-                            {item.price && (
+                            {item?.price && (
                               <div className="mt-3">
                                 <div className="flex items-baseline space-x-2">
-                                  <span className="text-2xl font-bold text-primary-blue">
+                                  <span className="text-xl font-bold text-primary-blue">
                                     ₹{((item.price[item.selectedDuration || 3] || item.price[3] || 0)).toLocaleString()}
                                   </span>
-                                  <span className="text-sm text-text-light">/month</span>
+                                  <span className="text-sm text-text-light">total</span>
                                 </div>
                                 <p className="text-xs text-text-light mt-1">
-                                  For {item.selectedDuration || 3} months rental period
+                                  Total price for {item.selectedDuration || 3} months rental
                                 </p>
                               </div>
                             )}
@@ -542,6 +545,14 @@ const Cart = () => {
             initialData={editingService.bookingDetails}
           />
         )}
+
+        {/* Login Prompt Modal */}
+        <LoginPromptModal
+          isOpen={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+          message="Please login first, then you will be able to place order"
+          redirectDelay={3000}
+        />
       </div>
     </div>
   );

@@ -44,12 +44,8 @@ const Login = () => {
       const result = await login(formData.email, formData.password);
 
       if (result.success) {
-        // Auto-redirect based on user role
-        if (result.user?.role === 'admin') {
-          navigate('/admin/dashboard');
-        } else {
-          navigate('/user/dashboard');
-        }
+        // Redirect to home page after login
+        navigate('/');
       } else {
         setError(result.message || 'Login failed. Please check your credentials.');
       }

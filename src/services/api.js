@@ -587,6 +587,57 @@ export const apiService = {
     }
   },
 
+  // Admin - Get All Orders
+  getAllOrders: async (filters = {}) => {
+    try {
+      const response = await api.get('/admin/orders', { params: filters });
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch orders',
+        data: [],
+      };
+    }
+  },
+
+  // Admin - Update Order Status
+  updateOrderStatus: async (orderId, status) => {
+    try {
+      const response = await api.patch(`/admin/orders/${orderId}/status`, { status });
+      return {
+        success: true,
+        message: response.data.message || 'Order status updated successfully',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to update order status',
+      };
+    }
+  },
+
+  // Get Order by ID
+  getOrderById: async (orderId) => {
+    try {
+      const response = await api.get(`/orders/${orderId}`);
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch order',
+        data: null,
+      };
+    }
+  },
+
   // Create Order
   createOrder: async (orderData) => {
     try {
@@ -600,6 +651,90 @@ export const apiService = {
       return {
         success: false,
         message: error.response?.data?.message || 'Failed to create order',
+      };
+    }
+  },
+
+  // Cancel Order (User)
+  cancelOrder: async (orderId, cancellationReason) => {
+    try {
+      const response = await api.patch(`/orders/${orderId}/cancel`, { 
+        cancellationReason 
+      });
+      return {
+        success: true,
+        message: response.data.message || 'Order cancelled successfully',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to cancel order',
+      };
+    }
+  },
+
+  // FAQ Management (Public)
+  getFAQs: async () => {
+    try {
+      const response = await api.get('/faqs');
+      return {
+        success: true,
+        data: response.data.data || response.data || [],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch FAQs',
+        data: [],
+      };
+    }
+  },
+
+  // Admin - FAQ Management
+  createFAQ: async (faqData) => {
+    try {
+      const response = await api.post('/admin/faqs', faqData);
+      return {
+        success: true,
+        message: response.data.message || 'FAQ created successfully',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to create FAQ',
+      };
+    }
+  },
+
+  updateFAQ: async (id, faqData) => {
+    try {
+      const response = await api.patch(`/admin/faqs/${id}`, faqData);
+      return {
+        success: true,
+        message: response.data.message || 'FAQ updated successfully',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to update FAQ',
+      };
+    }
+  },
+
+  deleteFAQ: async (id) => {
+    try {
+      const response = await api.delete(`/admin/faqs/${id}`);
+      return {
+        success: true,
+        message: response.data.message || 'FAQ deleted successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to delete FAQ',
       };
     }
   },

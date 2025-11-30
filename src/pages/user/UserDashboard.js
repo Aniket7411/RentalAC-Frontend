@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import TicketModal from '../../components/TicketModal';
 
 const UserDashboard = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [rentals, setRentals] = useState([]);
   const [serviceRequests, setServiceRequests] = useState([]);
   const [cartCount, setCartCount] = useState(0);
@@ -35,7 +35,10 @@ const UserDashboard = () => {
     loadData();
     loadLocalData();
     loadTickets();
-    // Load address data from user object
+  }, []);
+
+  // Load address data from user object whenever user changes or on mount
+  useEffect(() => {
     if (user) {
       setAddressData({
         homeAddress: user?.homeAddress || user?.address?.homeAddress || '',
@@ -44,8 +47,10 @@ const UserDashboard = () => {
         pincode: user?.address?.pincode || user?.pincode || '',
       });
     }
+  }, [user]);
 
-    // Listen for cart/wishlist updates
+  // Listen for cart/wishlist updates
+  useEffect(() => {
     const handleCartUpdate = () => {
       try {
         const cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -204,19 +209,50 @@ const UserDashboard = () => {
       if (response?.success) {
         setAddressSuccess(true);
         setShowAddressEdit(false);
-        // Update user context if available
-        if (window.updateUserContext) {
-          window.updateUserContext({
+        
+        // Update user context with the response data
+        // The API service returns response.data which contains the updated user object
+        if (response.data && updateUser) {
+          // Get updated user data from API response
+          const updatedUserData = response.data;
+          
+          // Ensure both nested address object and top-level fields are set
+          // Handle both response.data.address structure and top-level fields
+          const mergedUserData = {
             ...user,
-            homeAddress: addressData.homeAddress.trim(),
+            ...updatedUserData,
+            // Merge address object properly
             address: {
-              homeAddress: addressData.homeAddress.trim(),
-              nearLandmark: addressData.nearLandmark.trim(),
-              alternateNumber: addressData.alternateNumber.trim(),
-              pincode: addressData.pincode.trim(),
-            }
-          });
+              ...(user?.address || {}),
+              ...(updatedUserData.address || {}),
+              homeAddress: updatedUserData.address?.homeAddress || updatedUserData.homeAddress || user?.address?.homeAddress || user?.homeAddress,
+              nearLandmark: updatedUserData.address?.nearLandmark || updatedUserData.nearLandmark || user?.address?.nearLandmark || user?.nearLandmark,
+              alternateNumber: updatedUserData.address?.alternateNumber || updatedUserData.alternateNumber || user?.address?.alternateNumber || user?.alternateNumber,
+              pincode: updatedUserData.address?.pincode || updatedUserData.pincode || user?.address?.pincode || user?.pincode,
+            },
+            // Also set top-level fields for backward compatibility
+            homeAddress: updatedUserData.address?.homeAddress || updatedUserData.homeAddress || user?.homeAddress || addressData.homeAddress.trim(),
+            nearLandmark: updatedUserData.address?.nearLandmark || updatedUserData.nearLandmark || user?.nearLandmark || addressData.nearLandmark.trim(),
+            alternateNumber: updatedUserData.address?.alternateNumber || updatedUserData.alternateNumber || user?.alternateNumber || addressData.alternateNumber.trim(),
+            pincode: updatedUserData.address?.pincode || updatedUserData.pincode || user?.pincode || addressData.pincode.trim(),
+          };
+          
+          updateUser(mergedUserData);
         }
+        
+        // Update local addressData state to reflect changes immediately
+        const updatedHomeAddress = response.data?.address?.homeAddress || response.data?.homeAddress || addressData.homeAddress.trim();
+        const updatedNearLandmark = response.data?.address?.nearLandmark || response.data?.nearLandmark || addressData.nearLandmark.trim();
+        const updatedAlternateNumber = response.data?.address?.alternateNumber || response.data?.alternateNumber || addressData.alternateNumber.trim();
+        const updatedPincode = response.data?.address?.pincode || response.data?.pincode || addressData.pincode.trim();
+        
+        setAddressData({
+          homeAddress: updatedHomeAddress,
+          nearLandmark: updatedNearLandmark,
+          alternateNumber: updatedAlternateNumber,
+          pincode: updatedPincode,
+        });
+        
         setTimeout(() => setAddressSuccess(false), 3000);
       } else {
         setError(response?.message || 'Failed to update address');
@@ -411,31 +447,39 @@ const UserDashboard = () => {
             </div>
           ) : (
             <div className="space-y-2 text-text-dark text-sm md:text-base">
-              {user?.homeAddress || user?.address?.homeAddress ? (
-                <>
-                  <div className="flex items-start gap-2">
-                    <MapPin className="w-5 h-5 text-primary-blue flex-shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="font-medium">{user?.homeAddress || user?.address?.homeAddress}</p>
-                      {user?.address?.nearLandmark || user?.nearLandmark ? (
-                        <p className="text-text-light text-sm mt-1">
-                          Near {user?.address?.nearLandmark || user?.nearLandmark}
-                        </p>
-                      ) : null}
-                      <div className="flex flex-wrap gap-3 mt-2 text-sm text-text-light">
-                        {user?.address?.pincode || user?.pincode ? (
-                          <span>📮 Pincode: {user?.address?.pincode || user?.pincode}</span>
+              {(() => {
+                // Use addressData state as primary source, fallback to user object
+                const displayAddress = addressData.homeAddress || user?.homeAddress || user?.address?.homeAddress;
+                const displayLandmark = addressData.nearLandmark || user?.address?.nearLandmark || user?.nearLandmark;
+                const displayPincode = addressData.pincode || user?.address?.pincode || user?.pincode;
+                const displayAltNumber = addressData.alternateNumber || user?.address?.alternateNumber || user?.alternateNumber;
+                
+                return displayAddress ? (
+                  <>
+                    <div className="flex items-start gap-2">
+                      <MapPin className="w-5 h-5 text-primary-blue flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="font-medium">{displayAddress}</p>
+                        {displayLandmark ? (
+                          <p className="text-text-light text-sm mt-1">
+                            Near {displayLandmark}
+                          </p>
                         ) : null}
-                        {user?.address?.alternateNumber || user?.alternateNumber ? (
-                          <span>📱 Alt: {user?.address?.alternateNumber || user?.alternateNumber}</span>
-                        ) : null}
+                        <div className="flex flex-wrap gap-3 mt-2 text-sm text-text-light">
+                          {displayPincode ? (
+                            <span>📮 Pincode: {displayPincode}</span>
+                          ) : null}
+                          {displayAltNumber ? (
+                            <span>📱 Alt: {displayAltNumber}</span>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </>
-              ) : (
-                <p className="text-text-light">No address added yet. Click Edit to add your delivery address.</p>
-              )}
+                  </>
+                ) : (
+                  <p className="text-text-light">No address added yet. Click Edit to add your delivery address.</p>
+                );
+              })()}
             </div>
           )}
         </div>

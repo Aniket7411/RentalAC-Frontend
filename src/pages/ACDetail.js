@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { apiService } from '../services/api';
 import { MapPin, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight, Phone, Mail, Loader2, X, CheckCircle } from 'lucide-react';
+import { FiHeart } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { formatPhoneNumber, getFormattedPhone, validatePhoneNumber } from '../utils/phoneFormatter';
+import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../hooks/useToast';
 import { ToastContainer } from '../components/Toast';
 import ACCard from '../components/ACCard';
@@ -13,9 +15,13 @@ const ACDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const { addRentalToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [ac, setAc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   const prevImage = () => {
     if (ac?.images && ac.images.length > 0) {
@@ -29,16 +35,6 @@ const ACDetail = () => {
     }
   };
   const [selectedDuration, setSelectedDuration] = useState('3'); // '3', '6', '9', '11'
-  const [showInquiryForm, setShowInquiryForm] = useState(false);
-  const [inquiryData, setInquiryData] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    message: '',
-  });
-  const [submittingInquiry, setSubmittingInquiry] = useState(false);
-  const [inquiryError, setInquiryError] = useState('');
-  const [inquirySuccess, setInquirySuccess] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
   const [relatedACs, setRelatedACs] = useState([]);
   const { toasts, removeToast, success, error: showError } = useToast();
@@ -52,6 +48,17 @@ const ACDetail = () => {
       loadRelatedACs();
     }
   }, [ac]);
+
+  useEffect(() => {
+    if (isAuthenticated && ac) {
+      const productId = ac._id || ac.id;
+      if (productId) {
+        setIsWishlisted(isInWishlist(productId));
+      }
+    } else {
+      setIsWishlisted(false);
+    }
+  }, [isAuthenticated, ac, isInWishlist]);
 
   const loadAC = async () => {
     setLoading(true);
@@ -135,113 +142,57 @@ const ACDetail = () => {
     }
   };
 
-  const handleInquiryChange = (e) => {
-    const { name, value } = e.target;
-    if (name === 'phone') {
-      const formatted = formatPhoneNumber(value);
-      setInquiryData({ ...inquiryData, phone: formatted });
-    } else {
-      setInquiryData({ ...inquiryData, [name]: value });
-    }
-    setInquiryError('');
-  };
 
   const addToCart = () => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-
     try {
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      const existingItem = cart.find(item => item.id === (ac._id || ac.id));
-
-      if (existingItem) {
-        const updatedCart = cart.map(item =>
-          item.id === (ac._id || ac.id)
-            ? { ...item, quantity: (item.quantity || 1) + 1 }
-            : item
-        );
-        localStorage.setItem('cart', JSON.stringify(updatedCart));
-      } else {
-        const newItem = {
-          id: ac._id || ac.id,
-          brand: ac.brand,
-          model: ac.model,
-          name: `${ac.brand} ${ac.model}`,
-          capacity: ac.capacity,
-          type: ac.type,
-          location: ac.location,
-          price: ac.price,
-          images: ac.images,
-          quantity: 1,
-        };
-        localStorage.setItem('cart', JSON.stringify([...cart, newItem]));
-      }
-
+      // Use CartContext to add product (works for both logged-in and non-logged-in users)
+      addRentalToCart(ac, selectedDuration);
       setAddedToCart(true);
       success('Product added to cart successfully!');
-      window.dispatchEvent(new Event('cartUpdated'));
       setTimeout(() => setAddedToCart(false), 2000);
     } catch (error) {
       console.error('Error adding to cart:', error);
-      showError('Failed to add product to cart. Please try again.');
+      showError(error.message || 'Failed to add product to cart. Please try again.');
     }
   };
 
-  const handleInquirySubmit = async (e) => {
-    e.preventDefault();
-    setInquiryError('');
-
-    if (!inquiryData.name || !inquiryData.phone || !inquiryData.email) {
-      setInquiryError('Please fill all required fields');
+  const handleWishlistToggle = async () => {
+    if (!isAuthenticated) {
+      showError('Please login to add to wishlist');
+      setTimeout(() => navigate('/login'), 2000);
       return;
     }
 
-    if (!validatePhoneNumber(inquiryData.phone)) {
-      setInquiryError('Please enter a valid 10-digit phone number');
-      return;
-    }
+    const productId = ac._id || ac.id;
+    if (!productId) return;
 
-    setSubmittingInquiry(true);
-
+    setWishlistLoading(true);
     try {
-      const formattedData = {
-        ...inquiryData,
-        phone: getFormattedPhone(inquiryData.phone),
-        acDetails: ac ? {
-          id: ac._id || ac.id,
-          brand: ac.brand,
-          model: ac.model,
-          capacity: ac.capacity,
-          type: ac.type,
-          location: ac.location,
-          price: ac.price,
-        } : undefined,
-      };
-
-      const response = await apiService.createRentalInquiry(id, formattedData);
-      if (response.success) {
-        success('Rental inquiry submitted successfully! We will contact you soon.');
-        setInquirySuccess(true);
-        setInquiryData({ name: '', phone: '', email: '', message: '' });
-        setTimeout(() => {
-          setShowInquiryForm(false);
-          setInquirySuccess(false);
-        }, 2000);
+      if (isWishlisted) {
+        const result = await removeFromWishlist(productId);
+        if (result.success) {
+          setIsWishlisted(false);
+          success('Removed from wishlist');
+        } else {
+          showError(result.message || 'Failed to remove from wishlist');
+        }
       } else {
-        const errorMsg = response.message || 'Failed to submit inquiry. Please try again.';
-        setInquiryError(errorMsg);
-        showError(errorMsg);
+        const result = await addToWishlist(productId);
+        if (result.success) {
+          setIsWishlisted(true);
+          success('Added to wishlist');
+        } else {
+          showError(result.message || 'Failed to add to wishlist');
+        }
       }
-    } catch (err) {
-      const errorMsg = 'An error occurred. Please try again.';
-      setInquiryError(errorMsg);
-      showError(errorMsg);
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
+      showError('An error occurred. Please try again.');
     } finally {
-      setSubmittingInquiry(false);
+      setWishlistLoading(false);
     }
   };
+
 
   if (loading) {
     return (
@@ -369,9 +320,29 @@ const ACDetail = () => {
           >
             <div className="flex items-start justify-between mb-2 sm:mb-3">
               <div className="flex-1">
-                <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-text-dark mb-1">
-                  {ac.brand} {ac.model}
-                </h1>
+                <div className="flex items-center gap-2 sm:gap-3 mb-1">
+                  <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-text-dark">
+                    {ac.brand} {ac.model}
+                  </h1>
+                  {/* Wishlist Icon */}
+                  <button
+                    onClick={handleWishlistToggle}
+                    disabled={wishlistLoading}
+                    className={`flex-shrink-0 p-1.5 sm:p-2 rounded-full transition-all duration-300 ${
+                      isWishlisted
+                        ? 'text-red-500 bg-red-50 hover:bg-red-100'
+                        : 'text-gray-400 hover:text-red-500 hover:bg-gray-50'
+                    } ${wishlistLoading ? 'opacity-50 cursor-wait' : 'cursor-pointer'}`}
+                    title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                    aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                  >
+                    <FiHeart
+                      className={`w-4 h-4 sm:w-5 sm:h-5 transition-all duration-300 ${
+                        isWishlisted ? 'fill-current' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
                 <p className="text-xs sm:text-sm text-text-light">
                   {ac.capacity} • {ac.type}
                 </p>
@@ -449,195 +420,29 @@ const ACDetail = () => {
               <div className="text-xl sm:text-2xl md:text-3xl font-bold text-primary-blue">
                 ₹{price.toLocaleString()}
                 <span className="text-xs sm:text-sm md:text-base text-text-light font-normal ml-1">
-                  /{selectedDuration === '3' ? '3 months' : selectedDuration === '6' ? '6 months' : selectedDuration === '9' ? '9 months' : '11 months'}
+                  (Total for {selectedDuration === '3' ? '3' : selectedDuration === '6' ? '6' : selectedDuration === '9' ? '9' : '11'} months)
                 </span>
               </div>
             </div>
 
-            {/* Add to Cart / Inquiry Button */}
+            {/* Add to Cart Button - Always shown (works for both logged-in and non-logged-in users) */}
             {ac.status === 'Available' && (
-              <>
-                {isAuthenticated ? (
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={addToCart}
-                    disabled={addedToCart}
-                    className={`w-full py-2.5 sm:py-3 md:py-3.5 rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-300 font-semibold text-sm sm:text-base md:text-lg ${addedToCart
-                      ? 'bg-green-500 text-white cursor-not-allowed'
-                      : 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white'
-                      }`}
-                  >
-                    {addedToCart ? 'Added to Cart ✓' : 'Add to Cart'}
-                  </motion.button>
-                ) : (
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setShowInquiryForm(true)}
-                    className="w-full bg-gradient-to-r from-primary-blue to-primary-blue-light text-white py-2 sm:py-2.5 md:py-3 rounded-lg hover:shadow-lg transition-all duration-300 font-semibold text-xs sm:text-sm md:text-base"
-                  >
-                    Inquire About Rental
-                  </motion.button>
-                )}
-              </>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={addToCart}
+                disabled={addedToCart}
+                className={`w-full py-2.5 sm:py-3 md:py-3.5 rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-300 font-semibold text-sm sm:text-base md:text-lg ${addedToCart
+                  ? 'bg-green-500 text-white cursor-not-allowed'
+                  : 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white'
+                  }`}
+              >
+                {addedToCart ? 'Added to Cart ✓' : 'Add to Cart'}
+              </motion.button>
             )}
           </motion.div>
         </div>
 
-        {/* Inquiry Form Modal */}
-        {showInquiryForm && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-md w-full p-4 sm:p-6 md:p-8 max-h-[90vh] overflow-y-auto border border-gray-100"
-            >
-              <div className="flex items-center justify-between mb-4 sm:mb-6">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-text-dark">Rental Inquiry</h2>
-                <button
-                  onClick={() => {
-                    setShowInquiryForm(false);
-                    setInquiryError('');
-                    setInquirySuccess(false);
-                  }}
-                  className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-text-light hover:text-text-dark"
-                >
-                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
-                </button>
-              </div>
-
-              {inquirySuccess ? (
-                <div className="text-center py-6 sm:py-8">
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4"
-                  >
-                    <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" />
-                  </motion.div>
-                  <p className="text-lg sm:text-xl font-semibold text-text-dark mb-2">
-                    Thank you for your inquiry!
-                  </p>
-                  <p className="text-sm sm:text-base text-text-light">
-                    We'll contact you soon.
-                  </p>
-                </div>
-              ) : (
-                <form onSubmit={handleInquirySubmit} className="space-y-4 sm:space-y-5">
-                  {inquiryError && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg text-sm"
-                    >
-                      {inquiryError}
-                    </motion.div>
-                  )}
-
-                  <div>
-                    <label className="block text-xs sm:text-sm font-semibold text-text-dark mb-1.5 sm:mb-2">
-                      Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={inquiryData.name}
-                      onChange={handleInquiryChange}
-                      required
-                      className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all bg-gray-50 focus:bg-white text-sm sm:text-base"
-                      placeholder="Your Name"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs sm:text-sm font-semibold text-text-dark mb-1.5 sm:mb-2">
-                      Phone Number <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <div className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-text-light text-xs sm:text-sm font-medium">
-                        +91
-                      </div>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={inquiryData.phone}
-                        onChange={handleInquiryChange}
-                        required
-                        maxLength={15}
-                        className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-2.5 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all bg-gray-50 focus:bg-white text-sm sm:text-base"
-                        placeholder="9876543210"
-                      />
-                    </div>
-                    <p className="text-[10px] sm:text-xs text-text-light mt-1">Enter 10-digit phone number</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs sm:text-sm font-semibold text-text-dark mb-1.5 sm:mb-2">
-                      Email <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={inquiryData.email}
-                      onChange={handleInquiryChange}
-                      required
-                      className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all bg-gray-50 focus:bg-white text-sm sm:text-base"
-                      placeholder="your.email@example.com"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs sm:text-sm font-semibold text-text-dark mb-1.5 sm:mb-2">
-                      Message (Optional)
-                    </label>
-                    <textarea
-                      name="message"
-                      value={inquiryData.message}
-                      onChange={handleInquiryChange}
-                      rows={3}
-                      className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue transition-all bg-gray-50 focus:bg-white resize-none text-sm sm:text-base"
-                      placeholder="Any additional information..."
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
-                    <motion.button
-                      type="button"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => {
-                        setShowInquiryForm(false);
-                        setInquiryError('');
-                        setInquirySuccess(false);
-                      }}
-                      className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-gray-200 rounded-lg sm:rounded-xl hover:bg-gray-50 font-semibold transition-all text-sm sm:text-base"
-                    >
-                      Cancel
-                    </motion.button>
-                    <motion.button
-                      type="submit"
-                      disabled={submittingInquiry}
-                      whileHover={{ scale: submittingInquiry ? 1 : 1.02 }}
-                      whileTap={{ scale: submittingInquiry ? 1 : 0.98 }}
-                      className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-primary-blue to-primary-blue-light text-white rounded-lg sm:rounded-xl hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 font-semibold transition-all text-sm sm:text-base"
-                    >
-                      {submittingInquiry ? (
-                        <>
-                          <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
-                          <span>Submitting...</span>
-                        </>
-                      ) : (
-                        'Submit Inquiry'
-                      )}
-                    </motion.button>
-                  </div>
-                </form>
-              )}
-            </motion.div>
-          </div>
-        )}
 
         {/* Related ACs Section */}
         {relatedACs.length > 0 && (
