@@ -10,32 +10,38 @@ const LoginPromptModal = ({ isOpen, onClose, message = "Please login first, then
   useEffect(() => {
     if (!isOpen) return;
 
-    // Countdown timer
-    const countdownInterval = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(countdownInterval);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    // Only set up countdown and redirect if redirectDelay > 0
+    if (redirectDelay > 0) {
+      // Countdown timer
+      const countdownInterval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(countdownInterval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
 
-    // Redirect after delay
-    const redirectTimer = setTimeout(() => {
-      navigate('/login');
-      onClose();
-    }, redirectDelay);
+      // Redirect after delay
+      const redirectTimer = setTimeout(() => {
+        navigate('/login');
+        onClose();
+      }, redirectDelay);
 
-    return () => {
-      clearInterval(countdownInterval);
-      clearTimeout(redirectTimer);
-    };
+      return () => {
+        clearInterval(countdownInterval);
+        clearTimeout(redirectTimer);
+      };
+    } else {
+      // No auto-redirect, just set countdown to 0
+      setCountdown(0);
+    }
   }, [isOpen, navigate, redirectDelay, onClose]);
 
   useEffect(() => {
     if (isOpen) {
-      setCountdown(redirectDelay / 1000);
+      setCountdown(redirectDelay > 0 ? redirectDelay / 1000 : 0);
     }
   }, [isOpen, redirectDelay]);
 
@@ -106,13 +112,15 @@ const LoginPromptModal = ({ isOpen, onClose, message = "Please login first, then
                 </p>
               </div>
 
-              {/* Countdown */}
-              <div className="text-center mb-5 sm:mb-6">
-                <p className="text-xs sm:text-sm text-gray-500">
-                  Redirecting to login page in{' '}
-                  <span className="font-bold text-primary-blue">{countdown}</span> seconds
-                </p>
-              </div>
+              {/* Countdown - only show if redirectDelay > 0 */}
+              {redirectDelay > 0 && (
+                <div className="text-center mb-5 sm:mb-6">
+                  <p className="text-xs sm:text-sm text-gray-500">
+                    Redirecting to login page in{' '}
+                    <span className="font-bold text-primary-blue">{countdown}</span> seconds
+                  </p>
+                </div>
+              )}
 
               {/* Buttons */}
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">

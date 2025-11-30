@@ -32,13 +32,14 @@ const Checkout = () => {
   useEffect(() => {
     if (!isAuthenticated) {
       setShowLoginModal(true);
-      return;
     }
-    if (cartItems.length === 0) {
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (isAuthenticated && cartItems.length === 0) {
       navigate('/user/cart');
-      return;
     }
-  }, [isAuthenticated, cartItems, navigate]);
+  }, [isAuthenticated, cartItems.length, navigate]);
 
   const handlePlaceOrder = async () => {
     if (cartItems.length === 0) {
@@ -261,6 +262,46 @@ const Checkout = () => {
       (item.type !== 'service' && (item.brand || item.model || item.price));
   });
   const services = cartItems.filter(item => item.type === 'service');
+
+  // Don't render checkout form if not authenticated - just show modal
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <ToastContainer toasts={toasts} removeToast={removeToast} />
+        <LoginPromptModal
+          isOpen={true}
+          onClose={() => {
+            navigate('/user/cart');
+          }}
+          message="Please login first, then you will be able to place order"
+          redirectDelay={0}
+        />
+      </div>
+    );
+  }
+
+  // Don't render checkout form if cart is empty
+  if (cartItems.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8 md:py-12">
+        <ToastContainer toasts={toasts} removeToast={removeToast} />
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-12">
+            <FiShoppingCart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
+            <p className="text-gray-600 mb-6">Add items to your cart before checkout</p>
+            <Link
+              to="/user/cart"
+              className="inline-flex items-center space-x-2 text-primary-blue hover:text-primary-blue-light transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Cart</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 md:py-12">

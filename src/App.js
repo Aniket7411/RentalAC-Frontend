@@ -79,11 +79,7 @@ function App() {
                   />
                   <Route
                     path="/checkout"
-                    element={
-                      <ProtectedRoute requireUser={true}>
-                        <Checkout />
-                      </ProtectedRoute>
-                    }
+                    element={<Checkout />}
                   />
                   <Route
                     path="/user/wishlist"
