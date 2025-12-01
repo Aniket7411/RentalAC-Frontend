@@ -226,9 +226,17 @@ const Checkout = () => {
           // Clear cart after successful order placement
           clearCart();
 
+          // Show prominent success notification
+          showSuccess(`Order #${createdOrderId} placed successfully! Redirecting to your orders...`, 4000);
+
           // Show success modal
           setShowSuccessModal(true);
-          showSuccess('Order placed successfully!');
+
+          // Auto-redirect to orders page after showing notification (3 seconds)
+          setTimeout(() => {
+            setShowSuccessModal(false);
+            navigate('/user/orders');
+          }, 3000);
         } catch (err) {
           console.error('Error creating order:', err);
           const errorMessage = err.response?.data?.message || err.message || 'Failed to place order';
@@ -567,13 +575,13 @@ const Checkout = () => {
       {/* Success Modal */}
       <SuccessModal
         isOpen={showSuccessModal}
-        title="Order Placed Successfully!"
-        message={orderId ? `Your order #${orderId} has been placed successfully. You will be redirected to your orders page.` : 'Your order has been placed successfully. You will be redirected to your orders page.'}
+        title="Order Placed Successfully! 🎉"
+        message={orderId ? `Your order #${orderId} has been placed successfully. You will be redirected to your orders page in a moment.` : 'Your order has been placed successfully. You will be redirected to your orders page in a moment.'}
         onClose={() => {
           setShowSuccessModal(false);
           navigate('/user/orders');
         }}
-        confirmText="View Orders"
+        confirmText="View My Orders"
       />
     </div>
   );

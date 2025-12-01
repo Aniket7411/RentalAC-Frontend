@@ -30,13 +30,13 @@ const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: -50, x: '-50%' }}
-            animate={{ opacity: 1, y: 0, x: '-50%' }}
-            exit={{ opacity: 0, y: -20, x: '-50%' }}
-            className={`fixed top-4 left-1/2 z-50 ${colors[type]} border rounded-lg shadow-lg px-4 py-3 flex items-center space-x-3 min-w-[300px] max-w-md`}
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className={`${colors[type]} border rounded-lg shadow-lg px-3 sm:px-4 py-3 flex items-center space-x-2 sm:space-x-3 w-full`}
         >
             <Icon className="w-5 h-5 flex-shrink-0" />
-            <p className="flex-1 text-sm font-medium">{message}</p>
+            <p className="flex-1 text-sm font-medium break-words">{message}</p>
             <button
                 onClick={onClose}
                 className="flex-shrink-0 text-current opacity-70 hover:opacity-100"
@@ -48,8 +48,10 @@ const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
 };
 
 export const ToastContainer = ({ toasts, removeToast }) => {
+    if (toasts.length === 0) return null;
+    
     return (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 space-y-2">
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[9999] space-y-2 w-full max-w-md px-4 sm:px-0">
             <AnimatePresence>
                 {toasts.map((toast) => (
                     <Toast
