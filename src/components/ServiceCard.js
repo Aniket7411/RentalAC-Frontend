@@ -39,12 +39,14 @@ const ServiceCard = ({ service, onAddClick, onView }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
-      className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 border-gray-200 hover:border-sky-500/30 hover:-translate-y-2 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+      className="price-card bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 border-gray-200 hover:border-primary-blue/30 hover:-translate-y-2 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-blue/40"
     >
       {/* Image on top */}
       <div
@@ -111,7 +113,7 @@ const ServiceCard = ({ service, onAddClick, onView }) => {
         {/* Add Button */}
         <button
           onClick={handleBookClick}
-          className="w-full inline-flex items-center justify-center bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-6 py-3.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-xl hover:scale-[1.02] text-base"
+          className="cursor-hover w-full inline-flex items-center justify-center bg-gradient-to-r from-primary-blue to-primary-blue-light hover:from-primary-blue-light hover:to-primary-blue text-white px-6 py-3.5 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-xl hover:scale-[1.02] text-base"
         >
           Book Service
         </button>

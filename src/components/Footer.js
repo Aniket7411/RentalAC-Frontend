@@ -6,7 +6,7 @@ const Footer = () => {
   return (
     <footer className="bg-gradient-to-b from-text-dark to-gray-900 text-white mt-20 border-t border-gray-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Company Info */}
           <div>
             <Link to="/" className="flex items-center space-x-3 flex-shrink-0 group">
@@ -51,29 +51,13 @@ const Footer = () => {
                 <Link to="/" className="hover:text-primary-blue-light transition">Home</Link>
               </li>
               <li>
-                <Link to="/browse" className="hover:text-primary-blue-light transition">Browse ACs</Link>
+                <Link to="/browse?category=AC" className="hover:text-primary-blue-light transition">Rent</Link>
               </li>
               <li>
-                <Link to="/about" className="hover:text-primary-blue-light transition">About Us</Link>
+                <Link to="/service-request" className="hover:text-primary-blue-light transition">Services</Link>
               </li>
               <li>
-                <Link to="/contact" className="hover:text-primary-blue-light transition">Contact Us</Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Services */}
-          <div>
-            <h4 className="font-semibold mb-4">Services</h4>
-            <ul className="space-y-2 text-sm text-gray-300">
-              <li>
-                <Link to="/browse" className="hover:text-primary-blue-light transition">AC Rentals</Link>
-              </li>
-              <li>
-                <Link to="/service-request" className="hover:text-primary-blue-light transition">AC Repair</Link>
-              </li>
-              <li>
-                <Link to="/service-request" className="hover:text-primary-blue-light transition">AC Maintenance</Link>
+                <Link to="/login" className="hover:text-primary-blue-light transition">Login</Link>
               </li>
             </ul>
           </div>
@@ -83,23 +67,23 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">Contact Info</h4>
             <ul className="space-y-3 text-sm text-gray-300">
               <li className="flex items-center space-x-2">
-                <MapPin className="w-4 h-4" />
-                <span>123 Business Street, City, State 12345</span>
-              </li>
-              <li className="flex items-center space-x-2">
                 <Phone className="w-4 h-4" />
-                <span>+91 9876543210</span>
+                <span>+91 [Insert Number]</span>
               </li>
               <li className="flex items-center space-x-2">
                 <Mail className="w-4 h-4" />
-                <span>info@coolrentals.com</span>
+                <span>support@ashenterprises.com</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <MapPin className="w-4 h-4" />
+                <span>[Insert Short Address], Mumbai.</span>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-gray-700/50 mt-10 pt-8 text-center text-sm text-gray-400">
-          <p>&copy; {new Date().getFullYear()} ASH Enterprise. All rights reserved.</p>
+          <p>&copy; 2025 ASH Enterprises. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, CheckCircle, Star, Snowflake, Wrench, Clock, Loader2, Shield, Zap, Users } from 'lucide-react';
+import { ArrowRight, CheckCircle, Star, Snowflake, Wrench, Clock, Loader2, Shield, Zap, Users, ShieldCheck, Sparkles } from 'lucide-react';
 import { apiService } from '../services/api';
 import ACCard from '../components/ACCard';
 import ServiceCard from '../components/ServiceCard';
@@ -17,6 +17,56 @@ const Home = () => {
   const [loadingServices, setLoadingServices] = useState(true);
   const [selectedService, setSelectedService] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [hoveredPanel, setHoveredPanel] = useState(null);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+
+  useEffect(() => {
+    // Custom cursor effect
+    const updateCursor = (e) => {
+      setCursorPosition({ x: e.clientX, y: e.clientY });
+
+      // Check if hovering over interactive elements
+      const element = document.elementFromPoint(e.clientX, e.clientY);
+      if (element && element.nodeType === Node.ELEMENT_NODE) {
+        const isInteractive =
+          (element.closest && element.closest('.price-card')) ||
+          (element.closest && element.closest('button')) ||
+          (element.closest && element.closest('a[href]')) ||
+          (element.closest && element.closest('.cursor-hover')) ||
+          element.classList?.contains('price-card') ||
+          element.classList?.contains('cursor-hover') ||
+          element.tagName === 'BUTTON' ||
+          element.tagName === 'A';
+
+        setIsHovering(!!isInteractive);
+      } else {
+        setIsHovering(false);
+      }
+    };
+
+    if (isDesktop) {
+      document.addEventListener('mousemove', updateCursor);
+      document.body.style.cursor = 'none'; // Hide default cursor
+    }
+
+    return () => {
+      if (isDesktop) {
+        document.removeEventListener('mousemove', updateCursor);
+        document.body.style.cursor = 'auto'; // Restore default cursor
+      }
+    };
+  }, [isDesktop]);
+
+  useEffect(() => {
+    const checkDesktop = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -94,9 +144,27 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Hero Banner Section */}
-      <section className="relative w-full h-[70vh] sm:h-[75vh] md:h-[80vh] lg:h-[85vh] overflow-hidden bg-gradient-to-br from-primary-blue via-blue-600 to-primary-blue-light">
+    <div className="min-h-screen bg-background-light">
+      {/* Custom Cursor - Desktop Only */}
+      {isDesktop && (
+        <div
+          className={`custom-cursor ${isHovering ? 'hover' : ''}`}
+          style={{
+            left: `${cursorPosition.x}px`,
+            top: `${cursorPosition.y}px`,
+          }}
+        />
+      )}
+
+      {/* Sticky Mobile Book Now Button */}
+      <Link
+        to="/service-request"
+        className="fixed bottom-4 right-4 md:hidden z-50 px-6 py-3 bg-primary-blue text-white rounded-full font-semibold shadow-2xl hover:bg-primary-blue-light transition-all duration-300 hover:scale-105 active:scale-95"
+      >
+        Book Now
+      </Link>
+      {/* OLD Hero Banner Section - COMMENTED OUT */}
+      {/* <section className="relative w-full h-[70vh] sm:h-[75vh] md:h-[80vh] lg:h-[85vh] overflow-hidden bg-gradient-to-br from-primary-blue via-blue-600 to-primary-blue-light">
         <div className="absolute inset-0">
           <img
             src="https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=1920&q=80"
@@ -129,7 +197,7 @@ const Home = () => {
                 to="/browse?categories=AC%2CRefrigerator%2CWashing+Machine"
                 className="inline-flex items-center justify-center px-5 py-2.5 sm:px-6 sm:py-3 md:px-8 md:py-4 bg-white text-primary-blue rounded-lg sm:rounded-xl font-semibold sm:font-bold text-sm sm:text-base md:text-lg shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300 hover:bg-blue-50"
               >
-                Browse Products
+                Rent Now
                 <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
               </Link>
               <Link
@@ -143,11 +211,182 @@ const Home = () => {
           </motion.div>
         </div>
 
-        {/* Decorative Elements */}
         <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-white to-transparent"></div>
+      </section> */}
+
+      {/* NEW Hero Section - Split Screen */}
+      <section className="relative w-full h-[60vh] sm:h-[70vh] md:h-[80vh] lg:h-[90vh] overflow-hidden flex flex-col md:flex-row">
+        {/* Left Panel: Rental */}
+        <motion.div
+          className="relative w-full md:w-1/2 h-[50vh] md:h-full overflow-hidden cursor-pointer group"
+          onMouseEnter={() => isDesktop && setHoveredPanel('left')}
+          onMouseLeave={() => isDesktop && setHoveredPanel(null)}
+          animate={isDesktop ? {
+            width: hoveredPanel === 'left' ? '65%' : hoveredPanel === 'right' ? '35%' : '50%',
+          } : {}}
+          transition={{ duration: 0.5, ease: 'easeInOut' }}
+        >
+          {/* Background Image */}
+          <div className="absolute inset-0">
+            <img
+              src="/bannerleft.png"
+              alt="Premium AC Rental"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              onError={(e) => {
+                e.target.style.display = 'none';
+              }}
+            />
+            {/* Overlay for better text readability */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent"></div>
+          </div>
+
+          {/* Content */}
+          <div className="relative z-10 h-full flex flex-col justify-center items-start px-4 sm:px-6 md:px-8 lg:px-12 text-white">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="max-w-lg"
+            >
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 md:mb-5 leading-tight">
+                Don't Buy. Just Rent.
+              </h2>
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl mb-6 sm:mb-8 text-white/90 leading-relaxed">
+                Premium Split & Window ACs starting at flexible monthly plans. Free relocation included.
+              </p>
+              <Link
+                to="/browse?category=AC"
+                className="cursor-hover inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 bg-transparent border-2 border-white text-white rounded-lg font-semibold text-sm sm:text-base md:text-lg hover:bg-white/10 transition-all duration-300"
+              >
+                Explore Rentals
+                <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
+              </Link>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Right Panel: Services */}
+        <motion.div
+          className="relative w-full md:w-1/2 h-[50vh] md:h-full overflow-hidden cursor-pointer group"
+          onMouseEnter={() => isDesktop && setHoveredPanel('right')}
+          onMouseLeave={() => isDesktop && setHoveredPanel(null)}
+          animate={isDesktop ? {
+            width: hoveredPanel === 'right' ? '65%' : hoveredPanel === 'left' ? '35%' : '50%',
+          } : {}}
+          transition={{ duration: 0.5, ease: 'easeInOut' }}
+        >
+          {/* Background Image */}
+          <div className="absolute inset-0">
+            <img
+              src="/bannerright.png"
+              alt="AC Repair & Service"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              onError={(e) => {
+                e.target.style.display = 'none';
+              }}
+            />
+            {/* Overlay for better text readability */}
+            <div className="absolute inset-0 bg-gradient-to-l from-black/60 via-black/40 to-transparent"></div>
+          </div>
+
+          {/* Content */}
+          <div className="relative z-10 h-full flex flex-col justify-center items-start md:items-end px-4 sm:px-6 md:px-8 lg:px-12 text-white text-left md:text-right">
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="max-w-lg"
+            >
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 md:mb-5 leading-tight">
+                Expert AC Care & Repair.
+              </h2>
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl mb-6 sm:mb-8 text-white/90 leading-relaxed">
+                From Foam Wash to Gas Charging. Mumbai's most trusted technicians.
+              </p>
+              <Link
+                to="/service-request"
+                className="cursor-hover inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 bg-primary-blue text-white rounded-lg font-semibold text-sm sm:text-base md:text-lg hover:bg-primary-blue-light transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
+                Book Service
+                <Wrench className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
+              </Link>
+            </motion.div>
+          </div>
+        </motion.div>
       </section>
 
-      {/* Why Choose Us Section */}
+      {/* Brands We Work With - Logo Scroller */}
+      <section className="py-8 sm:py-10 md:py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-6 sm:mb-8 md:mb-10"
+          >
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-text-dark mb-2">
+              Brands We Work With
+            </h2>
+          </motion.div>
+
+          {/* Logo Scroller */}
+          <div className="relative overflow-hidden">
+            <div className="flex animate-scroll" style={{ width: 'max-content' }}>
+              {/* First set of logos */}
+              {[
+                { name: 'Voltas', src: '/voltaslogo.png' },
+                { name: 'Carrier', src: '/carrierlogo.png' },
+                { name: 'Blue Star', src: '/blustarlogo.png' },
+                { name: 'Daikin', src: '/daikinlogo.png' },
+                { name: 'Samsung', src: '/samsung.png' },
+                { name: 'Hitachi', src: '/hitachilogo.png' },
+                { name: 'Whirlpool', src: '/whirlphoollogo.png' },
+              ].map((brand, index) => (
+                <div
+                  key={`brand-1-${index}`}
+                  className="flex-shrink-0 flex items-center justify-center w-32 sm:w-40 md:w-48 h-20 sm:h-24 md:h-28 px-4 md:px-6 transition-all duration-300"
+                >
+                  <img
+                    src={brand.src}
+                    alt={brand.name}
+                    className="max-w-full max-h-full object-contain"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                </div>
+              ))}
+              {/* Duplicate set for seamless infinite loop */}
+              {[
+                { name: 'Voltas', src: '/voltaslogo.png' },
+                { name: 'Carrier', src: '/carrierlogo.png' },
+                { name: 'Blue Star', src: '/blustarlogo.png' },
+                { name: 'Daikin', src: '/daikinlogo.png' },
+                { name: 'Samsung', src: '/samsung.png' },
+                { name: 'Hitachi', src: '/hitachilogo.png' },
+                { name: 'Whirlpool', src: '/whirlphoollogo.png' },
+              ].map((brand, index) => (
+                <div
+                  key={`brand-2-${index}`}
+                  className="flex-shrink-0 flex items-center justify-center w-32 sm:w-40 md:w-48 h-20 sm:h-24 md:h-28 px-4 md:px-6 transition-all duration-300"
+                >
+                  <img
+                    src={brand.src}
+                    alt={brand.name}
+                    className="max-w-full max-h-full object-contain"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Value Proposition - Why Choose Us Section */}
       <section className="py-8 sm:py-10 md:py-12 lg:py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -158,42 +397,39 @@ const Home = () => {
             className="text-center mb-8 sm:mb-10 md:mb-12"
           >
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-text-dark mb-3 sm:mb-4">
-              Why Choose Us?
+              Why Mumbai Trusts ASH Enterprises
             </h2>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-text-light max-w-3xl mx-auto px-4">
-              Experience premium AC rental and service solutions tailored to your needs
-            </p>
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6 lg:gap-8">
             {[
               {
-                icon: Clock,
-                title: 'Fast Service',
-                description: 'Quick installation and repair services. Same-day service available for urgent needs.',
-                color: 'from-yellow-500 to-orange-500',
-                bgColor: 'bg-yellow-50',
-              },
-              {
-                icon: Shield,
-                title: 'Trusted & Reliable',
-                description: 'Verified vendors and certified technicians for your peace of mind. Quality guaranteed.',
-                color: 'from-blue-500 to-blue-600',
+                icon: ShieldCheck,
+                title: 'Zero Hidden Costs',
+                description: 'Fixed prices. You pay exactly what you see. ₹149 for visits, ₹449 for service. No surprises.',
+                color: 'from-primary-blue to-primary-blue-light',
                 bgColor: 'bg-blue-50',
               },
               {
-                icon: Zap,
-                title: 'Easy Booking',
-                description: 'Simple online booking process. Add to cart, checkout, and get your AC installed.',
+                icon: Snowflake,
+                title: 'Free Maintenance on Rentals',
+                description: 'Renting? If it stops cooling, we fix or replace it within 24 hours for free.',
+                color: 'from-cyan-500 to-blue-500',
+                bgColor: 'bg-cyan-50',
+              },
+              {
+                icon: Sparkles,
+                title: 'Lab-Grade Hygiene',
+                description: 'We use industrial Foam Wash technology to remove 99.9% of hidden dust and mold.',
                 color: 'from-purple-500 to-pink-500',
                 bgColor: 'bg-purple-50',
               },
               {
-                icon: Users,
-                title: '24/7 Support',
-                description: 'Round-the-clock customer support whenever you need us. We\'re always here to help.',
-                color: 'from-green-500 to-emerald-600',
-                bgColor: 'bg-green-50',
+                icon: Zap,
+                title: 'Same-Day Service',
+                description: 'We prioritize breakdowns. Our tech-enabled dispatch gets an expert to you fast.',
+                color: 'from-yellow-500 to-orange-500',
+                bgColor: 'bg-yellow-50',
               },
             ].map((feature, index) => (
               <motion.div
@@ -453,9 +689,11 @@ const Home = () => {
               {services.map((service, index) => (
                 <motion.div
                   key={service._id || service.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
+                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, margin: '-50px' }}
+                  transition={{ duration: 0.5, delay: index * 0.1, ease: 'easeOut' }}
+                  className="price-card"
                 >
                   <ServiceCard service={service} onAddClick={handleServiceAdd} />
                 </motion.div>
