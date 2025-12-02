@@ -47,9 +47,9 @@ function App() {
       <CartProvider>
         <WishlistProvider>
           <Router>
-            <div className="min-h-screen flex flex-col bg-gray-50">
+            <div className="min-h-screen flex flex-col bg-gray-50 overflow-x-hidden w-full max-w-full">
               <Header />
-              <main className="flex-grow pt-16 md:pt-20">
+              <main className="flex-grow pt-16 md:pt-20 w-full max-w-full overflow-x-hidden">
                 <ScrollToTop />
                 <Routes>
                   {/* Public Routes */}

@@ -26,15 +26,15 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white/95 backdrop-blur-md shadow-lg fixed top-0 z-50 w-full border-b border-gray-100">
-      <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 md:h-20">
+    <header className="bg-white/95 backdrop-blur-md shadow-lg sticky top-0 z-50 w-full border-b border-gray-100 overflow-hidden">
+      <div className="w-full max-w-full px-4 sm:px-6 lg:px-8 overflow-x-hidden">
+        <div className="flex justify-between items-center h-16 md:h-20 min-w-0">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3 flex-shrink-0 group">
+          <Link to="/" className="flex items-center space-x-3 flex-shrink-0 group min-w-0">
             <img
               src="/ashlogo.png"
               alt="ASH Enterprise logo"
-              className="h-16 w-20 md:h-14 rounded-md md:w-24 object-contain  flex-shrink-0"
+              className="h-12 w-16 md:h-14 rounded-md md:w-24 object-contain flex-shrink-0"
               style={{ maxWidth: '100%', height: 'auto' }}
               onError={(e) => {
                 console.error('Logo image not found at /ashlogo.png');
@@ -46,7 +46,7 @@ const Header = () => {
             </div> */}
           </Link>
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
+          <nav className="hidden md:flex items-center space-x-1 flex-shrink min-w-0 overflow-hidden">
             {!user ? (
               <>
                 {/* <Link to="/" className="px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">Home</Link> */}
@@ -147,7 +147,7 @@ const Header = () => {
           {/* Mobile Menu Button - Always on the right */}
 
           {/* User Actions for Mobile - Show cart/wishlist even when menu is closed */}
-          <div className="md:hidden flex items-center space-x-2 mr-2">
+          <div className="md:hidden flex items-center space-x-2 mr-2 flex-shrink-0">
             <Link to="/user/cart" className="relative p-2 text-neutral-900 hover:text-sky-500 transition-all">
               <FiShoppingCart className="w-6 h-6" />
               {cartCount > 0 && (
