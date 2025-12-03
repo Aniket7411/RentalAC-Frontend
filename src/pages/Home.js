@@ -8,6 +8,7 @@ import ServiceCard from '../components/ServiceCard';
 import ServiceBookingModal from '../components/ServiceBookingModal';
 // import SingleScreen from './SingleScreen/SingleScreen';
 import InstallCard from '../components/installcard';
+import CouponModal from '../components/CouponModal';
 
 const Home = () => {
   const [featuredACs, setFeaturedACs] = useState([]);
@@ -21,6 +22,7 @@ const Home = () => {
   const [isDesktop, setIsDesktop] = useState(false);
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
+  const [showCouponModal, setShowCouponModal] = useState(false);
 
   useEffect(() => {
     // Custom cursor effect
@@ -107,6 +109,22 @@ const Home = () => {
     loadData();
   }, []);
 
+  // Show coupon modal once on page load (check localStorage)
+  useEffect(() => {
+    const hasSeenCoupons = localStorage.getItem('hasSeenCoupons');
+    if (!hasSeenCoupons) {
+      // Show modal after a short delay for better UX
+      const timer = setTimeout(() => {
+        setShowCouponModal(true);
+      }, 2000); // 2 seconds delay
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleCloseCouponModal = () => {
+    setShowCouponModal(false);
+    localStorage.setItem('hasSeenCoupons', 'true');
+  };
 
   const handleServiceAdd = (service) => {
     setSelectedService(service);
@@ -543,8 +561,8 @@ const Home = () => {
           </motion.div>
         </div>
       </section>
- {/* Services Section */}
- <section className="py-4 sm:py-6 md:py-8 bg-gradient-to-b from-gray-50 to-white">
+      {/* Services Section */}
+      <section className="py-4 sm:py-6 md:py-8 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -743,7 +761,7 @@ const Home = () => {
 
 
 
-     
+
 
       {/* Testimonials */}
       <section className="py-4 sm:py-6 md:py-8 bg-gradient-to-b from-white via-gray-50 to-white">
@@ -785,6 +803,9 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Coupon Modal */}
+      <CouponModal isOpen={showCouponModal} onClose={handleCloseCouponModal} />
     </div>
   );
 };

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { apiService } from '../../services/api';
-import { FiShoppingCart, FiAlertCircle, FiCheckCircle, FiCreditCard, FiClock, FiCalendar, FiMapPin, FiUser, FiPhone } from 'react-icons/fi';
+import { FiShoppingCart, FiAlertCircle, FiCheckCircle, FiCreditCard, FiClock, FiCalendar, FiMapPin, FiUser, FiPhone, FiTag } from 'react-icons/fi';
 import { Loader2, Wrench, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '../../hooks/useToast';
@@ -22,12 +22,27 @@ const Checkout = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [orderId, setOrderId] = useState(null);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
   const { toasts, removeToast, success: showSuccess, error: showError } = useToast();
 
   const totals = calculateTotals();
   const paymentBenefits = getPaymentBenefits();
-  const discount = selectedPaymentOption === 'payNow' ? totals.total * paymentBenefits.payNow.discount : 0;
-  const finalTotal = totals.total - discount;
+  const paymentDiscount = selectedPaymentOption === 'payNow' ? totals.total * paymentBenefits.payNow.discount : 0;
+  
+  // Calculate coupon discount
+  const couponDiscount = appliedCoupon ? (() => {
+    if (appliedCoupon.type === 'percentage') {
+      return totals.total * (appliedCoupon.value / 100);
+    } else {
+      return appliedCoupon.value; // Fixed amount
+    }
+  })() : 0;
+  
+  const totalDiscount = paymentDiscount + couponDiscount;
+  const finalTotal = totals.total - totalDiscount;
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -188,7 +203,10 @@ const Checkout = () => {
             orderId: generateOrderId(), // Generate orderId on frontend
             items: orderItems,
             total: totals.total,
-            discount: discount,
+            discount: totalDiscount,
+            couponCode: appliedCoupon?.code || null,
+            couponDiscount: couponDiscount,
+            paymentDiscount: paymentDiscount,
             finalTotal: finalTotal,
             paymentOption: selectedPaymentOption,
             paymentStatus: selectedPaymentOption === 'payNow' ? 'paid' : 'pending',
@@ -344,6 +362,60 @@ const Checkout = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Order Summary */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Coupon Code Section */}
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+              <h2 className="text-xl font-semibold text-text-dark mb-4 flex items-center gap-2">
+                <FiTag className="w-5 h-5 text-primary-blue" />
+                Apply Coupon Code
+              </h2>
+              
+              {appliedCoupon ? (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-green-800">Coupon Applied: {appliedCoupon.code}</p>
+                      <p className="text-sm text-green-600">{appliedCoupon.description}</p>
+                    </div>
+                    <button
+                      onClick={handleRemoveCoupon}
+                      className="text-red-600 hover:text-red-700 text-sm font-semibold"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Enter coupon code"
+                    value={couponCode}
+                    onChange={(e) => {
+                      setCouponCode(e.target.value.toUpperCase());
+                      setCouponError('');
+                    }}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleApplyCoupon();
+                      }
+                    }}
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue"
+                  />
+                  <button
+                    onClick={handleApplyCoupon}
+                    disabled={couponLoading || !couponCode.trim()}
+                    className="px-6 py-3 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {couponLoading ? 'Applying...' : 'Apply'}
+                  </button>
+                </div>
+              )}
+              
+              {couponError && (
+                <p className="text-red-600 text-sm mt-2">{couponError}</p>
+              )}
+            </div>
+
             {/* Payment Option Selection */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-semibold text-text-dark mb-4">Select Payment Option</h2>
@@ -370,9 +442,9 @@ const Checkout = () => {
                         <FiCreditCard className="w-5 h-5 text-green-600" />
                         <span className="font-semibold text-text-dark">Pay Now</span>
                       </div>
-                      {selectedPaymentOption === 'payNow' && discount > 0 && (
+                      {selectedPaymentOption === 'payNow' && paymentDiscount > 0 && (
                         <span className="text-sm font-semibold text-green-600">
-                          Save ₹{discount.toLocaleString()}
+                          Save ₹{paymentDiscount.toLocaleString()}
                         </span>
                       )}
                     </div>
