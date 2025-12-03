@@ -156,6 +156,7 @@ export const CartProvider = ({ children }) => {
         quantity: 1, // Always 1, no quantity increase
         selectedDuration: selectedDuration || '3', // Use provided duration or default to 3 months
         paymentOption: 'payLater', // Default payment option (will be set at checkout)
+        installationCharges: product.installationCharges || null, // Include installation charges for AC
       };
 
       if (existingItem) {
@@ -287,7 +288,11 @@ export const CartProvider = ({ children }) => {
       const price = item.price && typeof item.price === 'object'
         ? (item.price[selectedDuration] || item.price[3] || 0)
         : (item.price || 0);
-      return total + price; // quantity is always 1
+      // Add installation charges if present (only for AC)
+      const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount) 
+        ? item.installationCharges.amount 
+        : 0;
+      return total + price + installationCharge; // quantity is always 1
     }, 0);
 
     const serviceTotal = services.reduce((total, item) => {

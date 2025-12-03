@@ -40,6 +40,16 @@ const AddAC = () => {
       dimensions: '',
       safety: [],
     },
+    // Installation charges (only for AC)
+    installationCharges: {
+      amount: '',
+      includedItems: [], // Array of items included in installation
+      extraMaterialRates: {
+        copperPipe: '', // ₹/meter
+        drainPipe: '', // ₹/meter
+        electricWire: '', // ₹/meter
+      },
+    },
   });
   const [heroImagePreview, setHeroImagePreview] = useState('');
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -50,6 +60,7 @@ const AddAC = () => {
   const [uploadingHeroImage, setUploadingHeroImage] = useState(false);
   const [specInput, setSpecInput] = useState('');
   const [safetyInput, setSafetyInput] = useState('');
+  const [installationItemInput, setInstallationItemInput] = useState('');
   const { toasts, removeToast, success: showSuccess, error: showError } = useToast();
 
   const handleChange = (e) => {
@@ -74,6 +85,16 @@ const AddAC = () => {
         energyRating: '',
         operationType: '',
         loadType: '',
+        // Reset installation charges when category changes
+        installationCharges: {
+          amount: '',
+          includedItems: [],
+          extraMaterialRates: {
+            copperPipe: '',
+            drainPipe: '',
+            electricWire: '',
+          },
+        },
       });
     } else {
       setFormData({
@@ -221,6 +242,30 @@ const AddAC = () => {
     });
   };
 
+  // Handle installation charges included items
+  const addInstallationItem = () => {
+    const val = installationItemInput.trim();
+    if (!val) return;
+    setFormData({
+      ...formData,
+      installationCharges: {
+        ...formData.installationCharges,
+        includedItems: [...formData.installationCharges.includedItems, val],
+      },
+    });
+    setInstallationItemInput('');
+  };
+
+  const removeInstallationItem = (index) => {
+    setFormData({
+      ...formData,
+      installationCharges: {
+        ...formData.installationCharges,
+        includedItems: formData.installationCharges.includedItems.filter((_, i) => i !== index),
+      },
+    });
+  };
+
   // Handle dimensions
   const handleDimensionsChange = (e) => {
     setFormData({
@@ -288,6 +333,18 @@ const AddAC = () => {
       if (formData.category === 'Washing Machine') {
         if (formData.operationType) productData.operationType = formData.operationType;
         if (formData.loadType) productData.loadType = formData.loadType;
+      }
+      // Add installation charges only for AC
+      if (formData.category === 'AC' && formData.installationCharges.amount) {
+        productData.installationCharges = {
+          amount: parseFloat(formData.installationCharges.amount) || 0,
+          includedItems: formData.installationCharges.includedItems || [],
+          extraMaterialRates: {
+            copperPipe: parseFloat(formData.installationCharges.extraMaterialRates.copperPipe) || 0,
+            drainPipe: parseFloat(formData.installationCharges.extraMaterialRates.drainPipe) || 0,
+            electricWire: parseFloat(formData.installationCharges.extraMaterialRates.electricWire) || 0,
+          },
+        };
       }
 
       const response = await apiService.addProduct(productData);
@@ -704,6 +761,160 @@ const AddAC = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
               />
             </div>
+
+            {/* Installation Charges Section - Only for AC */}
+            {formData.category === 'AC' && (
+              <div className="border-t border-gray-200 pt-6">
+                <h3 className="text-lg font-semibold text-text-dark mb-4">Installation Charges</h3>
+                
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-text-dark mb-2">
+                    Installation Charge Amount (₹)
+                  </label>
+                  <input
+                    type="number"
+                    name="installationCharges.amount"
+                    value={formData.installationCharges.amount}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        installationCharges: {
+                          ...formData.installationCharges,
+                          amount: e.target.value,
+                        },
+                      });
+                    }}
+                    min="0"
+                    placeholder="e.g., 2499"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                  />
+                </div>
+
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-text-dark mb-2">
+                    Included Items (What's included in installation charge)
+                  </label>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={installationItemInput}
+                        onChange={(e) => setInstallationItemInput(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addInstallationItem();
+                          }
+                        }}
+                        placeholder="e.g., Cable (3m) + 3pin plug"
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                      />
+                      <button
+                        type="button"
+                        onClick={addInstallationItem}
+                        className="px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition"
+                      >
+                        Add
+                      </button>
+                    </div>
+                    {formData.installationCharges.includedItems.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {formData.installationCharges.includedItems.map((item, index) => (
+                          <span
+                            key={index}
+                            className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-lg text-sm"
+                          >
+                            {item}
+                            <button
+                              type="button"
+                              onClick={() => removeInstallationItem(index)}
+                              className="hover:text-red-600 transition"
+                              title="Remove"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-text-dark mb-3">
+                    Extra Material Rates (₹/meter)
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs text-text-light mb-1">Copper Pipe</label>
+                      <input
+                        type="number"
+                        value={formData.installationCharges.extraMaterialRates.copperPipe}
+                        onChange={(e) => {
+                          setFormData({
+                            ...formData,
+                            installationCharges: {
+                              ...formData.installationCharges,
+                              extraMaterialRates: {
+                                ...formData.installationCharges.extraMaterialRates,
+                                copperPipe: e.target.value,
+                              },
+                            },
+                          });
+                        }}
+                        min="0"
+                        placeholder="e.g., 900"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-text-light mb-1">Drain Pipe</label>
+                      <input
+                        type="number"
+                        value={formData.installationCharges.extraMaterialRates.drainPipe}
+                        onChange={(e) => {
+                          setFormData({
+                            ...formData,
+                            installationCharges: {
+                              ...formData.installationCharges,
+                              extraMaterialRates: {
+                                ...formData.installationCharges.extraMaterialRates,
+                                drainPipe: e.target.value,
+                              },
+                            },
+                          });
+                        }}
+                        min="0"
+                        placeholder="e.g., 100"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-text-light mb-1">Electric Wire</label>
+                      <input
+                        type="number"
+                        value={formData.installationCharges.extraMaterialRates.electricWire}
+                        onChange={(e) => {
+                          setFormData({
+                            ...formData,
+                            installationCharges: {
+                              ...formData.installationCharges,
+                              extraMaterialRates: {
+                                ...formData.installationCharges.extraMaterialRates,
+                                electricWire: e.target.value,
+                              },
+                            },
+                          });
+                        }}
+                        min="0"
+                        placeholder="e.g., 120"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Features & Specs Section */}
             <div className="border-t border-gray-200 pt-6">

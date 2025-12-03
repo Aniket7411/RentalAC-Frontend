@@ -82,11 +82,17 @@ const Checkout = () => {
                 ? (rental.price[selectedDuration] || rental.price[3] || 0)
                 : (rental.price || 0);
 
+              // Get installation charges for AC products
+              const installationCharge = (rental.category === 'AC' && rental.installationCharges && rental.installationCharges.amount) 
+                ? rental.installationCharges.amount 
+                : 0;
+
               return {
                 type: 'rental',
                 productId: rental.id,
                 quantity: 1, // Always 1 per product
                 price: price,
+                installationCharges: installationCharge, // Include installation charges
                 duration: selectedDuration, // Number: 3, 6, 9, or 11
                 // Include product details for admin reference
                 productDetails: {
@@ -97,6 +103,7 @@ const Checkout = () => {
                   location: rental.location,
                   description: rental.description,
                   images: rental.images || [],
+                  installationCharges: rental.installationCharges || null, // Include full installation charges details
                 },
                 // Include delivery information for this rental
                 deliveryInfo: {
@@ -437,16 +444,31 @@ const Checkout = () => {
                             Duration: {item.selectedDuration} months
                           </p>
                         )}
+                        {item.category === 'AC' && item.installationCharges && item.installationCharges.amount > 0 && (
+                          <p className="text-xs text-blue-600 mt-1 font-medium">
+                            + Installation: ₹{item.installationCharges.amount.toLocaleString()}
+                          </p>
+                        )}
                       </div>
-                      <p className="font-semibold text-text-dark">
-                        ₹{(() => {
-                          const selectedDuration = item.selectedDuration || 3;
-                          const price = item.price && typeof item.price === 'object'
-                            ? (item.price[selectedDuration] || item.price[3] || 0)
-                            : (item.price || 0);
-                          return price.toLocaleString();
-                        })()}
-                      </p>
+                      <div className="text-right">
+                        <p className="font-semibold text-text-dark">
+                          ₹{(() => {
+                            const selectedDuration = item.selectedDuration || 3;
+                            const price = item.price && typeof item.price === 'object'
+                              ? (item.price[selectedDuration] || item.price[3] || 0)
+                              : (item.price || 0);
+                            const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount) 
+                              ? item.installationCharges.amount 
+                              : 0;
+                            return (price + installationCharge).toLocaleString();
+                          })()}
+                        </p>
+                        {item.category === 'AC' && item.installationCharges && item.installationCharges.amount > 0 && (
+                          <p className="text-xs text-text-light mt-1">
+                            (Rental + Installation)
+                          </p>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -515,7 +537,32 @@ const Checkout = () => {
                 {totals.rentalTotal > 0 && (
                   <div className="flex justify-between text-text-light">
                     <span>Rentals</span>
-                    <span>₹{totals.rentalTotal.toLocaleString()}</span>
+                    <span>₹{(() => {
+                      // Calculate rental total without installation charges
+                      const rentalTotalWithoutInstallation = rentals.reduce((total, item) => {
+                        const selectedDuration = item.selectedDuration || 3;
+                        const price = item.price && typeof item.price === 'object'
+                          ? (item.price[selectedDuration] || item.price[3] || 0)
+                          : (item.price || 0);
+                        return total + price;
+                      }, 0);
+                      return rentalTotalWithoutInstallation.toLocaleString();
+                    })()}</span>
+                  </div>
+                )}
+                {/* Installation Charges */}
+                {rentals.some(item => item.category === 'AC' && item.installationCharges && item.installationCharges.amount > 0) && (
+                  <div className="flex justify-between text-text-light">
+                    <span>Installation Charges</span>
+                    <span>₹{(() => {
+                      const installationTotal = rentals.reduce((total, item) => {
+                        if (item.category === 'AC' && item.installationCharges && item.installationCharges.amount) {
+                          return total + item.installationCharges.amount;
+                        }
+                        return total;
+                      }, 0);
+                      return installationTotal.toLocaleString();
+                    })()}</span>
                   </div>
                 )}
                 {totals.serviceTotal > 0 && (

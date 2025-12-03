@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
-import { FiShoppingCart, FiTrash2, FiAlertCircle, FiCheckCircle, FiEdit2, FiCalendar, FiClock, FiMapPin, FiUser, FiPhone } from 'react-icons/fi';
-import { Wrench } from 'lucide-react';
+import { FiShoppingCart, FiTrash2, FiAlertCircle, FiCheckCircle, FiEdit2, FiCalendar, FiClock, FiMapPin, FiUser, FiPhone, FiPackage, FiZap, FiInfo } from 'react-icons/fi';
+import { Wrench, X } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '../../hooks/useToast';
@@ -115,10 +115,13 @@ const Cart = () => {
   }, [cartItems, rentals, services]);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 md:py-12">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 py-8 md:py-12">
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-text-dark mb-8">Shopping Cart</h1>
+        <div className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-text-dark mb-2">Shopping Cart</h1>
+          <p className="text-text-light">Review your items and proceed to checkout</p>
+        </div>
 
         {/* Messages */}
         {error && (
@@ -209,27 +212,27 @@ const Cart = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="bg-white rounded-lg shadow-md p-4 md:p-6"
+                      className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 overflow-hidden"
                     >
-                      <div className="flex flex-col sm:flex-row gap-4">
+                      <div className="flex flex-col sm:flex-row gap-0">
                         {/* Product Image - Enhanced */}
                         <Link to={`/ac/${item.id}`} className="flex-shrink-0 relative group">
-                          <div className="relative w-full sm:w-40 h-40 rounded-lg overflow-hidden bg-gray-100">
+                          <div className="relative w-full sm:w-48 h-48 sm:h-full bg-gradient-to-br from-gray-50 to-gray-100">
                             <img
                               src={item.images?.[0] || 'https://via.placeholder.com/200'}
                               alt={item.name || `${item.brand} ${item.model}`}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
                               onError={(e) => {
                                 e.target.src = 'https://via.placeholder.com/200';
                               }}
                             />
                             {item.images && item.images.length > 1 && (
-                              <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                                +{item.images.length - 1} more
+                              <div className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full font-medium">
+                                +{item.images.length - 1}
                               </div>
                             )}
                             {item.status && (
-                              <div className={`absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold ${item.status === 'Available' ? 'bg-green-500 text-white' :
+                              <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-semibold shadow-md ${item.status === 'Available' ? 'bg-green-500 text-white' :
                                   item.status === 'Rented Out' ? 'bg-red-500 text-white' :
                                     'bg-yellow-500 text-white'
                                 }`}>
@@ -240,100 +243,149 @@ const Cart = () => {
                         </Link>
 
                         {/* Product Details - Enhanced */}
-                        <div className="flex-1">
-                          <div className="flex items-start justify-between mb-2">
-                            <Link to={`/ac/${item.id}`} className="flex-1">
-                              <h3 className="text-xl font-bold text-text-dark mb-2 hover:text-primary-blue transition-colors">
+                        <div className="flex-1 p-5 md:p-6">
+                          <div className="flex items-start justify-between mb-3">
+                            <Link to={`/ac/${item.id}`} className="flex-1 group">
+                              <h3 className="text-xl font-bold text-gray-900 mb-1 group-hover:text-primary-blue transition-colors">
                                 {item.brand} {item.model || item.name}
                               </h3>
+                              <div className="flex items-center gap-2 text-sm text-gray-500">
+                                {item.category && (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md font-medium">
+                                    <FiPackage className="w-3 h-3" />
+                                    {item.category}
+                                  </span>
+                                )}
+                                {item.location && (
+                                  <span className="inline-flex items-center gap-1 text-gray-500">
+                                    <FiMapPin className="w-3.5 h-3.5" />
+                                    {item.location}
+                                  </span>
+                                )}
+                              </div>
                             </Link>
+                            <button
+                              onClick={() => removeFromCart(item.id)}
+                              className="ml-3 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                              title="Remove from cart"
+                            >
+                              <X className="w-5 h-5" />
+                            </button>
                           </div>
 
                           {/* Product Specifications */}
-                          <div className="space-y-1 mb-3">
-                            <div className="flex flex-wrap items-center gap-2 text-sm text-text-light">
-                              {item.capacity && (
-                                <span className="bg-gray-100 px-2 py-1 rounded">Capacity: {item.capacity}</span>
-                              )}
-                              {item.productType && (
-                                <span className="bg-gray-100 px-2 py-1 rounded">Type: {item.productType}</span>
-                              )}
-                              {item.category && (
-                                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded font-medium">
-                                  {item.category}
-                                </span>
-                              )}
-                            </div>
-                            {item.location && (
-                              <div className="flex items-center text-sm text-text-light">
-                                <FiMapPin className="w-4 h-4 mr-1" />
-                                <span>{item.location}</span>
-                              </div>
+                          <div className="flex flex-wrap items-center gap-2 mb-4">
+                            {item.capacity && (
+                              <span className="inline-flex items-center px-2.5 py-1 bg-gray-100 text-gray-700 rounded-md text-xs font-medium">
+                                {item.capacity}
+                              </span>
                             )}
-                            {item.description && (
-                              <p className="text-sm text-text-light line-clamp-2 mt-2">
-                                {item.description}
-                              </p>
+                            {item.productType && (
+                              <span className="inline-flex items-center px-2.5 py-1 bg-gray-100 text-gray-700 rounded-md text-xs font-medium">
+                                {item.productType}
+                              </span>
                             )}
                           </div>
 
-                          {/* Rental Duration Selection */}
-                          <div className="mb-4">
-                            <label className="block text-sm font-semibold text-text-dark mb-2">
-                              Rental Duration <span className="text-red-500">*</span>
-                            </label>
-                            <div className="grid grid-cols-2 gap-2">
-                              {[3, 6, 9, 11].map((months) => (
-                                <button
-                                  key={months}
-                                  onClick={() => {
-                                    // Update cart item with selected duration using cart context
-                                    updateCartItem(item.id, { selectedDuration: months });
-                                  }}
-                                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${(item.selectedDuration || 3) === months
-                                      ? 'bg-primary-blue text-white shadow-md'
-                                      : 'bg-gray-100 text-text-dark hover:bg-gray-200'
-                                    }`}
-                                >
-                                  {months} Months
-                                  {item?.price && item.price[months] && (
-                                    <div className="text-xs mt-0.5">
-                                      ₹{item.price[months].toLocaleString()}
-                                    </div>
-                                  )}
-                                </button>
-                              ))}
+                          {/* Rental Duration Selection - Range Slider */}
+                          <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <div className="flex items-center gap-2 mb-4">
+                              <label className="block text-sm font-semibold text-gray-900">
+                                Choose Tenure <span className="text-red-500">*</span>
+                              </label>
+                              <div className="relative group">
+                                <FiInfo className="w-4 h-4 text-blue-500 cursor-help" />
+                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                                  Select rental duration
+                                </div>
+                              </div>
                             </div>
+                            
+                            {/* Range Slider */}
+                            <div className="mb-4">
+                              <div className="relative">
+                                <input
+                                  type="range"
+                                  min="0"
+                                  max="3"
+                                  step="1"
+                                  value={[3, 6, 9, 11].indexOf(item.selectedDuration || 3)}
+                                  onChange={(e) => {
+                                    const index = Number(e.target.value);
+                                    const tenureOptions = [3, 6, 9, 11];
+                                    updateCartItem(item.id, { selectedDuration: tenureOptions[index] });
+                                  }}
+                                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                                  style={{
+                                    background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${([3, 6, 9, 11].indexOf(item.selectedDuration || 3) / 3) * 100}%, #e5e7eb ${([3, 6, 9, 11].indexOf(item.selectedDuration || 3) / 3) * 100}%, #e5e7eb 100%)`
+                                  }}
+                                />
+                                <div className="flex justify-between mt-3">
+                                  {[3, 6, 9, 11].map((option) => (
+                                    <div key={option} className="flex flex-col items-center">
+                                      <div
+                                        className={`w-1 h-4 ${(item.selectedDuration || 3) === option ? 'bg-primary-blue' : 'bg-gray-400'}`}
+                                      />
+                                      <span className={`text-xs mt-1.5 font-medium ${(item.selectedDuration || 3) === option ? 'font-bold text-primary-blue' : 'text-gray-600'}`}>
+                                        {option}
+                                      </span>
+                                      {item?.price && item.price[option] && (
+                                        <span className={`text-xs mt-0.5 ${(item.selectedDuration || 3) === option ? 'text-primary-blue font-semibold' : 'text-gray-500'}`}>
+                                          ₹{item.price[option].toLocaleString()}
+                                        </span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                            
                             {/* Selected Price Display */}
                             {item?.price && (
-                              <div className="mt-3">
-                                <div className="flex items-baseline space-x-2">
-                                  <span className="text-xl font-bold text-primary-blue">
-                                    ₹{((item.price[item.selectedDuration || 3] || item.price[3] || 0)).toLocaleString()}
-                                  </span>
-                                  <span className="text-sm text-text-light">total</span>
+                              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                <div className="space-y-2.5">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium text-gray-600">Rental Price</span>
+                                    <span className="text-base font-semibold text-gray-900">
+                                      ₹{((item.price[item.selectedDuration || 3] || item.price[3] || 0)).toLocaleString()}
+                                    </span>
+                                  </div>
+                                  {item.category === 'AC' && item.installationCharges && item.installationCharges.amount > 0 && (
+                                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                                      <span className="text-sm font-medium text-gray-600 inline-flex items-center gap-1.5">
+                                        <FiZap className="w-4 h-4 text-blue-600" />
+                                        Installation
+                                      </span>
+                                      <span className="text-base font-semibold text-blue-600">
+                                        ₹{item.installationCharges.amount.toLocaleString()}
+                                      </span>
+                                    </div>
+                                  )}
+                                  <div className="flex items-center justify-between pt-2 border-t-2 border-gray-300">
+                                    <span className="text-base font-bold text-gray-900">Total</span>
+                                    <span className="text-xl font-bold text-primary-blue">
+                                      ₹{(() => {
+                                        const rentalPrice = (item.price[item.selectedDuration || 3] || item.price[3] || 0);
+                                        const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount) 
+                                          ? item.installationCharges.amount 
+                                          : 0;
+                                        return (rentalPrice + installationCharge).toLocaleString();
+                                      })()}
+                                    </span>
+                                  </div>
                                 </div>
-                                <p className="text-xs text-text-light mt-1">
-                                  Total price for {item.selectedDuration || 3} months rental
+                                <p className="text-xs text-gray-500 mt-2.5">
+                                  For {item.selectedDuration || 3} months rental
+                                  {item.category === 'AC' && item.installationCharges && item.installationCharges.amount > 0 && ' + installation'}
                                 </p>
                               </div>
                             )}
                             {item.discount > 0 && (
-                              <div className="text-sm text-green-600 font-medium mt-2">
+                              <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-md text-sm font-medium">
+                                <FiCheckCircle className="w-4 h-4" />
                                 {item.discount}% discount available
                               </div>
                             )}
-                          </div>
-
-                          {/* Remove Button */}
-                          <div className="flex items-center justify-end">
-                            <button
-                              onClick={() => removeFromCart(item.id)}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Remove from cart"
-                            >
-                              <FiTrash2 className="w-5 h-5" />
-                            </button>
                           </div>
                         </div>
                       </div>
@@ -354,7 +406,7 @@ const Cart = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="bg-white rounded-lg shadow-md p-4 md:p-6 border-l-4 border-sky-500 mb-4"
+                      className="bg-white rounded-xl shadow-sm border-l-4 border-sky-500 hover:shadow-md transition-shadow duration-300 overflow-hidden"
                     >
                       <div className="flex flex-col sm:flex-row gap-4">
                         {/* Service Image */}
@@ -376,27 +428,27 @@ const Cart = () => {
                         </div>
 
                         {/* Service Details */}
-                        <div className="flex-1">
-                          <div className="flex items-start justify-between mb-2">
-                            <div>
-                              <h3 className="text-lg font-semibold text-text-dark mb-1">
+                        <div className="flex-1 p-5 md:p-6">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <h3 className="text-lg font-bold text-gray-900 mb-2">
                                 {item.serviceTitle}
                               </h3>
-                              <p className="text-xl font-bold text-sky-600 mb-4">
+                              <p className="text-2xl font-bold text-sky-600 mb-4">
                                 ₹{(item.servicePrice || 0).toLocaleString()}
                               </p>
                             </div>
                             <button
                               onClick={() => removeFromCart(item.id)}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              className="ml-3 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                             >
-                              <FiTrash2 className="w-5 h-5" />
+                              <X className="w-5 h-5" />
                             </button>
                           </div>
 
                           {/* Booking Details */}
                           {item.bookingDetails && (
-                            <div className="bg-gray-50 rounded-lg p-4 space-y-2 mb-4">
+                            <div className="bg-gray-50 rounded-lg p-4 space-y-2.5 mb-4 border border-gray-200">
                               {item.bookingDetails.date && (
                                 <div className="flex items-center space-x-2 text-sm">
                                   <FiCalendar className="w-4 h-4 text-gray-500" />
@@ -467,24 +519,27 @@ const Cart = () => {
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
-                <h2 className="text-xl font-semibold text-text-dark mb-4">Order Summary</h2>
+              <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 sticky top-24">
+                <h2 className="text-xl font-bold text-gray-900 mb-6">Order Summary</h2>
 
                 {/* Payment Benefits Info */}
-                <div className="bg-gradient-to-r from-sky-50 to-blue-50 rounded-lg p-4 mb-4 border border-sky-200">
-                  <h3 className="text-sm font-semibold text-text-dark mb-2">Payment Benefits</h3>
-                  <div className="space-y-2 text-xs">
-                    <div>
-                      <span className="font-medium text-green-700">Pay Now:</span>
-                      <ul className="list-disc list-inside ml-2 text-gray-600">
+                <div className="bg-gradient-to-br from-blue-50 via-sky-50 to-blue-50 rounded-xl p-4 mb-6 border border-blue-100">
+                  <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <FiCheckCircle className="w-4 h-4 text-green-600" />
+                    Payment Benefits
+                  </h3>
+                  <div className="space-y-3 text-xs">
+                    <div className="bg-white/60 rounded-lg p-2.5">
+                      <span className="font-semibold text-green-700">Pay Now:</span>
+                      <ul className="list-disc list-inside ml-2 mt-1 text-gray-600 space-y-0.5">
                         {paymentBenefits.payNow.benefits.slice(0, 2).map((benefit, idx) => (
                           <li key={idx}>{benefit}</li>
                         ))}
                       </ul>
                     </div>
-                    <div>
-                      <span className="font-medium text-blue-700">Pay Later:</span>
-                      <ul className="list-disc list-inside ml-2 text-gray-600">
+                    <div className="bg-white/60 rounded-lg p-2.5">
+                      <span className="font-semibold text-blue-700">Pay Later:</span>
+                      <ul className="list-disc list-inside ml-2 mt-1 text-gray-600 space-y-0.5">
                         {paymentBenefits.payLater.benefits.slice(0, 2).map((benefit, idx) => (
                           <li key={idx}>{benefit}</li>
                         ))}
@@ -493,35 +548,73 @@ const Cart = () => {
                   </div>
                 </div>
 
-                <div className="space-y-3 mb-4">
+                <div className="space-y-3 mb-6">
                   {totals.rentalTotal > 0 && (
-                    <div className="flex justify-between text-text-light">
-                      <span>Rentals ({totals.rentalCount})</span>
-                      <span>₹{totals.rentalTotal.toLocaleString()}</span>
-                    </div>
+                    <>
+                      <div className="flex justify-between items-center py-2">
+                        <span className="text-sm font-medium text-gray-600">Rentals ({totals.rentalCount})</span>
+                        <span className="text-sm font-semibold text-gray-900">
+                          ₹{(() => {
+                            const rentalTotalWithoutInstallation = rentals.reduce((total, item) => {
+                              const selectedDuration = item.selectedDuration || 3;
+                              const price = item.price && typeof item.price === 'object'
+                                ? (item.price[selectedDuration] || item.price[3] || 0)
+                                : (item.price || 0);
+                              return total + price;
+                            }, 0);
+                            return rentalTotalWithoutInstallation.toLocaleString();
+                          })()}
+                        </span>
+                      </div>
+                      {/* Installation Charges */}
+                      {rentals.some(item => item.category === 'AC' && item.installationCharges && item.installationCharges.amount > 0) && (
+                        <div className="flex justify-between items-center py-2 border-t border-gray-100">
+                          <span className="text-sm font-medium text-gray-600 inline-flex items-center gap-1.5">
+                            <FiZap className="w-3.5 h-3.5 text-blue-600" />
+                            Installation
+                          </span>
+                          <span className="text-sm font-semibold text-blue-600">
+                            ₹{(() => {
+                              const installationTotal = rentals.reduce((total, item) => {
+                                if (item.category === 'AC' && item.installationCharges && item.installationCharges.amount) {
+                                  return total + item.installationCharges.amount;
+                                }
+                                return total;
+                              }, 0);
+                              return installationTotal.toLocaleString();
+                            })()}
+                          </span>
+                        </div>
+                      )}
+                    </>
                   )}
                   {totals.serviceTotal > 0 && (
-                    <div className="flex justify-between text-text-light">
-                      <span>Services ({totals.serviceCount})</span>
-                      <span>₹{totals.serviceTotal.toLocaleString()}</span>
+                    <div className="flex justify-between items-center py-2 border-t border-gray-100">
+                      <span className="text-sm font-medium text-gray-600">Services ({totals.serviceCount})</span>
+                      <span className="text-sm font-semibold text-gray-900">
+                        ₹{totals.serviceTotal.toLocaleString()}
+                      </span>
                     </div>
                   )}
-                  <div className="border-t border-gray-200 pt-3 flex justify-between text-lg font-bold text-text-dark">
-                    <span>Total</span>
-                    <span>₹{totals.total.toLocaleString()}</span>
+                  <div className="border-t-2 border-gray-300 pt-4 mt-4 flex justify-between items-center">
+                    <span className="text-lg font-bold text-gray-900">Total Amount</span>
+                    <span className="text-2xl font-bold text-primary-blue">
+                      ₹{totals.total.toLocaleString()}
+                    </span>
                   </div>
                 </div>
+                
                 <button
                   onClick={handleCheckout}
-                  className="w-full py-3 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition-all font-semibold shadow-md hover:shadow-lg"
+                  className="w-full py-3.5 bg-gradient-to-r from-primary-blue to-primary-blue-light text-white rounded-xl hover:shadow-lg transition-all font-bold shadow-md shadow-primary-blue/20 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Proceed to Checkout
                 </button>
                 <Link
                   to="/browse"
-                  className="block text-center mt-4 text-primary-blue hover:text-primary-blue-light transition-colors"
+                  className="block text-center mt-4 text-sm text-primary-blue hover:text-primary-blue-light transition-colors font-medium"
                 >
-                  Continue Shopping
+                  ← Continue Shopping
                 </Link>
               </div>
             </div>

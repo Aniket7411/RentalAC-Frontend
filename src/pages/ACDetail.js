@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { apiService } from '../services/api';
-import { MapPin, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight, Phone, Mail, Loader2, X, CheckCircle } from 'lucide-react';
+import { MapPin, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight, Phone, Mail, Loader2, X, CheckCircle, Info } from 'lucide-react';
 import { FiHeart } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +10,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../hooks/useToast';
 import { ToastContainer } from '../components/Toast';
 import ACCard from '../components/ACCard';
+import InstallationChargesModal from '../components/InstallationChargesModal';
 
 const ACDetail = () => {
   const { id } = useParams();
@@ -34,9 +35,10 @@ const ACDetail = () => {
       setCurrentImageIndex((prev) => (prev + 1) % ac.images.length);
     }
   };
-  const [selectedDuration, setSelectedDuration] = useState('3'); // '3', '6', '9', '11'
+  const [selectedDuration, setSelectedDuration] = useState(11); // 3, 6, 9, 11 (as number for slider)
   const [addedToCart, setAddedToCart] = useState(false);
   const [relatedACs, setRelatedACs] = useState([]);
+  const [showInstallationModal, setShowInstallationModal] = useState(false);
   const { toasts, removeToast, success, error: showError } = useToast();
 
   useEffect(() => {
@@ -143,13 +145,24 @@ const ACDetail = () => {
   };
 
 
+  const handleAddToCartClick = () => {
+    // If AC has installation charges, show modal first
+    if (ac.category === 'AC' && ac.installationCharges && ac.installationCharges.amount) {
+      setShowInstallationModal(true);
+    } else {
+      // No installation charges, add directly to cart
+      addToCart();
+    }
+  };
+
   const addToCart = () => {
     try {
       // Use CartContext to add product (works for both logged-in and non-logged-in users)
-      addRentalToCart(ac, selectedDuration);
+      addRentalToCart(ac, String(selectedDuration));
       setAddedToCart(true);
       success('Product added to cart successfully!');
       setTimeout(() => setAddedToCart(false), 2000);
+      setShowInstallationModal(false);
     } catch (error) {
       console.error('Error adding to cart:', error);
       showError(error.message || 'Failed to add product to cart. Please try again.');
@@ -224,10 +237,14 @@ const ACDetail = () => {
   // Get price based on selected duration
   const getPrice = () => {
     if (!ac.price) return 0;
-    // Default to 3 months if selectedDuration is not valid
-    return ac.price[selectedDuration] || ac.price[3] || 0;
+    // Convert selectedDuration to string key
+    const durationKey = String(selectedDuration);
+    return ac.price[durationKey] || ac.price['3'] || 0;
   };
   const price = getPrice();
+
+  // Get tenure options for slider
+  const tenureOptions = [3, 6, 9, 11];
   const hasImages = ac.images && ac.images.length > 0;
 
   return (
@@ -395,32 +412,55 @@ const ACDetail = () => {
               </div>
             )}
 
-            {/* Pricing */}
+            {/* Pricing with Range Slider */}
             <div className="mb-2 sm:mb-3">
-              <h3 className="font-semibold text-text-dark mb-2 sm:mb-3 text-sm sm:text-base">Rental Pricing</h3>
-              <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-                {[
-                  { key: '3', label: '3 Months' },
-                  { key: '6', label: '6 Months' },
-                  { key: '9', label: '9 Months' },
-                  { key: '11', label: '11 Months' }
-                ].map((duration) => (
-                  <button
-                    key={duration.key}
-                    onClick={() => setSelectedDuration(duration.key)}
-                    className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-300 text-xs ${selectedDuration === duration.key
-                      ? 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white shadow-md'
-                      : 'bg-gray-100 text-text-dark hover:bg-gray-200'
-                      }`}
-                  >
-                    {duration.label}
-                  </button>
-                ))}
+              <div className="flex items-center gap-2 mb-3">
+                <h3 className="font-semibold text-text-dark text-sm sm:text-base">Choose Tenure</h3>
+                <div className="relative group">
+                  <Info className="w-4 h-4 text-blue-500 cursor-help" />
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                    Select rental duration
+                  </div>
+                </div>
               </div>
+              
+              {/* Range Slider */}
+              <div className="mb-4">
+                <div className="relative">
+                  <input
+                    type="range"
+                    min="0"
+                    max="3"
+                    step="1"
+                    value={tenureOptions.indexOf(selectedDuration)}
+                    onChange={(e) => {
+                      const index = Number(e.target.value);
+                      setSelectedDuration(tenureOptions[index]);
+                    }}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                    style={{
+                      background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(tenureOptions.indexOf(selectedDuration) / 3) * 100}%, #e5e7eb ${(tenureOptions.indexOf(selectedDuration) / 3) * 100}%, #e5e7eb 100%)`
+                    }}
+                  />
+                  <div className="flex justify-between mt-2">
+                    {tenureOptions.map((option) => (
+                      <div key={option} className="flex flex-col items-center">
+                        <div
+                          className={`w-1 h-4 ${selectedDuration === option ? 'bg-primary-blue' : 'bg-gray-400'}`}
+                        />
+                        <span className={`text-xs mt-1 ${selectedDuration === option ? 'font-bold text-primary-blue' : 'text-gray-600'}`}>
+                          {option}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <div className="text-xl sm:text-2xl md:text-3xl font-bold text-primary-blue">
                 ₹{price.toLocaleString()}
                 <span className="text-xs sm:text-sm md:text-base text-text-light font-normal ml-1">
-                  (Total for {selectedDuration === '3' ? '3' : selectedDuration === '6' ? '6' : selectedDuration === '9' ? '9' : '11'} months)
+                  (Total for {selectedDuration} months)
                 </span>
               </div>
             </div>
@@ -430,7 +470,7 @@ const ACDetail = () => {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={addToCart}
+                onClick={handleAddToCartClick}
                 disabled={addedToCart}
                 className={`w-full py-2.5 sm:py-3 md:py-3.5 rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-300 font-semibold text-sm sm:text-base md:text-lg ${addedToCart
                   ? 'bg-green-500 text-white cursor-not-allowed'
@@ -471,6 +511,16 @@ const ACDetail = () => {
               ))}
             </div>
           </motion.section>
+        )}
+
+        {/* Installation Charges Modal */}
+        {ac.category === 'AC' && ac.installationCharges && (
+          <InstallationChargesModal
+            isOpen={showInstallationModal}
+            onClose={() => setShowInstallationModal(false)}
+            onConfirm={addToCart}
+            installationCharges={ac.installationCharges}
+          />
         )}
       </div>
     </div>

@@ -457,12 +457,12 @@ const BrowseACs = () => {
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-8"
+                className="mb-4 lg:mb-6"
               >
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 bg-clip-text text-transparent mb-3">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 bg-clip-text text-transparent mb-1 lg:mb-2">
                   Browse Products
                 </h1>
-                <p className="text-gray-600 text-base md:text-lg">
+                <p className="text-gray-600 text-sm md:text-base lg:text-base">
                   Discover amazing appliances for your home
                 </p>
               </motion.div>
@@ -480,7 +480,7 @@ const BrowseACs = () => {
               )}
 
               {/* Search and Sort Bar */}
-              <div className="mb-8 flex flex-col sm:flex-row gap-3">
+              <div className="mb-4 lg:mb-6 flex flex-col sm:flex-row gap-3">
                 <div className="flex-1 relative">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
