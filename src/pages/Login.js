@@ -44,8 +44,22 @@ const Login = () => {
       const result = await login(formData.email, formData.password);
 
       if (result.success) {
-        // Redirect to home page after login
-        navigate('/');
+        // Check if there's a stored redirect path
+        const redirectPath = localStorage.getItem('redirectAfterLogin');
+        if (redirectPath && redirectPath !== '/login' && redirectPath !== '/admin/login') {
+          localStorage.removeItem('redirectAfterLogin');
+          navigate(redirectPath, { replace: true });
+        } else {
+          // Default redirect based on user type from login result
+          const user = result.user || JSON.parse(localStorage.getItem('user') || '{}');
+          if (user.role === 'admin') {
+            navigate('/admin/dashboard', { replace: true });
+          } else if (user.role === 'user') {
+            navigate('/user/dashboard', { replace: true });
+          } else {
+            navigate('/', { replace: true });
+          }
+        }
       } else {
         setError(result.message || 'Login failed. Please check your credentials.');
       }

@@ -427,7 +427,7 @@ const Checkout = () => {
                   </div>
                 </div>
               ) : (
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     placeholder="Enter coupon code"
@@ -441,12 +441,12 @@ const Checkout = () => {
                         handleApplyCoupon();
                       }
                     }}
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue"
+                    className="flex-1 min-w-0 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-primary-blue"
                   />
                   <button
                     onClick={handleApplyCoupon}
                     disabled={couponLoading || !couponCode.trim()}
-                    className="px-6 py-3 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-6 py-3 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap flex-shrink-0"
                   >
                     {couponLoading ? 'Applying...' : 'Apply'}
                   </button>

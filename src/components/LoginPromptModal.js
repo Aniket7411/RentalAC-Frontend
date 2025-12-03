@@ -46,6 +46,11 @@ const LoginPromptModal = ({ isOpen, onClose, message = "Please login first, then
   }, [isOpen, redirectDelay]);
 
   const handleLoginNow = () => {
+    // Store current location for redirect after login
+    const currentPath = window.location.pathname + window.location.search;
+    if (currentPath !== '/login' && currentPath !== '/admin/login') {
+      localStorage.setItem('redirectAfterLogin', currentPath);
+    }
     navigate('/login');
     onClose();
   };

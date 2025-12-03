@@ -44,7 +44,14 @@ const AdminLogin = () => {
       const result = await login(formData.email, formData.password, 'admin');
 
       if (result.success) {
-        navigate('/admin/dashboard');
+        // Check if there's a stored redirect path
+        const redirectPath = localStorage.getItem('redirectAfterLogin');
+        if (redirectPath && redirectPath !== '/login' && redirectPath !== '/admin/login') {
+          localStorage.removeItem('redirectAfterLogin');
+          navigate(redirectPath, { replace: true });
+        } else {
+          navigate('/admin/dashboard', { replace: true });
+        }
       } else {
         setError(result.message || 'Login failed. Please check your credentials.');
       }
