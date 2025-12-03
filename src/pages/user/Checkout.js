@@ -290,6 +290,56 @@ const Checkout = () => {
     return timeMap[time] || time;
   };
 
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      setCouponError('Please enter a coupon code');
+      return;
+    }
+
+    setCouponLoading(true);
+    setCouponError('');
+
+    try {
+      // TODO: Replace with actual API call
+      // const response = await apiService.validateCoupon(couponCode);
+      
+      // Mock validation for now - replace with actual API call
+      const mockCoupons = {
+        'WELCOME10': { type: 'percentage', value: 10, code: 'WELCOME10', description: '10% off on your first order' },
+        'SAVE500': { type: 'fixed', value: 500, code: 'SAVE500', description: 'Save ₹500 on orders above ₹5000', minAmount: 5000 },
+        'LONGTERM15': { type: 'percentage', value: 15, code: 'LONGTERM15', description: '15% off on 12+ months rental' },
+      };
+
+      const coupon = mockCoupons[couponCode.toUpperCase()];
+      
+      if (!coupon) {
+        setCouponError('Invalid coupon code');
+        return;
+      }
+
+      // Check minimum amount if required
+      if (coupon.minAmount && totals.total < coupon.minAmount) {
+        setCouponError(`Minimum order amount of ₹${coupon.minAmount} required`);
+        return;
+      }
+
+      setAppliedCoupon(coupon);
+      setCouponCode('');
+      showSuccess(`Coupon "${coupon.code}" applied successfully!`);
+    } catch (error) {
+      setCouponError(error.message || 'Failed to apply coupon. Please try again.');
+      showError(error.message || 'Failed to apply coupon');
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode('');
+    setCouponError('');
+  };
+
   const rentals = cartItems.filter(item => {
     return item.type === 'rental' ||
       (item.type !== 'service' && (item.brand || item.model || item.price));
@@ -643,10 +693,16 @@ const Checkout = () => {
                     <span>₹{totals.serviceTotal.toLocaleString()}</span>
                   </div>
                 )}
-                {discount > 0 && (
+                {paymentDiscount > 0 && (
                   <div className="flex justify-between text-green-600">
-                    <span>Discount (5%)</span>
-                    <span>-₹{discount.toLocaleString()}</span>
+                    <span>Payment Discount (5%)</span>
+                    <span>-₹{paymentDiscount.toLocaleString()}</span>
+                  </div>
+                )}
+                {couponDiscount > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Coupon Discount ({appliedCoupon?.code})</span>
+                    <span>-₹{couponDiscount.toLocaleString()}</span>
                   </div>
                 )}
                 <div className="border-t border-gray-200 pt-3 flex justify-between text-lg font-bold text-text-dark">
