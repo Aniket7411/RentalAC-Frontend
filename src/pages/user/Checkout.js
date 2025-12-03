@@ -73,8 +73,8 @@ const Checkout = () => {
               if (typeof selectedDuration === 'string') {
                 selectedDuration = parseInt(selectedDuration, 10);
               }
-              // Ensure duration is valid (3, 6, 9, or 11)
-              if (![3, 6, 9, 11].includes(selectedDuration)) {
+              // Ensure duration is valid (3, 6, 9, 11, 12, or 24)
+              if (![3, 6, 9, 11, 12, 24].includes(selectedDuration)) {
                 selectedDuration = 3; // Default to 3 months if invalid
               }
 
@@ -93,7 +93,7 @@ const Checkout = () => {
                 quantity: 1, // Always 1 per product
                 price: price,
                 installationCharges: installationCharge, // Include installation charges
-                duration: selectedDuration, // Number: 3, 6, 9, or 11
+                duration: selectedDuration, // Number: 3, 6, 9, 11, 12, or 24
                 // Include product details for admin reference
                 productDetails: {
                   brand: rental.brand,

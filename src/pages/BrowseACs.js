@@ -268,13 +268,13 @@ const BrowseACs = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
+    <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Main Content */}
         <div className="flex gap-6 lg:gap-8 items-start">
-          {/* Filter Sidebar - Sticky Left */}
+          {/* Filter Sidebar - Fixed Left */}
           <aside className="hidden lg:block w-80 flex-shrink-0">
-            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 sticky top-24 overflow-y-auto w-80 p-5" style={{ maxHeight: 'calc(100vh - 7rem)' }}>
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 fixed top-24 overflow-y-auto w-80 p-5" style={{ maxHeight: 'calc(100vh - 6rem)' }}>
               {/* Filter Header */}
               <div className="flex justify-between items-center mb-5 pb-4 border-b border-gray-200 sticky top-0 bg-white/95 backdrop-blur-sm z-10 -mt-1 pt-1">
                 <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
@@ -338,10 +338,10 @@ const BrowseACs = () => {
                           key={cond}
                           onClick={() => toggleArrayFilter('condition', cond)}
                           className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all text-center whitespace-nowrap ${isSelected
-                              ? cond === 'New'
-                                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md'
-                                : 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-md'
-                              : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                            ? cond === 'New'
+                              ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md'
+                              : 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-md'
+                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                             }`}
                         >
                           {cond}
@@ -357,7 +357,7 @@ const BrowseACs = () => {
                     Rental Duration
                   </label>
                   <div className="grid grid-cols-2 gap-1.5">
-                    {['3', '6', '9', '11'].map((dur) => (
+                    {['3', '6', '9', '11', '12', '24'].map((dur) => (
                       <button
                         key={dur}
                         onClick={() => handleFilterChange('duration', filters.duration === dur ? '3' : dur)}
@@ -395,8 +395,8 @@ const BrowseACs = () => {
                             key={cap}
                             onClick={() => toggleArrayFilter('capacity', cap)}
                             className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all text-center whitespace-nowrap ${isSelected
-                                ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
-                                : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                              ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
+                              : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                               }`}
                           >
                             {cap}
@@ -421,8 +421,8 @@ const BrowseACs = () => {
                             key={type}
                             onClick={() => toggleArrayFilter('type', type)}
                             className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all text-center whitespace-nowrap ${isSelected
-                                ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
-                                : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                              ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
+                              : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                               }`}
                           >
                             {type}
@@ -452,12 +452,12 @@ const BrowseACs = () => {
 
           {/* Main Content Area - Takes remaining space */}
           <main className="flex-1 min-w-0">
-            <div>
+            <div className="flex flex-col h-full">
               {/* Page Header */}
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-4 lg:mb-6"
+                className="mb-4 lg:mb-6 flex-shrink-0"
               >
                 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 bg-clip-text text-transparent mb-1 lg:mb-2">
                   Browse Products
@@ -472,7 +472,7 @@ const BrowseACs = () => {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center space-x-2 shadow-sm"
+                  className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center space-x-2 shadow-sm flex-shrink-0"
                 >
                   <AlertCircle className="w-5 h-5 flex-shrink-0" />
                   <span className="text-sm">{error}</span>
@@ -480,7 +480,7 @@ const BrowseACs = () => {
               )}
 
               {/* Search and Sort Bar */}
-              <div className="mb-4 lg:mb-6 flex flex-col sm:flex-row gap-3">
+              <div className="mb-4 lg:mb-6 flex flex-col sm:flex-row gap-3 flex-shrink-0">
                 <div className="flex-1 relative">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
@@ -531,39 +531,41 @@ const BrowseACs = () => {
                 </button>
               </div>
 
-              {/* Products Grid */}
-              {loading ? (
-                <div className="flex justify-center items-center h-64">
-                  <Loader2 className="w-12 h-12 animate-spin text-purple-600" />
-                </div>
-              ) : (filters.condition.length > 0 || filters.capacity.length > 0 || filters.type.length > 0 || filters.priceSort ? filteredACs.length > 0 : acs.length > 0) ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-                  {(filters.condition.length > 0 || filters.capacity.length > 0 || filters.type.length > 0 || filters.priceSort ? filteredACs : acs).map((ac, index) => (
-                    <motion.div
-                      key={ac?._id || ac?.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <ACCard ac={ac} />
-                    </motion.div>
-                  ))}
-                </div>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="bg-white/90 backdrop-blur-sm p-12 rounded-2xl shadow-lg text-center border border-purple-100"
-                >
-                  <p className="text-gray-600 text-lg mb-4">No products found matching your criteria.</p>
-                  <button
-                    onClick={clearFilters}
-                    className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all font-semibold shadow-md hover:shadow-lg"
+              {/* Products Grid - Scrollable */}
+              <div className="flex-1 overflow-y-auto min-h-0" style={{ maxHeight: 'calc(100vh - 20rem)' }}>
+                {loading ? (
+                  <div className="flex justify-center items-center h-64">
+                    <Loader2 className="w-12 h-12 animate-spin text-purple-600" />
+                  </div>
+                ) : (filters.condition.length > 0 || filters.capacity.length > 0 || filters.type.length > 0 || filters.priceSort ? filteredACs.length > 0 : acs.length > 0) ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 md:gap-6 pb-4">
+                    {(filters.condition.length > 0 || filters.capacity.length > 0 || filters.type.length > 0 || filters.priceSort ? filteredACs : acs).map((ac, index) => (
+                      <motion.div
+                        key={ac?._id || ac?.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        <ACCard ac={ac} />
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-white/90 backdrop-blur-sm p-12 rounded-2xl shadow-lg text-center border border-purple-100"
                   >
-                    Clear filters
-                  </button>
-                </motion.div>
-              )}
+                    <p className="text-gray-600 text-lg mb-4">No products found matching your criteria.</p>
+                    <button
+                      onClick={clearFilters}
+                      className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all font-semibold shadow-md hover:shadow-lg"
+                    >
+                      Clear filters
+                    </button>
+                  </motion.div>
+                )}
+              </div>
             </div>
           </main>
         </div>
@@ -634,10 +636,10 @@ const BrowseACs = () => {
                         key={cond}
                         onClick={() => toggleArrayFilter('condition', cond)}
                         className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all text-center whitespace-nowrap ${isSelected
-                            ? cond === 'New'
-                              ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md'
-                              : 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-md'
-                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                          ? cond === 'New'
+                            ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md'
+                            : 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-md'
+                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                           }`}
                       >
                         {cond}
@@ -653,7 +655,7 @@ const BrowseACs = () => {
                   Rental Duration
                 </label>
                 <div className="grid grid-cols-2 gap-1.5">
-                  {['3', '6', '9', '11'].map((dur) => (
+                  {['3', '6', '9', '11', '12', '24'].map((dur) => (
                     <button
                       key={dur}
                       onClick={() => handleFilterChange('duration', filters.duration === dur ? '3' : dur)}
@@ -682,8 +684,8 @@ const BrowseACs = () => {
                           key={cap}
                           onClick={() => toggleArrayFilter('capacity', cap)}
                           className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all text-center whitespace-nowrap ${isSelected
-                              ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
-                              : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                            ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
+                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                             }`}
                         >
                           {cap}
@@ -708,8 +710,8 @@ const BrowseACs = () => {
                           key={type}
                           onClick={() => toggleArrayFilter('type', type)}
                           className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all text-center whitespace-nowrap ${isSelected
-                              ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
-                              : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                            ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
+                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                             }`}
                         >
                           {type}

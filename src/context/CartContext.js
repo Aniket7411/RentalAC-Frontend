@@ -282,7 +282,7 @@ export const CartProvider = ({ children }) => {
     const services = cartItems.filter(item => item.type === 'service');
 
     // Since quantity is always 1, we just sum the prices
-    // Use selected duration (3, 6, 9, 11 months) or default to 3 months
+    // Use selected duration (3, 6, 9, 11, 12, 24 months) or default to 3 months
     const rentalTotal = rentals.reduce((total, item) => {
       const selectedDuration = item.selectedDuration || 3;
       const price = item.price && typeof item.price === 'object'

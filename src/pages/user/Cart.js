@@ -307,21 +307,21 @@ const Cart = () => {
                                 <input
                                   type="range"
                                   min="0"
-                                  max="3"
+                                  max="5"
                                   step="1"
-                                  value={[3, 6, 9, 11].indexOf(item.selectedDuration || 3)}
+                                  value={[3, 6, 9, 11, 12, 24].indexOf(item.selectedDuration || 3)}
                                   onChange={(e) => {
                                     const index = Number(e.target.value);
-                                    const tenureOptions = [3, 6, 9, 11];
+                                    const tenureOptions = [3, 6, 9, 11, 12, 24];
                                     updateCartItem(item.id, { selectedDuration: tenureOptions[index] });
                                   }}
                                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                                   style={{
-                                    background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${([3, 6, 9, 11].indexOf(item.selectedDuration || 3) / 3) * 100}%, #e5e7eb ${([3, 6, 9, 11].indexOf(item.selectedDuration || 3) / 3) * 100}%, #e5e7eb 100%)`
+                                    background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${([3, 6, 9, 11, 12, 24].indexOf(item.selectedDuration || 3) / 5) * 100}%, #e5e7eb ${([3, 6, 9, 11, 12, 24].indexOf(item.selectedDuration || 3) / 5) * 100}%, #e5e7eb 100%)`
                                   }}
                                 />
                                 <div className="flex justify-between mt-3">
-                                  {[3, 6, 9, 11].map((option) => (
+                                  {[3, 6, 9, 11, 12, 24].map((option) => (
                                     <div key={option} className="flex flex-col items-center">
                                       <div
                                         className={`w-1 h-4 ${(item.selectedDuration || 3) === option ? 'bg-primary-blue' : 'bg-gray-400'}`}

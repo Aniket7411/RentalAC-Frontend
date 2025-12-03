@@ -37,22 +37,22 @@ const InstallCard = () => {
             color: 'from-green-500 to-emerald-600',
             reverse: true,
         },
-        {
-            id: 3,
-            image: '/familyhappyafteracinstall.png',
-            title: 'Happy Families, Cool Homes',
-            subtitle: 'Your Comfort is Our Success',
-            description: 'Join thousands of satisfied families enjoying perfect climate control. Our reliable AC rental service brings comfort and happiness to your home.',
-            features: [
-                '1000+ happy customers',
-                '24/7 customer support',
-                'Satisfaction guaranteed',
-                'Family-friendly service'
-            ],
-            icon: Users,
-            color: 'from-purple-500 to-pink-600',
-            reverse: false,
-        },
+        // {
+        //     id: 3,
+        //     image: '/familyhappyafteracinstall.png',
+        //     title: 'Happy Families, Cool Homes',
+        //     subtitle: 'Your Comfort is Our Success',
+        //     description: 'Join thousands of satisfied families enjoying perfect climate control. Our reliable AC rental service brings comfort and happiness to your home.',
+        //     features: [
+        //         '1000+ happy customers',
+        //         '24/7 customer support',
+        //         'Satisfaction guaranteed',
+        //         'Family-friendly service'
+        //     ],
+        //     icon: Users,
+        //     color: 'from-purple-500 to-pink-600',
+        //     reverse: false,
+        // },
         {
             id: 4,
             image: '/implementingac.png',
@@ -82,10 +82,10 @@ const InstallCard = () => {
                     transition={{ duration: 0.6 }}
                     className="text-center mb-12 md:mb-16"
                 >
-                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-text-dark mb-4">
+                    <h2 className="text-3xl md:text-4xl lg:text-6xl font-bold text-text-dark mb-4">
                         Your Journey to Cool Comfort
                     </h2>
-                    <p className="text-lg md:text-xl text-text-light max-w-3xl mx-auto">
+                    <p className="text-lg md:text-xl text-text-light max-w-5xl mx-auto">
                         From selection to installation, we make the entire process seamless and stress-free
                     </p>
                 </motion.div>

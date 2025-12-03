@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { apiService } from '../services/api';
-import { MapPin, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight, Phone, Mail, Loader2, X, CheckCircle, Info } from 'lucide-react';
+import { MapPin, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight, Phone, Mail, Loader2, X, CheckCircle, Info, Sparkles, Wrench, RotateCcw, RefreshCw, Plus, Minus, Shield, Ruler } from 'lucide-react';
 import { FiHeart } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -35,10 +35,11 @@ const ACDetail = () => {
       setCurrentImageIndex((prev) => (prev + 1) % ac.images.length);
     }
   };
-  const [selectedDuration, setSelectedDuration] = useState(11); // 3, 6, 9, 11 (as number for slider)
+  const [selectedDuration, setSelectedDuration] = useState(11); // 3, 6, 9, 11, 12, 24 (as number for slider)
   const [addedToCart, setAddedToCart] = useState(false);
   const [relatedACs, setRelatedACs] = useState([]);
   const [showInstallationModal, setShowInstallationModal] = useState(false);
+  const [openFAQIndex, setOpenFAQIndex] = useState(null);
   const { toasts, removeToast, success, error: showError } = useToast();
 
   useEffect(() => {
@@ -244,7 +245,7 @@ const ACDetail = () => {
   const price = getPrice();
 
   // Get tenure options for slider
-  const tenureOptions = [3, 6, 9, 11];
+  const tenureOptions = [3, 6, 9, 11, 12, 24];
   const hasImages = ac.images && ac.images.length > 0;
 
   return (
@@ -326,6 +327,43 @@ const ACDetail = () => {
                 </div>
               </div>
             )}
+
+            {/* Service Benefit Cards */}
+            <div className="p-3 sm:p-4 md:p-5">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                {/* Card 1: Products as good as new */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 flex flex-col items-center text-center">
+                  <div className="mb-2">
+                    <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-blue-600" />
+                  </div>
+                  <p className="text-xs sm:text-sm font-medium text-gray-800">Products as good as new</p>
+                </div>
+
+                {/* Card 2: Free repairs & maintenance */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 flex flex-col items-center text-center">
+                  <div className="mb-2">
+                    <Wrench className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-blue-600" />
+                  </div>
+                  <p className="text-xs sm:text-sm font-medium text-gray-800">Free repairs & maintenance</p>
+                </div>
+
+                {/* Card 3: Easy Returns, no questions asked */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 flex flex-col items-center text-center">
+                  <div className="mb-2">
+                    <RotateCcw className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-blue-600" />
+                  </div>
+                  <p className="text-xs sm:text-sm font-medium text-gray-800">Easy Returns, no questions asked</p>
+                </div>
+
+                {/* Card 4: Free upgrades & relocation */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 flex flex-col items-center text-center">
+                  <div className="mb-2">
+                    <RefreshCw className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-blue-600" />
+                  </div>
+                  <p className="text-xs sm:text-sm font-medium text-gray-800">Free upgrades & relocation</p>
+                </div>
+              </div>
+            </div>
           </motion.div>
 
           {/* AC Details */}
@@ -345,18 +383,16 @@ const ACDetail = () => {
                   <button
                     onClick={handleWishlistToggle}
                     disabled={wishlistLoading}
-                    className={`flex-shrink-0 p-1.5 sm:p-2 rounded-full transition-all duration-300 ${
-                      isWishlisted
+                    className={`flex-shrink-0 p-1.5 sm:p-2 rounded-full transition-all duration-300 ${isWishlisted
                         ? 'text-red-500 bg-red-50 hover:bg-red-100'
                         : 'text-gray-400 hover:text-red-500 hover:bg-gray-50'
-                    } ${wishlistLoading ? 'opacity-50 cursor-wait' : 'cursor-pointer'}`}
+                      } ${wishlistLoading ? 'opacity-50 cursor-wait' : 'cursor-pointer'}`}
                     title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                     aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                   >
                     <FiHeart
-                      className={`w-4 h-4 sm:w-5 sm:h-5 transition-all duration-300 ${
-                        isWishlisted ? 'fill-current' : ''
-                      }`}
+                      className={`w-4 h-4 sm:w-5 sm:h-5 transition-all duration-300 ${isWishlisted ? 'fill-current' : ''
+                        }`}
                     />
                   </button>
                 </div>
@@ -423,14 +459,14 @@ const ACDetail = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Range Slider */}
               <div className="mb-4">
                 <div className="relative">
                   <input
                     type="range"
                     min="0"
-                    max="3"
+                    max={tenureOptions.length - 1}
                     step="1"
                     value={tenureOptions.indexOf(selectedDuration)}
                     onChange={(e) => {
@@ -439,7 +475,7 @@ const ACDetail = () => {
                     }}
                     className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                     style={{
-                      background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(tenureOptions.indexOf(selectedDuration) / 3) * 100}%, #e5e7eb ${(tenureOptions.indexOf(selectedDuration) / 3) * 100}%, #e5e7eb 100%)`
+                      background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(tenureOptions.indexOf(selectedDuration) / (tenureOptions.length - 1)) * 100}%, #e5e7eb ${(tenureOptions.indexOf(selectedDuration) / (tenureOptions.length - 1)) * 100}%, #e5e7eb 100%)`
                     }}
                   />
                   <div className="flex justify-between mt-2">
@@ -480,9 +516,173 @@ const ACDetail = () => {
                 {addedToCart ? 'Added to Cart ✓' : 'Add to Cart'}
               </motion.button>
             )}
+
+            {/* Safety and Dimensions Section */}
+            <div className="mt-4 sm:mt-6 space-y-4 pt-4 sm:pt-6 border-t border-gray-200">
+              {/* Safety Section */}
+              {ac.features?.safety && ac.features.safety.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-text-dark mb-2 sm:mb-3 text-sm sm:text-base flex items-center gap-2">
+                    <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-primary-blue" />
+                    Safety Features
+                  </h3>
+                  <ul className="space-y-1.5 sm:space-y-2">
+                    {ac.features.safety.map((safetyItem, index) => (
+                      <li key={index} className="flex items-start gap-2 text-xs sm:text-sm text-text-light">
+                        <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>{safetyItem}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Dimensions/Size Section */}
+              {ac.features?.dimensions && (
+                <div>
+                  <h3 className="font-semibold text-text-dark mb-2 sm:mb-3 text-sm sm:text-base flex items-center gap-2">
+                    <Ruler className="w-4 h-4 sm:w-5 sm:h-5 text-primary-blue" />
+                    Size & Dimensions
+                  </h3>
+                  <p className="text-xs sm:text-sm text-text-light">
+                    {ac.features.dimensions}
+                  </p>
+                </div>
+              )}
+            </div>
           </motion.div>
         </div>
 
+        {/* FAQ and Recommended Products Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8 mt-8 sm:mt-10 md:mt-12">
+          {/* FAQ Section - 3/5 width */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="lg:col-span-3"
+          >
+            <div className="mb-6">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-dark mb-2">
+                Questions & Answers
+              </h2>
+              <p className="text-sm sm:text-base text-text-light">
+                List of frequently asked questions from our users.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {[
+                {
+                  question: "What are the steps involved in the process of renting?",
+                  answer: "The rental process is simple: 1) Browse and select your preferred product, 2) Choose your rental tenure (3, 6, 9, 11, 12, or 24 months), 3) Complete KYC verification, 4) Pay security deposit and first month's rent, 5) Schedule delivery and installation, 6) Enjoy your rental product!"
+                },
+                {
+                  question: "What kind of charges will be deducted from the deposit? When will I get my security deposit back?",
+                  answer: "The security deposit may be used to cover any damages beyond normal wear and tear, missing accessories, or unpaid dues. The deposit will be refunded within 7-10 business days after the product is returned in good condition and all dues are cleared."
+                },
+                {
+                  question: "Why do you need a KYC process? What documents are needed? What time does it take for the KYC process?",
+                  answer: "KYC (Know Your Customer) is required for security and compliance. You'll need: Aadhaar card, PAN card, and a valid ID proof. The KYC process typically takes 24-48 hours for verification and approval."
+                },
+                {
+                  question: "How long does it take for delivery? Does Rentomojo also take responsibility for installations?",
+                  answer: "Delivery typically takes 2-3 business days after order confirmation and KYC approval. Yes, we provide free installation for all products. Our trained technicians will install and set up your product at your location."
+                },
+                {
+                  question: "Will I get a new or an older product at the time of delivery? What if I don't like the quality of the product delivered to me?",
+                  answer: "We provide refurbished products that are thoroughly tested and in excellent working condition. If you're not satisfied with the product quality, you can request a replacement or return within 7 days of delivery with no questions asked."
+                },
+                {
+                  question: "How will I pay the monthly rentals? Will there be a late fee involved? Is there an auto-debit facility?",
+                  answer: "You can pay monthly rentals through online payment, UPI, or bank transfer. Late fees may apply if payment is delayed beyond the due date. Yes, we offer auto-debit facility for hassle-free monthly payments."
+                },
+                {
+                  question: "Will you relocate my rented products if I move to another house?",
+                  answer: "Yes, we provide free relocation services. Simply inform us at least 7 days in advance about your new address, and we'll arrange to relocate your rented products to your new location at no extra cost."
+                },
+                {
+                  question: "How do I return the products if I want to stop the subscription? Are there any charges if I close earlier than contracted?",
+                  answer: "You can return products by contacting our customer service. If you return before the contracted period ends, there may be early termination charges as per the rental agreement. Please check your contract terms or contact us for specific details."
+                }
+              ].map((faq, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden"
+                >
+                  <button
+                    onClick={() => setOpenFAQIndex(openFAQIndex === index ? null : index)}
+                    className="w-full px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between text-left hover:bg-gray-100 transition-colors"
+                  >
+                    <span className="text-sm sm:text-base font-medium text-text-dark pr-4 flex-1">
+                      {faq.question}
+                    </span>
+                    <div className="flex-shrink-0">
+                      {openFAQIndex === index ? (
+                        <Minus className="w-5 h-5 text-gray-600" />
+                      ) : (
+                        <Plus className="w-5 h-5 text-gray-600" />
+                      )}
+                    </div>
+                  </button>
+                  {openFAQIndex === index && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="px-4 sm:px-6 pb-3 sm:pb-4"
+                    >
+                      <p className="text-sm sm:text-base text-text-light leading-relaxed">
+                        {faq.answer}
+                      </p>
+                    </motion.div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Recommended Products Section - 2/5 width */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="lg:col-span-2"
+          >
+            <div className="mb-6">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-text-dark mb-2">
+                Recommended Products
+              </h2>
+              <p className="text-sm sm:text-base text-text-light">
+                Products you might like
+              </p>
+            </div>
+
+            {relatedACs.length > 0 ? (
+              <div className="space-y-4">
+                {relatedACs.slice(0, 4).map((relatedAC) => (
+                  <ACCard key={relatedAC._id || relatedAC.id} ac={relatedAC} />
+                ))}
+                {relatedACs.length > 4 && (
+                  <Link
+                    to={`/browse?category=${ac?.category || 'AC'}`}
+                    className="block text-center py-3 px-4 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition-colors font-semibold text-sm sm:text-base"
+                  >
+                    View All Products
+                    <ArrowRight className="inline-block ml-2 w-4 h-4" />
+                  </Link>
+                )}
+              </div>
+            ) : (
+              <div className="bg-gray-50 rounded-lg p-8 text-center">
+                <p className="text-text-light">No recommended products available at the moment.</p>
+              </div>
+            )}
+          </motion.div>
+        </div>
 
         {/* Related ACs Section */}
         {relatedACs.length > 0 && (
