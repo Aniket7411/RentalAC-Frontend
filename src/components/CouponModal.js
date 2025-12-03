@@ -1,43 +1,64 @@
-import React, { useState } from 'react';
-import { X, Tag, Gift, Percent, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Tag, Gift, Percent, Sparkles, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { apiService } from '../services/api';
 
 const CouponModal = ({ isOpen, onClose }) => {
-  const [hasSeenCoupons, setHasSeenCoupons] = useState(false);
+  const [coupons, setCoupons] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  // Available coupons/offers
-  const coupons = [
-    {
-      id: 1,
-      code: 'WELCOME10',
-      title: 'Welcome Offer',
-      discount: '10%',
-      description: 'Get 10% off on your first rental order',
-      validUntil: 'Valid till Dec 31, 2025',
-      icon: Gift,
-      color: 'from-blue-500 to-blue-600',
-    },
-    {
-      id: 2,
-      code: 'SAVE500',
-      title: 'Flat Discount',
-      discount: '₹500',
-      description: 'Save ₹500 on orders above ₹5000',
-      validUntil: 'Valid till Dec 31, 2025',
-      icon: Percent,
-      color: 'from-purple-500 to-purple-600',
-    },
-    {
-      id: 3,
-      code: 'LONGTERM15',
-      title: 'Long Term Rental',
-      discount: '15%',
-      description: 'Get 15% off on 12+ months rental',
-      validUntil: 'Valid till Dec 31, 2025',
-      icon: Sparkles,
-      color: 'from-green-500 to-green-600',
-    },
-  ];
+  useEffect(() => {
+    if (isOpen) {
+      loadCoupons();
+    }
+  }, [isOpen]);
+
+  const loadCoupons = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await apiService.getAvailableCoupons();
+      if (response.success) {
+        setCoupons(response.data || []);
+      } else {
+        setError(response.message || 'Failed to load coupons');
+      }
+    } catch (err) {
+      setError('Failed to load coupons. Please try again later.');
+      console.error('Error loading coupons:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getCouponIcon = (index) => {
+    const icons = [Gift, Percent, Sparkles];
+    return icons[index % icons.length];
+  };
+
+  const getCouponColor = (index) => {
+    const colors = [
+      'from-blue-500 to-blue-600',
+      'from-purple-500 to-purple-600',
+      'from-green-500 to-green-600',
+    ];
+    return colors[index % colors.length];
+  };
+
+  const formatDiscount = (coupon) => {
+    if (coupon.type === 'percentage') {
+      return `${coupon.value}%`;
+    } else {
+      return `₹${coupon.value}`;
+    }
+  };
+
+  const formatValidUntil = (validUntil) => {
+    if (!validUntil) return '';
+    const date = new Date(validUntil);
+    return `Valid till ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  };
 
   if (!isOpen) return null;
 
@@ -71,41 +92,58 @@ const CouponModal = ({ isOpen, onClose }) => {
 
           {/* Coupons List */}
           <div className="p-4 sm:p-6 space-y-4">
-            {coupons.map((coupon, index) => {
-              const Icon = coupon.icon;
-              return (
-                <motion.div
-                  key={coupon.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className={`bg-gradient-to-r ${coupon.color} rounded-xl p-4 sm:p-5 text-white shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20`}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-3 flex-1">
-                      <div className="bg-white/20 rounded-lg p-2 sm:p-3">
-                        <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-bold text-base sm:text-lg">{coupon.title}</h3>
-                          <span className="bg-white/30 px-2 py-0.5 rounded text-xs sm:text-sm font-semibold">
-                            {coupon.discount} OFF
-                          </span>
+            {loading ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary-blue" />
+              </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
+            ) : coupons.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-sm">No coupons available at the moment.</p>
+              </div>
+            ) : (
+              coupons.map((coupon, index) => {
+                const Icon = getCouponIcon(index);
+                const color = getCouponColor(index);
+                return (
+                  <motion.div
+                    key={coupon._id || coupon.id || index}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className={`bg-gradient-to-r ${color} rounded-xl p-4 sm:p-5 text-white shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20`}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className="bg-white/20 rounded-lg p-2 sm:p-3">
+                          <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                         </div>
-                        <p className="text-sm text-white/90 mb-2">{coupon.description}</p>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="bg-white/20 px-3 py-1 rounded-lg font-mono text-sm sm:text-base font-bold">
-                            {coupon.code}
-                          </span>
-                          <span className="text-xs text-white/80">{coupon.validUntil}</span>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-bold text-base sm:text-lg">{coupon.title || 'Special Offer'}</h3>
+                            <span className="bg-white/30 px-2 py-0.5 rounded text-xs sm:text-sm font-semibold">
+                              {formatDiscount(coupon)} OFF
+                            </span>
+                          </div>
+                          <p className="text-sm text-white/90 mb-2">{coupon.description || ''}</p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="bg-white/20 px-3 py-1 rounded-lg font-mono text-sm sm:text-base font-bold">
+                              {coupon.code}
+                            </span>
+                            {coupon.validUntil && (
+                              <span className="text-xs text-white/80">{formatValidUntil(coupon.validUntil)}</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </motion.div>
-              );
-            })}
+                  </motion.div>
+                );
+              })
+            )}
           </div>
 
           {/* Footer */}

@@ -658,8 +658,8 @@ export const apiService = {
   // Cancel Order (User)
   cancelOrder: async (orderId, cancellationReason) => {
     try {
-      const response = await api.patch(`/orders/${orderId}/cancel`, { 
-        cancellationReason 
+      const response = await api.patch(`/orders/${orderId}/cancel`, {
+        cancellationReason
       });
       return {
         success: true,
@@ -929,6 +929,52 @@ export const apiService = {
       return {
         success: false,
         message: error.response?.data?.message || 'Failed to add remark',
+      };
+    }
+  },
+
+  // Coupon APIs
+  getAvailableCoupons: async (userId = null, category = null, minAmount = null) => {
+    try {
+      const params = {};
+      if (userId) params.userId = userId;
+      if (category) params.category = category;
+      if (minAmount) params.minAmount = minAmount;
+
+      const response = await api.get('/coupons/available', { params });
+      return {
+        success: true,
+        data: response.data?.data || response.data || [],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to load coupons',
+        data: [],
+      };
+    }
+  },
+
+  validateCoupon: async (code, orderTotal, items = []) => {
+    try {
+      const response = await api.post('/coupons/validate', {
+        code,
+        orderTotal,
+        items: items.map(item => ({
+          type: item.type || 'rental',
+          category: item.category,
+          duration: item.selectedDuration,
+        })),
+      });
+      return {
+        success: true,
+        data: response.data?.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Invalid coupon code',
+        error: error.response?.data?.error || 'COUPON_VALIDATION_ERROR',
       };
     }
   },

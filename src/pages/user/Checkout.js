@@ -300,23 +300,15 @@ const Checkout = () => {
     setCouponError('');
 
     try {
-      // TODO: Replace with actual API call
-      // const response = await apiService.validateCoupon(couponCode);
+      const response = await apiService.validateCoupon(couponCode, totals.total, rentals);
       
-      // Mock validation for now - replace with actual API call
-      const mockCoupons = {
-        'WELCOME10': { type: 'percentage', value: 10, code: 'WELCOME10', description: '10% off on your first order' },
-        'SAVE500': { type: 'fixed', value: 500, code: 'SAVE500', description: 'Save ₹500 on orders above ₹5000', minAmount: 5000 },
-        'LONGTERM15': { type: 'percentage', value: 15, code: 'LONGTERM15', description: '15% off on 12+ months rental' },
-      };
-
-      const coupon = mockCoupons[couponCode.toUpperCase()];
-      
-      if (!coupon) {
-        setCouponError('Invalid coupon code');
+      if (!response.success) {
+        setCouponError(response.message || 'Invalid coupon code');
         return;
       }
 
+      const coupon = response.data;
+      
       // Check minimum amount if required
       if (coupon.minAmount && totals.total < coupon.minAmount) {
         setCouponError(`Minimum order amount of ₹${coupon.minAmount} required`);
@@ -327,8 +319,8 @@ const Checkout = () => {
       setCouponCode('');
       showSuccess(`Coupon "${coupon.code}" applied successfully!`);
     } catch (error) {
-      setCouponError(error.message || 'Failed to apply coupon. Please try again.');
-      showError(error.message || 'Failed to apply coupon');
+      setCouponError(error.response?.data?.message || error.message || 'Failed to apply coupon. Please try again.');
+      showError(error.response?.data?.message || error.message || 'Failed to apply coupon');
     } finally {
       setCouponLoading(false);
     }
