@@ -33,7 +33,7 @@ const About = () => {
             animate={{ opacity: 1, x: 0 }}
             className="bg-white p-8 rounded-lg shadow-md"
           >
-            <Target className="w-12 h-12 text-primary-blue mb-4" />
+            {/* <Target className="w-12 h-12 text-primary-blue mb-4" /> */}
             <h2 className="text-2xl font-bold text-text-dark mb-4">Our Mission</h2>
             <p className="text-text-light">
               To provide accessible, reliable, and affordable AC rental and repair services
@@ -47,7 +47,7 @@ const About = () => {
             animate={{ opacity: 1, x: 0 }}
             className="bg-white p-8 rounded-lg shadow-md"
           >
-            <Eye className="w-12 h-12 text-primary-blue mb-4" />
+            {/* <Eye className="w-12 h-12 text-primary-blue mb-4" /> */}
             <h2 className="text-2xl font-bold text-text-dark mb-4">Our Vision</h2>
             <p className="text-text-light">
               To become India's leading platform for AC rentals and services,
@@ -66,7 +66,7 @@ const About = () => {
               animate={{ opacity: 1, y: 0 }}
               className="text-center"
             >
-              <Users className="w-16 h-16 text-primary-blue mx-auto mb-4" />
+              {/* <Users className="w-16 h-16 text-primary-blue mx-auto mb-4" /> */}
               <h3 className="text-xl font-semibold text-text-dark mb-2">Customer First</h3>
               <p className="text-text-light">
                 Your comfort and satisfaction are our top priorities. We go the extra mile
@@ -80,7 +80,7 @@ const About = () => {
               transition={{ delay: 0.1 }}
               className="text-center"
             >
-              <Award className="w-16 h-16 text-primary-blue mx-auto mb-4" />
+              {/* <Award className="w-16 h-16 text-primary-blue mx-auto mb-4" /> */}
               <h3 className="text-xl font-semibold text-text-dark mb-2">Quality Assurance</h3>
               <p className="text-text-light">
                 We partner with verified vendors and ensure all services meet our
@@ -94,7 +94,7 @@ const About = () => {
               transition={{ delay: 0.2 }}
               className="text-center"
             >
-              <Target className="w-16 h-16 text-primary-blue mx-auto mb-4" />
+              {/* <Target className="w-16 h-16 text-primary-blue mx-auto mb-4" /> */}
               <h3 className="text-xl font-semibold text-text-dark mb-2">Transparency</h3>
               <p className="text-text-light">
                 Clear pricing, honest communication, and transparent processes.

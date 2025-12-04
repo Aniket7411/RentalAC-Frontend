@@ -268,13 +268,13 @@ const BrowseACs = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
+    <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50/50 min-h-screen">
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Main Content */}
         <div className="flex gap-6 lg:gap-8 items-start">
           {/* Filter Sidebar - Fixed Left */}
           <aside className="hidden lg:block w-80 flex-shrink-0">
-            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 fixed top-24 overflow-y-auto w-80 p-5" style={{ maxHeight: 'calc(100vh - 6rem)' }}>
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 fixed top-24 overflow-y-auto w-80 p-5 z-10" style={{ maxHeight: 'calc(100vh - 6rem)', bottom: 0 }}>
               {/* Filter Header */}
               <div className="flex justify-between items-center mb-5 pb-4 border-b border-gray-200 sticky top-0 bg-white/95 backdrop-blur-sm z-10 -mt-1 pt-1">
                 <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
@@ -451,8 +451,8 @@ const BrowseACs = () => {
           </aside>
 
           {/* Main Content Area - Takes remaining space */}
-          <main className="flex-1 min-w-0">
-            <div className="flex flex-col h-full">
+          <main className="flex-1 min-w-0 lg:ml-0">
+            <div className="flex flex-col">
               {/* Page Header */}
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
@@ -531,14 +531,14 @@ const BrowseACs = () => {
                 </button>
               </div>
 
-              {/* Products Grid - Scrollable */}
-              <div className="flex-1 overflow-y-auto min-h-0" style={{ maxHeight: 'calc(100vh - 20rem)' }}>
+              {/* Products Grid */}
+              <div className="flex-1">
                 {loading ? (
                   <div className="flex justify-center items-center h-64">
                     <Loader2 className="w-12 h-12 animate-spin text-purple-600" />
                   </div>
                 ) : (filters.condition.length > 0 || filters.capacity.length > 0 || filters.type.length > 0 || filters.priceSort ? filteredACs.length > 0 : acs.length > 0) ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 md:gap-6 pb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 md:gap-6 pb-8">
                     {(filters.condition.length > 0 || filters.capacity.length > 0 || filters.type.length > 0 || filters.priceSort ? filteredACs : acs).map((ac, index) => (
                       <motion.div
                         key={ac?._id || ac?.id}

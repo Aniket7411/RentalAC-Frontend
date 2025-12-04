@@ -184,6 +184,87 @@ export const apiService = {
     }
   },
 
+  // Admin - Callback Leads (from LeadCaptureModal)
+  getCallbackLeads: async (filters = {}) => {
+    try {
+      const response = await api.get('/admin/leads', { params: filters });
+      return {
+        success: true,
+        data: response.data.data || response.data,
+        pagination: response.data.pagination,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch callback leads',
+        data: [],
+      };
+    }
+  },
+
+  getCallbackLead: async (leadId) => {
+    try {
+      const response = await api.get(`/admin/leads/${leadId}`);
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch lead',
+        data: null,
+      };
+    }
+  },
+
+  updateCallbackLeadStatus: async (leadId, updates) => {
+    try {
+      const response = await api.patch(`/admin/leads/${leadId}`, updates);
+      return {
+        success: true,
+        message: response.data.message || 'Lead updated successfully',
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to update lead',
+      };
+    }
+  },
+
+  deleteCallbackLead: async (leadId) => {
+    try {
+      const response = await api.delete(`/admin/leads/${leadId}`);
+      return {
+        success: true,
+        message: response.data.message || 'Lead deleted successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to delete lead',
+      };
+    }
+  },
+
+  getCallbackLeadStats: async () => {
+    try {
+      const response = await api.get('/admin/leads/stats');
+      return {
+        success: true,
+        data: response.data.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch lead statistics',
+        data: null,
+      };
+    }
+  },
+
   // Contact Form - Public endpoint
   submitContactForm: async (formData) => {
     try {

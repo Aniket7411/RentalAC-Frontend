@@ -755,7 +755,7 @@ const Home = () => {
       </section> */}
 
 
-      <InstallCard />
+      {/* <InstallCard /> */}
 
 
 
