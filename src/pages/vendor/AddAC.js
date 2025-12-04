@@ -20,6 +20,8 @@ const AddAC = () => {
       6: '',
       9: '',
       11: '',
+      12: '',
+      24: '',
     },
     status: 'Available',
     images: [],
@@ -84,7 +86,7 @@ const AddAC = () => {
       return;
     }
 
-    if (!formData.price[3] || !formData.price[6] || !formData.price[9] || !formData.price[11]) {
+    if (!formData.price[3] || !formData.price[6] || !formData.price[9] || !formData.price[11] || !formData.price[12] || !formData.price[24]) {
       setError('Please fill all price fields');
       return;
     }
@@ -100,6 +102,8 @@ const AddAC = () => {
         6: parseFloat(formData.price[6]),
         9: parseFloat(formData.price[9]),
         11: parseFloat(formData.price[11]),
+        12: parseFloat(formData.price[12]),
+        24: parseFloat(formData.price[24]),
       },
     };
 
@@ -260,7 +264,7 @@ const AddAC = () => {
               <label className="block text-sm font-medium text-text-dark mb-2">
                 Rental Prices (₹) <span className="text-red-500">*</span>
               </label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 <div>
                   <label className="block text-xs text-text-light mb-1">3 Months</label>
                   <input
@@ -303,6 +307,30 @@ const AddAC = () => {
                     type="number"
                     name="price.11"
                     value={formData.price[11] || ''}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-text-light mb-1">12 Months</label>
+                  <input
+                    type="number"
+                    name="price.12"
+                    value={formData.price[12] || ''}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-text-light mb-1">24 Months</label>
+                  <input
+                    type="number"
+                    name="price.24"
+                    value={formData.price[24] || ''}
                     onChange={handleChange}
                     required
                     min="0"
