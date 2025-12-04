@@ -26,6 +26,9 @@ const Checkout = () => {
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponError, setCouponError] = useState('');
   const [couponLoading, setCouponLoading] = useState(false);
+  const [availableCoupons, setAvailableCoupons] = useState([]);
+  const [loadingCoupons, setLoadingCoupons] = useState(false);
+  const [showAvailableCoupons, setShowAvailableCoupons] = useState(true);
   const { toasts, removeToast, success: showSuccess, error: showError } = useToast();
 
   const totals = calculateTotals();
@@ -55,6 +58,28 @@ const Checkout = () => {
       navigate('/user/cart');
     }
   }, [isAuthenticated, cartItems.length, navigate]);
+
+  // Fetch available coupons
+  useEffect(() => {
+    const fetchAvailableCoupons = async () => {
+      if (!isAuthenticated || cartItems.length === 0) return;
+      
+      setLoadingCoupons(true);
+      try {
+        const orderTotal = totals.total;
+        const response = await apiService.getAvailableCoupons(user?.id, null, orderTotal);
+        if (response.success) {
+          setAvailableCoupons(response.data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching available coupons:', error);
+      } finally {
+        setLoadingCoupons(false);
+      }
+    };
+
+    fetchAvailableCoupons();
+  }, [isAuthenticated, cartItems.length, totals.total, user?.id]);
 
   const handlePlaceOrder = async () => {
     if (cartItems.length === 0) {
@@ -290,8 +315,9 @@ const Checkout = () => {
     return timeMap[time] || time;
   };
 
-  const handleApplyCoupon = async () => {
-    if (!couponCode.trim()) {
+  const handleApplyCoupon = async (code = null) => {
+    const couponToApply = code || couponCode.trim();
+    if (!couponToApply) {
       setCouponError('Please enter a coupon code');
       return;
     }
@@ -300,7 +326,11 @@ const Checkout = () => {
     setCouponError('');
 
     try {
-      const response = await apiService.validateCoupon(couponCode, totals.total, rentals);
+      const rentals = cartItems.filter(item => {
+        return item.type === 'rental' ||
+          (item.type !== 'service' && (item.brand || item.model || item.price));
+      });
+      const response = await apiService.validateCoupon(couponToApply, totals.total, rentals);
       
       if (!response.success) {
         setCouponError(response.message || 'Invalid coupon code');
@@ -324,6 +354,10 @@ const Checkout = () => {
     } finally {
       setCouponLoading(false);
     }
+  };
+
+  const handleApplyCouponFromList = (coupon) => {
+    handleApplyCoupon(coupon.code);
   };
 
   const handleRemoveCoupon = () => {
@@ -456,6 +490,104 @@ const Checkout = () => {
               
               {couponError && (
                 <p className="text-red-600 text-sm mt-2">{couponError}</p>
+              )}
+
+              {/* Available Coupons Section */}
+              {!appliedCoupon && availableCoupons.length > 0 && (
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-text-dark flex items-center gap-2">
+                      <FiTag className="w-5 h-5 text-primary-blue" />
+                      Available Coupons
+                    </h3>
+                    <button
+                      onClick={() => setShowAvailableCoupons(!showAvailableCoupons)}
+                      className="text-sm text-primary-blue hover:text-primary-blue-light font-medium"
+                    >
+                      {showAvailableCoupons ? 'Hide' : 'Show'} ({availableCoupons.length})
+                    </button>
+                  </div>
+                  
+                  {showAvailableCoupons && (
+                    <div className="space-y-3">
+                      {loadingCoupons ? (
+                        <div className="flex justify-center py-4">
+                          <Loader2 className="w-6 h-6 animate-spin text-primary-blue" />
+                        </div>
+                      ) : (
+                        availableCoupons.map((coupon, index) => {
+                          const formatDiscount = () => {
+                            if (coupon.type === 'percentage') {
+                              return `${coupon.value}% OFF`;
+                            } else {
+                              return `₹${coupon.value} OFF`;
+                            }
+                          };
+
+                          const isEligible = !coupon.minAmount || totals.total >= coupon.minAmount;
+
+                          return (
+                            <motion.div
+                              key={coupon._id || coupon.id || index}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                              className={`border-2 rounded-lg p-4 transition-all ${
+                                isEligible
+                                  ? 'border-primary-blue/30 bg-gradient-to-r from-primary-blue/5 to-primary-blue-light/5 hover:border-primary-blue/50 cursor-pointer'
+                                  : 'border-gray-200 bg-gray-50 opacity-60'
+                              }`}
+                              onClick={() => isEligible && handleApplyCouponFromList(coupon)}
+                            >
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <span className="font-mono font-bold text-lg text-primary-blue">
+                                      {coupon.code}
+                                    </span>
+                                    <span className="px-2 py-1 bg-primary-blue text-white text-xs font-semibold rounded">
+                                      {formatDiscount()}
+                                    </span>
+                                  </div>
+                                  <p className="text-sm font-semibold text-text-dark mb-1">
+                                    {coupon.title}
+                                  </p>
+                                  <p className="text-xs text-text-light mb-2">
+                                    {coupon.description}
+                                  </p>
+                                  {coupon.minAmount > 0 && (
+                                    <p className={`text-xs ${isEligible ? 'text-green-600' : 'text-orange-600'}`}>
+                                      {isEligible 
+                                        ? `✓ Min. order: ₹${coupon.minAmount.toLocaleString()}`
+                                        : `Min. order: ₹${coupon.minAmount.toLocaleString()} required`
+                                      }
+                                    </p>
+                                  )}
+                                  {coupon.validUntil && (
+                                    <p className="text-xs text-text-light mt-1">
+                                      Valid till: {new Date(coupon.validUntil).toLocaleDateString('en-IN')}
+                                    </p>
+                                  )}
+                                </div>
+                                {isEligible && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleApplyCouponFromList(coupon);
+                                    }}
+                                    className="px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition-colors font-semibold text-sm whitespace-nowrap flex-shrink-0"
+                                  >
+                                    Apply
+                                  </button>
+                                )}
+                              </div>
+                            </motion.div>
+                          );
+                        })
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
