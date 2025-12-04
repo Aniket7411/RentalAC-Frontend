@@ -39,11 +39,23 @@ const Orders = () => {
       // Load product orders
       const ordersResponse = await apiService.getUserOrders(user?.id);
       if (ordersResponse.success) {
-        setOrders(ordersResponse.data || []);
+        // Sort orders by date (newest first)
+        const sortedOrders = (ordersResponse.data || []).sort((a, b) => {
+          const dateA = new Date(a.createdAt || a.orderDate || a.date || 0);
+          const dateB = new Date(b.createdAt || b.orderDate || b.date || 0);
+          return dateB - dateA; // Descending order (newest first)
+        });
+        setOrders(sortedOrders);
       } else {
         // Fallback to localStorage
         const storedOrders = JSON.parse(localStorage.getItem(`orders_${user?.id}`) || '[]');
-        setOrders(storedOrders);
+        // Sort orders by date (newest first)
+        const sortedOrders = storedOrders.sort((a, b) => {
+          const dateA = new Date(a.createdAt || a.orderDate || a.date || 0);
+          const dateB = new Date(b.createdAt || b.orderDate || b.date || 0);
+          return dateB - dateA; // Descending order (newest first)
+        });
+        setOrders(sortedOrders);
       }
 
       // Load service bookings
@@ -59,6 +71,19 @@ const Orders = () => {
         setOrders(storedOrders);
       } catch (e) {
         setError('Failed to load orders');
+        // Fallback to localStorage
+        try {
+          const storedOrders = JSON.parse(localStorage.getItem(`orders_${user?.id}`) || '[]');
+          // Sort orders by date (newest first)
+          const sortedOrders = storedOrders.sort((a, b) => {
+            const dateA = new Date(a.createdAt || a.orderDate || a.date || 0);
+            const dateB = new Date(b.createdAt || b.orderDate || b.date || 0);
+            return dateB - dateA; // Descending order (newest first)
+          });
+          setOrders(sortedOrders);
+        } catch (err) {
+          console.error('Error loading orders from localStorage:', err);
+        }
       }
     } finally {
       setLoading(false);

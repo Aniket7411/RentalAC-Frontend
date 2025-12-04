@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { apiService } from '../../services/api';
-import { Plus, Edit2, Trash2, Loader2, Tag, X, Calendar, Percent, DollarSign } from 'lucide-react';
+import { Plus, Edit2, Trash2, Loader2, Tag, X, Calendar, Percent } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '../../hooks/useToast';
 import { ToastContainer } from '../../components/Toast';
@@ -395,8 +395,8 @@ const ManageCoupons = () => {
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue"
                       required
                     >
-                      <option value="percentage">Percentage</option>
-                      <option value="fixed">Fixed Amount</option>
+                      <option value="percentage">Percentage (%)</option>
+                      <option value="fixed">Fixed Amount (₹)</option>
                     </select>
                   </div>
 
@@ -408,14 +408,14 @@ const ManageCoupons = () => {
                       {formData.type === 'percentage' ? (
                         <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                       ) : (
-                        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg font-semibold">₹</span>
                       )}
                       <input
                         type="number"
                         name="value"
                         value={formData.value}
                         onChange={handleChange}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue"
+                        className={`w-full ${formData.type === 'percentage' ? 'pl-10' : 'pl-8'} pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue`}
                         placeholder={formData.type === 'percentage' ? '10' : '500'}
                         min="0"
                         step={formData.type === 'percentage' ? '1' : '1'}
@@ -428,33 +428,39 @@ const ManageCoupons = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Minimum Order Amount
+                      Minimum Order Amount (₹)
                     </label>
-                    <input
-                      type="number"
-                      name="minAmount"
-                      value={formData.minAmount || ''}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue"
-                      placeholder="0"
-                      min="0"
-                    />
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg font-semibold">₹</span>
+                      <input
+                        type="number"
+                        name="minAmount"
+                        value={formData.minAmount || ''}
+                        onChange={handleChange}
+                        className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue"
+                        placeholder="0"
+                        min="0"
+                      />
+                    </div>
                   </div>
 
                   {formData.type === 'percentage' && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Maximum Discount (Optional)
+                        Maximum Discount (₹) - Optional
                       </label>
-                      <input
-                        type="number"
-                        name="maxDiscount"
-                        value={formData.maxDiscount || ''}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue"
-                        placeholder="No limit"
-                        min="0"
-                      />
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg font-semibold">₹</span>
+                        <input
+                          type="number"
+                          name="maxDiscount"
+                          value={formData.maxDiscount || ''}
+                          onChange={handleChange}
+                          className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-primary-blue"
+                          placeholder="No limit"
+                          min="0"
+                        />
+                      </div>
                     </div>
                   )}
                 </div>

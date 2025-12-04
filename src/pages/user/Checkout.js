@@ -252,16 +252,16 @@ const Checkout = () => {
           clearCart();
 
           // Show prominent success notification
-          showSuccess(`Order #${createdOrderId} placed successfully! Redirecting to your orders...`, 4000);
+          showSuccess(`🎉 Order #${createdOrderId} placed successfully!`, 5000);
 
-          // Show success modal
+          // Show success modal immediately
           setShowSuccessModal(true);
 
-          // Auto-redirect to orders page after showing notification (3 seconds)
+          // Auto-redirect to orders page after showing notification (5 seconds)
           setTimeout(() => {
             setShowSuccessModal(false);
             navigate('/user/orders');
-          }, 3000);
+          }, 5000);
         } catch (err) {
           console.error('Error creating order:', err);
           const errorMessage = err.response?.data?.message || err.message || 'Failed to place order';
@@ -405,10 +405,11 @@ const Checkout = () => {
           {/* Order Summary */}
           <div className="lg:col-span-2 space-y-6">
             {/* Coupon Code Section */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div className="bg-gradient-to-r from-primary-blue/5 to-primary-blue-light/5 border-2 border-primary-blue/20 rounded-lg shadow-lg p-6 mb-6">
               <h2 className="text-xl font-semibold text-text-dark mb-4 flex items-center gap-2">
                 <FiTag className="w-5 h-5 text-primary-blue" />
-                Apply Coupon Code
+                <span>Apply Coupon Code</span>
+                <span className="text-sm font-normal text-primary-blue bg-primary-blue/10 px-2 py-1 rounded">Save More!</span>
               </h2>
               
               {appliedCoupon ? (
