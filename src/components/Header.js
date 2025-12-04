@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
-import { LogOut, Wrench, Plus, List, Users, LayoutDashboard, Ticket, MessageSquare, Package } from 'lucide-react';
+import { LogOut, Wrench, Plus, List, Users, LayoutDashboard, Ticket, MessageSquare, Package, Tag } from 'lucide-react';
 import { FiShoppingCart, FiHeart, FiUser, FiMenu, FiX } from 'react-icons/fi';
 
 const Header = () => {
@@ -98,6 +98,10 @@ const Header = () => {
                 <Link to="/admin/manage-faqs" className="flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
                   <MessageSquare className="w-4 h-4" />
                   <span>FAQs</span>
+                </Link>
+                <Link to="/admin/manage-coupons" className="flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
+                  <Tag className="w-4 h-4" />
+                  <span>Coupons</span>
                 </Link>
                 <button onClick={handleLogout} className="ml-2 flex items-center space-x-2 px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 transition-all rounded-lg font-medium">
                   <LogOut className="w-4 h-4" />

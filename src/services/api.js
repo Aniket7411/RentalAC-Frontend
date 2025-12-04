@@ -978,6 +978,70 @@ export const apiService = {
       };
     }
   },
+
+  // Admin Coupon APIs
+  getAdminCoupons: async () => {
+    try {
+      const response = await api.get('/admin/coupons');
+      return {
+        success: true,
+        data: response.data?.data || response.data || [],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to load coupons',
+        data: [],
+      };
+    }
+  },
+
+  createCoupon: async (couponData) => {
+    try {
+      const response = await api.post('/admin/coupons', couponData);
+      return {
+        success: true,
+        data: response.data?.data || response.data,
+        message: response.data?.message || 'Coupon created successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Failed to create coupon',
+      };
+    }
+  },
+
+  updateCoupon: async (couponId, couponData) => {
+    try {
+      const response = await api.put(`/admin/coupons/${couponId}`, couponData);
+      return {
+        success: true,
+        data: response.data?.data || response.data,
+        message: response.data?.message || 'Coupon updated successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Failed to update coupon',
+      };
+    }
+  },
+
+  deleteCoupon: async (couponId) => {
+    try {
+      const response = await api.delete(`/admin/coupons/${couponId}`);
+      return {
+        success: true,
+        message: response.data?.message || 'Coupon deleted successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'Failed to delete coupon',
+      };
+    }
+  },
 };
 
 export default api;

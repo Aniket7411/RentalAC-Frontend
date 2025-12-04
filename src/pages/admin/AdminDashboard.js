@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { apiService } from '../../services/api';
-import { ShoppingBag, Users, Plus, List, TrendingUp, AlertCircle, Package } from 'lucide-react';
+import { ShoppingBag, Users, Plus, List, TrendingUp, AlertCircle, Package, Tag } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const AdminDashboard = () => {
@@ -238,6 +238,18 @@ const AdminDashboard = () => {
                             <div>
                                 <p className="text-sm font-semibold">View All Orders</p>
                                 <p className="text-xs text-text-light group-hover:text-white">Manage customer orders</p>
+                            </div>
+                        </Link>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
+                        <Link
+                            to="/admin/manage-coupons"
+                            className="flex items-center space-x-2 p-3 border-2 border-dashed border-primary-blue rounded-xl hover:bg-primary-blue hover:text-white transition group"
+                        >
+                            <Tag className="w-5 h-5 text-primary-blue group-hover:text-white" />
+                            <div>
+                                <p className="text-sm font-semibold">Manage Coupons</p>
+                                <p className="text-xs text-text-light group-hover:text-white">Create and manage discount coupons</p>
                             </div>
                         </Link>
                     </div>

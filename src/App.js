@@ -40,6 +40,7 @@ import AdminOrderDetail from './pages/admin/AdminOrderDetail';
 import ManageServices from './pages/admin/ManageServices';
 import Tickets from './pages/admin/Tickets';
 import ManageFAQs from './pages/admin/ManageFAQs';
+import ManageCoupons from './pages/admin/ManageCoupons';
 
 function App() {
   return (
@@ -200,6 +201,14 @@ function App() {
                     element={
                       <ProtectedRoute requireAdmin={true}>
                         <ManageFAQs />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/manage-coupons"
+                    element={
+                      <ProtectedRoute requireAdmin={true}>
+                        <ManageCoupons />
                       </ProtectedRoute>
                     }
                   />
