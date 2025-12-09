@@ -72,27 +72,54 @@ export const CartProvider = ({ children }) => {
           }
           // If it has brand, model, productId, name, or price, it's a rental product
           if (item.brand || item.model || item.productId || item.name || item.price) {
+            // Convert selectedDuration to number if it's a string
+            let duration = item.selectedDuration;
+            if (typeof duration === 'string') {
+              duration = parseInt(duration, 10);
+            }
+            // Ensure it's a valid tenure option
+            const validTenureOptions = [3, 6, 9, 11, 12, 24];
+            duration = validTenureOptions.includes(duration) ? duration : 3;
+
             return {
               ...item,
               type: 'rental', // Cart item type - overwrite the product type
               productType: productType || item.productType, // Preserve product type (Split, Window, etc.)
-              selectedDuration: item.selectedDuration || 3, // Default to 3 months if not set
+              selectedDuration: duration, // Ensure it's a number
             };
           }
           // Default to rental if we can't determine
+          // Convert selectedDuration to number if it's a string
+          let duration = item.selectedDuration;
+          if (typeof duration === 'string') {
+            duration = parseInt(duration, 10);
+          }
+          // Ensure it's a valid tenure option
+          const validTenureOptions = [3, 6, 9, 11, 12, 24];
+          duration = validTenureOptions.includes(duration) ? duration : 3;
+
           return {
             ...item,
             type: 'rental',
             productType: productType || item.productType,
-            selectedDuration: item.selectedDuration || 3, // Default to 3 months if not set
+            selectedDuration: duration, // Ensure it's a number
           };
         }
 
         // Item already has cart item type, ensure productType and selectedDuration are set
         if (item.type === 'rental') {
+          // Convert selectedDuration to number if it's a string
+          let duration = item.selectedDuration;
+          if (typeof duration === 'string') {
+            duration = parseInt(duration, 10);
+          }
+          // Ensure it's a valid tenure option
+          const validTenureOptions = [3, 6, 9, 11, 12, 24];
+          duration = validTenureOptions.includes(duration) ? duration : 3;
+
           return {
             ...item,
-            selectedDuration: item.selectedDuration || 3, // Default to 3 months if not set
+            selectedDuration: duration, // Ensure it's a number
           };
         }
 
@@ -134,6 +161,14 @@ export const CartProvider = ({ children }) => {
         item => item.type === 'rental' && item.id === productId
       );
 
+      // Convert selectedDuration to number to ensure consistency
+      const durationNumber = typeof selectedDuration === 'string'
+        ? parseInt(selectedDuration, 10)
+        : (selectedDuration || 3);
+      // Ensure it's a valid tenure option, default to 3 if not
+      const validTenureOptions = [3, 6, 9, 11, 12, 24];
+      const finalDuration = validTenureOptions.includes(durationNumber) ? durationNumber : 3;
+
       const cartItem = {
         id: productId,
         type: 'rental',
@@ -154,7 +189,7 @@ export const CartProvider = ({ children }) => {
         operationType: product.operationType,
         loadType: product.loadType,
         quantity: 1, // Always 1, no quantity increase
-        selectedDuration: selectedDuration || '3', // Use provided duration or default to 3 months
+        selectedDuration: finalDuration, // Store as number: 3, 6, 9, 11, 12, or 24
         paymentOption: 'payLater', // Default payment option (will be set at checkout)
         installationCharges: product.installationCharges || null, // Include installation charges for AC
       };
@@ -284,13 +319,18 @@ export const CartProvider = ({ children }) => {
     // Since quantity is always 1, we just sum the prices
     // Use selected duration (3, 6, 9, 11, 12, 24 months) or default to 3 months
     const rentalTotal = rentals.reduce((total, item) => {
-      const selectedDuration = item.selectedDuration || 3;
+      // Ensure selectedDuration is a number
+      let duration = item.selectedDuration;
+      if (typeof duration === 'string') {
+        duration = parseInt(duration, 10);
+      }
+      const selectedDuration = duration || 3;
       const price = item.price && typeof item.price === 'object'
         ? (item.price[selectedDuration] || item.price[3] || 0)
         : (item.price || 0);
       // Add installation charges if present (only for AC)
-      const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount) 
-        ? item.installationCharges.amount 
+      const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount)
+        ? item.installationCharges.amount
         : 0;
       return total + price + installationCharge; // quantity is always 1
     }, 0);

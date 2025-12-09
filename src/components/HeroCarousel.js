@@ -82,6 +82,8 @@ const HeroCarousel = () => {
                     e.target.src = 'https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=1920&q=80';
                   }}
                 />
+                {/* Darker overlay for better text visibility */}
+                <div className="absolute inset-0 bg-black/50"></div>
                 <div className={`absolute inset-0 bg-gradient-to-r ${slide.gradient} backdrop-blur-sm`}></div>
               </div>
 
@@ -123,14 +125,14 @@ const HeroCarousel = () => {
       {/* Navigation Arrows */}
       <button
         onClick={goToPrevious}
-        className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 backdrop-blur-md text-white p-2 sm:p-3 rounded-full hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl"
+        className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 bg-primary-blue/90 backdrop-blur-md text-white p-2 sm:p-3 rounded-full hover:bg-primary-blue transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
         aria-label="Previous slide"
       >
         <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
       </button>
       <button
         onClick={goToNext}
-        className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 backdrop-blur-md text-white p-2 sm:p-3 rounded-full hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl"
+        className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 bg-primary-blue/90 backdrop-blur-md text-white p-2 sm:p-3 rounded-full hover:bg-primary-blue transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
         aria-label="Next slide"
       >
         <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -142,11 +144,10 @@ const HeroCarousel = () => {
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`transition-all duration-300 rounded-full ${
-              index === currentIndex
+            className={`transition-all duration-300 rounded-full ${index === currentIndex
                 ? 'w-8 h-2 sm:h-3 bg-white shadow-lg'
                 : 'w-2 h-2 sm:w-3 sm:h-3 bg-white/50 hover:bg-white/70'
-            }`}
+              }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}

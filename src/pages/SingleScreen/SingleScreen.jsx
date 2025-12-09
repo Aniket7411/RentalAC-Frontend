@@ -242,9 +242,9 @@ function SingleScreen() {
                       e.stopPropagation();
                       handleMouseMoveLeft();
                     }}
-                    className="bg-white/20 backdrop-blur-md p-3 rounded-full hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
+                    className="bg-[#2563EB] backdrop-blur-md p-3 rounded-full hover:bg-[#1e40af] transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
                   >
-                    <ChevronLeft className="w-6 h-6 text-[#2563EB] " />
+                    <ChevronLeft className="w-6 h-6 text-white" />
                   </div>
                 )}
               </>
@@ -276,7 +276,7 @@ function SingleScreen() {
                       e.stopPropagation();
                       handleMouseMoveRight();
                     }}
-                    className="bg-white/20 backdrop-blur-md p-3 rounded-full hover:bg-white/30 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
+                    className="bg-[#2563EB] backdrop-blur-md p-3 rounded-full hover:bg-[#1e40af] transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-110"
                   >
                     <ChevronRight className="w-6 h-6 text-white" />
                   </div>

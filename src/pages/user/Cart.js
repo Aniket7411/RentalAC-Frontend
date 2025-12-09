@@ -233,8 +233,8 @@ const Cart = () => {
                             )}
                             {item.status && (
                               <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-semibold shadow-md ${item.status === 'Available' ? 'bg-green-500 text-white' :
-                                  item.status === 'Rented Out' ? 'bg-red-500 text-white' :
-                                    'bg-yellow-500 text-white'
+                                item.status === 'Rented Out' ? 'bg-red-500 text-white' :
+                                  'bg-yellow-500 text-white'
                                 }`}>
                                 {item.status}
                               </div>
@@ -300,7 +300,7 @@ const Cart = () => {
                                 </div>
                               </div>
                             </div>
-                            
+
                             {/* Range Slider */}
                             <div className="mb-4">
                               <div className="relative">
@@ -309,7 +309,16 @@ const Cart = () => {
                                   min="0"
                                   max="5"
                                   step="1"
-                                  value={[3, 6, 9, 11, 12, 24].indexOf(item.selectedDuration || 3)}
+                                  value={(() => {
+                                    // Ensure selectedDuration is a number
+                                    let duration = item.selectedDuration;
+                                    if (typeof duration === 'string') {
+                                      duration = parseInt(duration, 10);
+                                    }
+                                    const tenureOptions = [3, 6, 9, 11, 12, 24];
+                                    const index = tenureOptions.indexOf(duration);
+                                    return index >= 0 ? index : 0; // Default to 0 (3 months) if not found
+                                  })()}
                                   onChange={(e) => {
                                     const index = Number(e.target.value);
                                     const tenureOptions = [3, 6, 9, 11, 12, 24];
@@ -317,29 +326,47 @@ const Cart = () => {
                                   }}
                                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                                   style={{
-                                    background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${([3, 6, 9, 11, 12, 24].indexOf(item.selectedDuration || 3) / 5) * 100}%, #e5e7eb ${([3, 6, 9, 11, 12, 24].indexOf(item.selectedDuration || 3) / 5) * 100}%, #e5e7eb 100%)`
+                                    background: (() => {
+                                      // Ensure selectedDuration is a number
+                                      let duration = item.selectedDuration;
+                                      if (typeof duration === 'string') {
+                                        duration = parseInt(duration, 10);
+                                      }
+                                      const tenureOptions = [3, 6, 9, 11, 12, 24];
+                                      const index = tenureOptions.indexOf(duration);
+                                      const sliderIndex = index >= 0 ? index : 0;
+                                      return `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(sliderIndex / 5) * 100}%, #e5e7eb ${(sliderIndex / 5) * 100}%, #e5e7eb 100%)`;
+                                    })()
                                   }}
                                 />
                                 <div className="flex justify-between mt-3">
-                                  {[3, 6, 9, 11, 12, 24].map((option) => (
-                                    <div key={option} className="flex flex-col items-center">
-                                      <div
-                                        className={`w-1 h-4 ${(item.selectedDuration || 3) === option ? 'bg-primary-blue' : 'bg-gray-400'}`}
-                                      />
-                                      <span className={`text-xs mt-1.5 font-medium ${(item.selectedDuration || 3) === option ? 'font-bold text-primary-blue' : 'text-gray-600'}`}>
-                                        {option}
-                                      </span>
-                                      {item?.price && item.price[option] && (
-                                        <span className={`text-xs mt-0.5 ${(item.selectedDuration || 3) === option ? 'text-primary-blue font-semibold' : 'text-gray-500'}`}>
-                                          ₹{item.price[option].toLocaleString()}
+                                  {[3, 6, 9, 11, 12, 24].map((option) => {
+                                    // Ensure selectedDuration is a number for comparison
+                                    let duration = item.selectedDuration;
+                                    if (typeof duration === 'string') {
+                                      duration = parseInt(duration, 10);
+                                    }
+                                    const isSelected = (duration || 3) === option;
+                                    return (
+                                      <div key={option} className="flex flex-col items-center">
+                                        <div
+                                          className={`w-1 h-4 ${isSelected ? 'bg-primary-blue' : 'bg-gray-400'}`}
+                                        />
+                                        <span className={`text-xs mt-1.5 font-medium ${isSelected ? 'font-bold text-primary-blue' : 'text-gray-600'}`}>
+                                          {option}
                                         </span>
-                                      )}
-                                    </div>
-                                  ))}
+                                        {item?.price && item.price[option] && (
+                                          <span className={`text-xs mt-0.5 ${isSelected ? 'text-primary-blue font-semibold' : 'text-gray-500'}`}>
+                                            ₹{item.price[option].toLocaleString()}
+                                          </span>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                               </div>
                             </div>
-                            
+
                             {/* Selected Price Display */}
                             {item?.price && (
                               <div className="bg-white rounded-lg p-4 border border-gray-200">
@@ -347,7 +374,14 @@ const Cart = () => {
                                   <div className="flex items-center justify-between">
                                     <span className="text-sm font-medium text-gray-600">Rental Price</span>
                                     <span className="text-base font-semibold text-gray-900">
-                                      ₹{((item.price[item.selectedDuration || 3] || item.price[3] || 0)).toLocaleString()}
+                                      ₹{(() => {
+                                        // Ensure selectedDuration is a number
+                                        let duration = item.selectedDuration;
+                                        if (typeof duration === 'string') {
+                                          duration = parseInt(duration, 10);
+                                        }
+                                        return ((item.price[duration || 3] || item.price[3] || 0)).toLocaleString();
+                                      })()}
                                     </span>
                                   </div>
                                   {item.category === 'AC' && item.installationCharges && item.installationCharges.amount > 0 && (
@@ -365,9 +399,14 @@ const Cart = () => {
                                     <span className="text-base font-bold text-gray-900">Total</span>
                                     <span className="text-xl font-bold text-primary-blue">
                                       ₹{(() => {
-                                        const rentalPrice = (item.price[item.selectedDuration || 3] || item.price[3] || 0);
-                                        const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount) 
-                                          ? item.installationCharges.amount 
+                                        // Ensure selectedDuration is a number
+                                        let duration = item.selectedDuration;
+                                        if (typeof duration === 'string') {
+                                          duration = parseInt(duration, 10);
+                                        }
+                                        const rentalPrice = (item.price[duration || 3] || item.price[3] || 0);
+                                        const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount)
+                                          ? item.installationCharges.amount
                                           : 0;
                                         return (rentalPrice + installationCharge).toLocaleString();
                                       })()}
@@ -375,7 +414,14 @@ const Cart = () => {
                                   </div>
                                 </div>
                                 <p className="text-xs text-gray-500 mt-2.5">
-                                  For {item.selectedDuration || 3} months rental
+                                  For {(() => {
+                                    // Ensure selectedDuration is a number
+                                    let duration = item.selectedDuration;
+                                    if (typeof duration === 'string') {
+                                      duration = parseInt(duration, 10);
+                                    }
+                                    return duration || 3;
+                                  })()} months rental
                                   {item.category === 'AC' && item.installationCharges && item.installationCharges.amount > 0 && ' + installation'}
                                 </p>
                               </div>
@@ -492,8 +538,8 @@ const Cart = () => {
                                 <div className="flex items-center space-x-2 text-sm">
                                   <span className="text-text-light">Payment:</span>
                                   <span className={`font-medium px-2 py-1 rounded ${item.bookingDetails.paymentOption === 'payNow'
-                                      ? 'bg-green-100 text-green-800'
-                                      : 'bg-yellow-100 text-yellow-800'
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-yellow-100 text-yellow-800'
                                     }`}>
                                     {item.bookingDetails.paymentOption === 'payNow' ? 'Pay Now' : 'Pay Later'}
                                   </span>
@@ -556,7 +602,12 @@ const Cart = () => {
                         <span className="text-sm font-semibold text-gray-900">
                           ₹{(() => {
                             const rentalTotalWithoutInstallation = rentals.reduce((total, item) => {
-                              const selectedDuration = item.selectedDuration || 3;
+                              // Ensure selectedDuration is a number
+                              let duration = item.selectedDuration;
+                              if (typeof duration === 'string') {
+                                duration = parseInt(duration, 10);
+                              }
+                              const selectedDuration = duration || 3;
                               const price = item.price && typeof item.price === 'object'
                                 ? (item.price[selectedDuration] || item.price[3] || 0)
                                 : (item.price || 0);
@@ -603,7 +654,7 @@ const Cart = () => {
                     </span>
                   </div>
                 </div>
-                
+
                 <button
                   onClick={handleCheckout}
                   className="w-full py-3.5 bg-gradient-to-r from-primary-blue to-primary-blue-light text-white rounded-xl hover:shadow-lg transition-all font-bold shadow-md shadow-primary-blue/20 hover:scale-[1.02] active:scale-[0.98]"

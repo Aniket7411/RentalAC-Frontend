@@ -254,8 +254,9 @@ const Home = () => {
                 e.target.style.display = 'none';
               }}
             />
-            {/* Overlay for better text readability */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent"></div>
+            {/* Darker overlay for better text readability */}
+            <div className="absolute inset-0 bg-black/70"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40"></div>
           </div>
 
           {/* Content */}
@@ -303,8 +304,9 @@ const Home = () => {
                 e.target.style.display = 'none';
               }}
             />
-            {/* Overlay for better text readability */}
-            <div className="absolute inset-0 bg-gradient-to-l from-black/60 via-black/40 to-transparent"></div>
+            {/* Darker overlay for better text readability */}
+            <div className="absolute inset-0 bg-black/70"></div>
+            <div className="absolute inset-0 bg-gradient-to-l from-black/80 via-black/60 to-black/40"></div>
           </div>
 
           {/* Content */}
