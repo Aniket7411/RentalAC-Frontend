@@ -40,6 +40,8 @@ const ACDetail = () => {
   const [relatedACs, setRelatedACs] = useState([]);
   const [showInstallationModal, setShowInstallationModal] = useState(false);
   const [openFAQIndex, setOpenFAQIndex] = useState(null);
+  const [isMonthlyPayment, setIsMonthlyPayment] = useState(false); // Monthly payment option
+  const [monthlyTenure, setMonthlyTenure] = useState(3); // Minimum 3 months for monthly payment
   const { toasts, removeToast, success, error: showError } = useToast();
 
   useEffect(() => {
@@ -159,7 +161,9 @@ const ACDetail = () => {
   const addToCart = () => {
     try {
       // Use CartContext to add product (works for both logged-in and non-logged-in users)
-      addRentalToCart(ac, String(selectedDuration));
+      // Pass monthly payment info if selected
+      const duration = isMonthlyPayment ? String(monthlyTenure) : String(selectedDuration);
+      addRentalToCart(ac, duration, isMonthlyPayment, isMonthlyPayment ? monthlyTenure : null);
       setAddedToCart(true);
       success('Product added to cart successfully!');
       setTimeout(() => setAddedToCart(false), 2000);
@@ -238,6 +242,10 @@ const ACDetail = () => {
   // Get price based on selected duration
   const getPrice = () => {
     if (!ac.price) return 0;
+    // If monthly payment is selected, calculate monthly price * tenure
+    if (isMonthlyPayment && ac.monthlyPaymentEnabled && ac.monthlyPrice) {
+      return ac.monthlyPrice * monthlyTenure;
+    }
     // Convert selectedDuration to string key
     const durationKey = String(selectedDuration);
     return ac.price[durationKey] || ac.price['3'] || 0;
@@ -493,13 +501,78 @@ const ACDetail = () => {
                 </div>
               </div>
 
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-primary-blue">
-                ₹{price.toLocaleString()}
-                <span className="text-xs sm:text-sm md:text-base text-text-light font-normal ml-1">
-                  (Total for {selectedDuration} months)
-                </span>
-              </div>
+              {!isMonthlyPayment && (
+                <div className="text-xl sm:text-2xl md:text-3xl font-bold text-primary-blue">
+                  ₹{price.toLocaleString()}
+                  <span className="text-xs sm:text-sm md:text-base text-text-light font-normal ml-1">
+                    (Total for {selectedDuration} months)
+                  </span>
+                </div>
+              )}
             </div>
+
+            {/* Monthly Payment Option - Show below pricing if enabled */}
+            {ac.status === 'Available' && ac.monthlyPaymentEnabled && ac.monthlyPrice && (
+              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <label className="flex items-start space-x-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="paymentType"
+                    checked={isMonthlyPayment}
+                    onChange={(e) => setIsMonthlyPayment(e.target.checked)}
+                    className="mt-1 w-4 h-4 text-primary-blue border-gray-300 focus:ring-primary-blue"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-semibold text-text-dark">Pay Monthly</span>
+                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">New</span>
+                    </div>
+                    <p className="text-xs text-text-light mb-3">
+                      Pay on a monthly basis instead of upfront payment
+                    </p>
+                    {isMonthlyPayment && (
+                      <div className="mt-3">
+                        <label className="block text-sm font-medium text-text-dark mb-2">
+                          Select Tenure (Minimum 3 months) <span className="text-red-500">*</span>
+                        </label>
+                        <div className="flex gap-2 flex-wrap">
+                          {[3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24].map((months) => (
+                            <button
+                              key={months}
+                              type="button"
+                              onClick={() => setMonthlyTenure(months)}
+                              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                                monthlyTenure === months
+                                  ? 'bg-primary-blue text-white shadow-md'
+                                  : 'bg-white text-gray-700 border border-gray-300 hover:border-primary-blue'
+                              }`}
+                            >
+                              {months} {months === 1 ? 'Month' : 'Months'}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="mt-3 p-3 bg-white rounded-lg border border-gray-200">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-sm text-gray-600">Monthly Payment:</span>
+                            <span className="text-lg font-bold text-primary-blue">
+                              ₹{ac.monthlyPrice.toLocaleString()}/month
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                            <span className="text-sm font-medium text-gray-700">
+                              Total for {monthlyTenure} months:
+                            </span>
+                            <span className="text-xl font-bold text-primary-blue">
+                              ₹{(ac.monthlyPrice * monthlyTenure).toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </label>
+              </div>
+            )}
 
             {/* Add to Cart Button - Always shown (works for both logged-in and non-logged-in users) */}
             {ac.status === 'Available' && (

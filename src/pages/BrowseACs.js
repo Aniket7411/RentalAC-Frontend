@@ -531,6 +531,36 @@ const BrowseACs = () => {
                 </button>
               </div>
 
+              {/* Mobile Category Buttons - Visible only on small screens, below search bar */}
+              <div className="md:hidden mb-4">
+                <div className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide">
+                  {['AC', 'Refrigerator', 'Washing Machine'].map((category) => {
+                    const info = categoryInfo[category];
+                    const Icon = info.icon;
+                    const isSelected = selectedCategories.includes(category);
+
+                    return (
+                      <button
+                        key={category}
+                        onClick={() => toggleCategory(category)}
+                        className={`
+                          flex items-center gap-2 px-4 py-2.5 rounded-xl
+                          text-sm font-semibold transition-all duration-200 whitespace-nowrap flex-shrink-0
+                          ${isSelected
+                            ? `bg-gradient-to-r ${info.color} text-white shadow-md`
+                            : 'bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200 shadow-sm'
+                          }
+                        `}
+                      >
+                        <Icon className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-gray-600'}`} />
+                        <span>{category}</span>
+                        {isSelected && <Check className="w-4 h-4" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Products Grid */}
               <div className="flex-1">
                 {loading ? (

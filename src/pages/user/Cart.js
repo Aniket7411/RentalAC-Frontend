@@ -287,46 +287,62 @@ const Cart = () => {
                             )}
                           </div>
 
-                          {/* Rental Duration Selection - Range Slider */}
-                          <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                            <div className="flex items-center gap-2 mb-4">
-                              <label className="block text-sm font-semibold text-gray-900">
-                                Choose Tenure <span className="text-red-500">*</span>
-                              </label>
-                              <div className="relative group">
-                                <FiInfo className="w-4 h-4 text-blue-500 cursor-help" />
-                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
-                                  Select rental duration
+                          {/* Payment Type Display */}
+                          {item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure ? (
+                            /* Monthly Payment Tenure Selection */
+                            <div className="mb-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-semibold">
+                                  <FiInfo className="w-3 h-3" />
+                                  Monthly Payment Plan
+                                </div>
+                              </div>
+                              <div className="mb-3">
+                                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                                  Select Tenure (Minimum 3 months) <span className="text-red-500">*</span>
+                                </label>
+                                <div className="flex flex-wrap gap-2">
+                                  {[3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24].map((months) => (
+                                    <button
+                                      key={months}
+                                      type="button"
+                                      onClick={() => updateCartItem(item.id, { monthlyTenure: months })}
+                                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                                        item.monthlyTenure === months
+                                          ? 'bg-primary-blue text-white shadow-md'
+                                          : 'bg-white text-gray-700 border border-gray-300 hover:border-primary-blue hover:bg-blue-50'
+                                      }`}
+                                    >
+                                      {months} {months === 1 ? 'Month' : 'Months'}
+                                    </button>
+                                  ))}
                                 </div>
                               </div>
                             </div>
+                          ) : (
+                            /* Regular Payment Tenure Selection */
+                            <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                              <div className="flex items-center gap-2 mb-4">
+                                <label className="block text-sm font-semibold text-gray-900">
+                                  Choose Tenure <span className="text-red-500">*</span>
+                                </label>
+                                <div className="relative group">
+                                  <FiInfo className="w-4 h-4 text-blue-500 cursor-help" />
+                                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                                    Select rental duration
+                                  </div>
+                                </div>
+                              </div>
 
-                            {/* Range Slider */}
-                            <div className="mb-4">
-                              <div className="relative">
-                                <input
-                                  type="range"
-                                  min="0"
-                                  max="5"
-                                  step="1"
-                                  value={(() => {
-                                    // Ensure selectedDuration is a number
-                                    let duration = item.selectedDuration;
-                                    if (typeof duration === 'string') {
-                                      duration = parseInt(duration, 10);
-                                    }
-                                    const tenureOptions = [3, 6, 9, 11, 12, 24];
-                                    const index = tenureOptions.indexOf(duration);
-                                    return index >= 0 ? index : 0; // Default to 0 (3 months) if not found
-                                  })()}
-                                  onChange={(e) => {
-                                    const index = Number(e.target.value);
-                                    const tenureOptions = [3, 6, 9, 11, 12, 24];
-                                    updateCartItem(item.id, { selectedDuration: tenureOptions[index] });
-                                  }}
-                                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                                  style={{
-                                    background: (() => {
+                              {/* Range Slider */}
+                              <div className="mb-4">
+                                <div className="relative">
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="5"
+                                    step="1"
+                                    value={(() => {
                                       // Ensure selectedDuration is a number
                                       let duration = item.selectedDuration;
                                       if (typeof duration === 'string') {
@@ -334,43 +350,114 @@ const Cart = () => {
                                       }
                                       const tenureOptions = [3, 6, 9, 11, 12, 24];
                                       const index = tenureOptions.indexOf(duration);
-                                      const sliderIndex = index >= 0 ? index : 0;
-                                      return `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(sliderIndex / 5) * 100}%, #e5e7eb ${(sliderIndex / 5) * 100}%, #e5e7eb 100%)`;
-                                    })()
-                                  }}
-                                />
-                                <div className="flex justify-between mt-3">
-                                  {[3, 6, 9, 11, 12, 24].map((option) => {
-                                    // Ensure selectedDuration is a number for comparison
-                                    let duration = item.selectedDuration;
-                                    if (typeof duration === 'string') {
-                                      duration = parseInt(duration, 10);
-                                    }
-                                    const isSelected = (duration || 3) === option;
-                                    return (
-                                      <div key={option} className="flex flex-col items-center">
-                                        <div
-                                          className={`w-1 h-4 ${isSelected ? 'bg-primary-blue' : 'bg-gray-400'}`}
-                                        />
-                                        <span className={`text-xs mt-1.5 font-medium ${isSelected ? 'font-bold text-primary-blue' : 'text-gray-600'}`}>
-                                          {option}
-                                        </span>
-                                        {item?.price && item.price[option] && (
-                                          <span className={`text-xs mt-0.5 ${isSelected ? 'text-primary-blue font-semibold' : 'text-gray-500'}`}>
-                                            ₹{item.price[option].toLocaleString()}
+                                      return index >= 0 ? index : 0; // Default to 0 (3 months) if not found
+                                    })()}
+                                    onChange={(e) => {
+                                      const index = Number(e.target.value);
+                                      const tenureOptions = [3, 6, 9, 11, 12, 24];
+                                      updateCartItem(item.id, { selectedDuration: tenureOptions[index] });
+                                    }}
+                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                                    style={{
+                                      background: (() => {
+                                        // Ensure selectedDuration is a number
+                                        let duration = item.selectedDuration;
+                                        if (typeof duration === 'string') {
+                                          duration = parseInt(duration, 10);
+                                        }
+                                        const tenureOptions = [3, 6, 9, 11, 12, 24];
+                                        const index = tenureOptions.indexOf(duration);
+                                        const sliderIndex = index >= 0 ? index : 0;
+                                        return `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(sliderIndex / 5) * 100}%, #e5e7eb ${(sliderIndex / 5) * 100}%, #e5e7eb 100%)`;
+                                      })()
+                                    }}
+                                  />
+                                  <div className="flex justify-between mt-3">
+                                    {[3, 6, 9, 11, 12, 24].map((option) => {
+                                      // Ensure selectedDuration is a number for comparison
+                                      let duration = item.selectedDuration;
+                                      if (typeof duration === 'string') {
+                                        duration = parseInt(duration, 10);
+                                      }
+                                      const isSelected = (duration || 3) === option;
+                                      return (
+                                        <div key={option} className="flex flex-col items-center">
+                                          <div
+                                            className={`w-1 h-4 ${isSelected ? 'bg-primary-blue' : 'bg-gray-400'}`}
+                                          />
+                                          <span className={`text-xs mt-1.5 font-medium ${isSelected ? 'font-bold text-primary-blue' : 'text-gray-600'}`}>
+                                            {option}
                                           </span>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
+                                          {item?.price && item.price[option] && (
+                                            <span className={`text-xs mt-0.5 ${isSelected ? 'text-primary-blue font-semibold' : 'text-gray-500'}`}>
+                                              ₹{item.price[option].toLocaleString()}
+                                            </span>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
                                 </div>
                               </div>
                             </div>
+                          )}
 
-                            {/* Selected Price Display */}
-                            {item?.price && (
-                              <div className="bg-white rounded-lg p-4 border border-gray-200">
-                                <div className="space-y-2.5">
+                            {/* Price Summary */}
+                            <div className="bg-white rounded-lg p-4 border border-gray-200">
+                              {item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure ? (
+                                /* Monthly Payment Summary */
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-between pb-2 border-b border-gray-200">
+                                    <span className="text-sm font-medium text-gray-600">Monthly Payment</span>
+                                    <span className="text-lg font-bold text-primary-blue">
+                                      ₹{item.monthlyPrice.toLocaleString()}<span className="text-sm font-normal text-gray-500">/month</span>
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium text-gray-600">Tenure</span>
+                                    <span className="text-base font-semibold text-gray-900">
+                                      {item.monthlyTenure} {item.monthlyTenure === 1 ? 'Month' : 'Months'}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                                    <span className="text-sm font-medium text-gray-600">Subtotal ({item.monthlyTenure} months)</span>
+                                    <span className="text-base font-semibold text-gray-900">
+                                      ₹{(item.monthlyPrice * item.monthlyTenure).toLocaleString()}
+                                    </span>
+                                  </div>
+                                  {item.category === 'AC' && item.installationCharges && item.installationCharges.amount > 0 && (
+                                    <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                                      <span className="text-sm font-medium text-gray-600 inline-flex items-center gap-1.5">
+                                        <FiZap className="w-4 h-4 text-blue-600" />
+                                        Installation (One-time)
+                                      </span>
+                                      <span className="text-base font-semibold text-blue-600">
+                                        ₹{item.installationCharges.amount.toLocaleString()}
+                                      </span>
+                                    </div>
+                                  )}
+                                  <div className="flex items-center justify-between pt-3 border-t-2 border-gray-300">
+                                    <span className="text-lg font-bold text-gray-900">Total Amount</span>
+                                    <span className="text-2xl font-bold text-primary-blue">
+                                      ₹{(() => {
+                                        const monthlyTotal = item.monthlyPrice * item.monthlyTenure;
+                                        const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount)
+                                          ? item.installationCharges.amount
+                                          : 0;
+                                        return (monthlyTotal + installationCharge).toLocaleString();
+                                      })()}
+                                    </span>
+                                  </div>
+                                  <div className="mt-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
+                                    <p className="text-xs text-blue-700 font-medium">
+                                      💡 You will pay ₹{item.monthlyPrice.toLocaleString()} per month for {item.monthlyTenure} months
+                                      {item.category === 'AC' && item.installationCharges && item.installationCharges.amount > 0 && ` + ₹${item.installationCharges.amount.toLocaleString()} one-time installation`}
+                                    </p>
+                                  </div>
+                                </div>
+                              ) : (
+                                /* Regular Payment Summary */
+                                <div className="space-y-3">
                                   <div className="flex items-center justify-between">
                                     <span className="text-sm font-medium text-gray-600">Rental Price</span>
                                     <span className="text-base font-semibold text-gray-900">
@@ -385,19 +472,19 @@ const Cart = () => {
                                     </span>
                                   </div>
                                   {item.category === 'AC' && item.installationCharges && item.installationCharges.amount > 0 && (
-                                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                                    <div className="flex items-center justify-between pt-2 border-t border-gray-200">
                                       <span className="text-sm font-medium text-gray-600 inline-flex items-center gap-1.5">
                                         <FiZap className="w-4 h-4 text-blue-600" />
-                                        Installation
+                                        Installation (One-time)
                                       </span>
                                       <span className="text-base font-semibold text-blue-600">
                                         ₹{item.installationCharges.amount.toLocaleString()}
                                       </span>
                                     </div>
                                   )}
-                                  <div className="flex items-center justify-between pt-2 border-t-2 border-gray-300">
-                                    <span className="text-base font-bold text-gray-900">Total</span>
-                                    <span className="text-xl font-bold text-primary-blue">
+                                  <div className="flex items-center justify-between pt-3 border-t-2 border-gray-300">
+                                    <span className="text-lg font-bold text-gray-900">Total Amount</span>
+                                    <span className="text-2xl font-bold text-primary-blue">
                                       ₹{(() => {
                                         // Ensure selectedDuration is a number
                                         let duration = item.selectedDuration;
@@ -412,20 +499,20 @@ const Cart = () => {
                                       })()}
                                     </span>
                                   </div>
+                                  <p className="text-xs text-gray-500 mt-2">
+                                    For {(() => {
+                                      // Ensure selectedDuration is a number
+                                      let duration = item.selectedDuration;
+                                      if (typeof duration === 'string') {
+                                        duration = parseInt(duration, 10);
+                                      }
+                                      return duration || 3;
+                                    })()} months rental
+                                    {item.category === 'AC' && item.installationCharges && item.installationCharges.amount > 0 && ' + one-time installation'}
+                                  </p>
                                 </div>
-                                <p className="text-xs text-gray-500 mt-2.5">
-                                  For {(() => {
-                                    // Ensure selectedDuration is a number
-                                    let duration = item.selectedDuration;
-                                    if (typeof duration === 'string') {
-                                      duration = parseInt(duration, 10);
-                                    }
-                                    return duration || 3;
-                                  })()} months rental
-                                  {item.category === 'AC' && item.installationCharges && item.installationCharges.amount > 0 && ' + installation'}
-                                </p>
-                              </div>
-                            )}
+                              )}
+                            </div>
                             {item.discount > 0 && (
                               <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-md text-sm font-medium">
                                 <FiCheckCircle className="w-4 h-4" />
@@ -434,7 +521,6 @@ const Cart = () => {
                             )}
                           </div>
                         </div>
-                      </div>
                     </motion.div>
                   ))}
                 </div>
@@ -602,7 +688,11 @@ const Cart = () => {
                         <span className="text-sm font-semibold text-gray-900">
                           ₹{(() => {
                             const rentalTotalWithoutInstallation = rentals.reduce((total, item) => {
-                              // Ensure selectedDuration is a number
+                              // Check if this is a monthly payment item
+                              if (item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure) {
+                                return total + (item.monthlyPrice * item.monthlyTenure);
+                              }
+                              // Regular payment: ensure selectedDuration is a number
                               let duration = item.selectedDuration;
                               if (typeof duration === 'string') {
                                 duration = parseInt(duration, 10);

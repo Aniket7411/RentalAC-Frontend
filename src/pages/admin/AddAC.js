@@ -52,6 +52,9 @@ const AddAC = () => {
         electricWire: '', // ₹/meter
       },
     },
+    // Monthly payment option
+    monthlyPaymentEnabled: false,
+    monthlyPrice: '', // Monthly rental price
   });
   const [heroImagePreview, setHeroImagePreview] = useState('');
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -349,6 +352,13 @@ const AddAC = () => {
             electricWire: parseFloat(formData.installationCharges.extraMaterialRates.electricWire) || 0,
           },
         };
+      }
+      // Add monthly payment option
+      if (formData.monthlyPaymentEnabled) {
+        productData.monthlyPaymentEnabled = true;
+        productData.monthlyPrice = parseFloat(formData.monthlyPrice) || 0;
+      } else {
+        productData.monthlyPaymentEnabled = false;
       }
 
       const response = await apiService.addProduct(productData);
@@ -788,6 +798,58 @@ const AddAC = () => {
                 placeholder="e.g., 5"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
               />
+            </div>
+
+            {/* Monthly Payment Option */}
+            <div className="border-t border-gray-200 pt-6">
+              <h3 className="text-lg font-semibold text-text-dark mb-4">Monthly Payment Option</h3>
+              
+              <div className="mb-6">
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.monthlyPaymentEnabled}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        monthlyPaymentEnabled: e.target.checked,
+                        monthlyPrice: e.target.checked ? formData.monthlyPrice : '',
+                      });
+                    }}
+                    className="w-5 h-5 text-primary-blue border-gray-300 rounded focus:ring-primary-blue"
+                  />
+                  <span className="text-sm font-medium text-text-dark">
+                    Enable Monthly Payment Option
+                  </span>
+                </label>
+                <p className="text-xs text-text-light ml-8 mt-1">
+                  Allow users to pay on a monthly basis (minimum 3 months tenure)
+                </p>
+              </div>
+
+              {formData.monthlyPaymentEnabled && (
+                <div className="mb-6 ml-8">
+                  <label className="block text-sm font-medium text-text-dark mb-2">
+                    Monthly Rental Price (₹) <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.monthlyPrice}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        monthlyPrice: e.target.value,
+                      });
+                    }}
+                    min="0"
+                    placeholder="e.g., 2000"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                  />
+                  <p className="text-xs text-text-light mt-1">
+                    This will be the monthly rental amount. Users will pay this amount each month for the selected tenure (minimum 3 months).
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Installation Charges Section - Only for AC */}

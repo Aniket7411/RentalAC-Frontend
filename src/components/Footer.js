@@ -9,7 +9,7 @@ const Footer = () => {
   return (
     <footer className={`bg-gradient-to-b from-text-dark to-gray-900 text-white mt-20 border-t border-gray-700 relative ${isBrowsePage ? 'z-20' : 'z-0'}`}>
       <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 ${isBrowsePage ? 'lg:pl-[22rem]' : ''}`}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
             <Link to="/" className="flex items-center space-x-3 flex-shrink-0 group">
@@ -60,7 +60,32 @@ const Footer = () => {
                 <Link to="/service-request" className="hover:text-primary-blue-light transition">Services</Link>
               </li>
               <li>
+                <Link to="/about" className="hover:text-primary-blue-light transition">About</Link>
+              </li>
+              <li>
+                <Link to="/contact" className="hover:text-primary-blue-light transition">Contact</Link>
+              </li>
+              <li>
                 <Link to="/login" className="hover:text-primary-blue-light transition">Login</Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal Links */}
+          <div>
+            <h4 className="font-semibold mb-4">Legal</h4>
+            <ul className="space-y-2 text-sm text-gray-300">
+              <li>
+                <Link to="/terms-conditions" className="hover:text-primary-blue-light transition">Terms & Conditions</Link>
+              </li>
+              <li>
+                <Link to="/privacy-policy" className="hover:text-primary-blue-light transition">Privacy Policy</Link>
+              </li>
+              <li>
+                <Link to="/cancellation-refund-policy" className="hover:text-primary-blue-light transition">Cancellation & Refund</Link>
+              </li>
+              <li>
+                <Link to="/delivery-service-policy" className="hover:text-primary-blue-light transition">Delivery & Service</Link>
               </li>
             </ul>
           </div>

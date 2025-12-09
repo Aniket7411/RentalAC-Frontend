@@ -152,7 +152,7 @@ export const CartProvider = ({ children }) => {
   };
 
   // Add rental product to cart (works for both logged-in and non-logged-in users)
-  const addRentalToCart = (product, selectedDuration = '3') => {
+  const addRentalToCart = (product, selectedDuration = '3', isMonthlyPayment = false, monthlyTenure = null) => {
     // No authentication check - allow cart for all users
     try {
       const cart = [...cartItems];
@@ -168,6 +168,11 @@ export const CartProvider = ({ children }) => {
       // Ensure it's a valid tenure option, default to 3 if not
       const validTenureOptions = [3, 6, 9, 11, 12, 24];
       const finalDuration = validTenureOptions.includes(durationNumber) ? durationNumber : 3;
+
+      // For monthly payment, ensure minimum 3 months
+      const finalMonthlyTenure = isMonthlyPayment && monthlyTenure 
+        ? Math.max(3, monthlyTenure) 
+        : null;
 
       const cartItem = {
         id: productId,
@@ -192,6 +197,11 @@ export const CartProvider = ({ children }) => {
         selectedDuration: finalDuration, // Store as number: 3, 6, 9, 11, 12, or 24
         paymentOption: 'payLater', // Default payment option (will be set at checkout)
         installationCharges: product.installationCharges || null, // Include installation charges for AC
+        // Monthly payment fields
+        isMonthlyPayment: isMonthlyPayment,
+        monthlyPrice: isMonthlyPayment ? (product.monthlyPrice || 0) : null,
+        monthlyTenure: finalMonthlyTenure,
+        monthlyPaymentEnabled: product.monthlyPaymentEnabled || false, // Store for reference
       };
 
       if (existingItem) {
@@ -319,6 +329,18 @@ export const CartProvider = ({ children }) => {
     // Since quantity is always 1, we just sum the prices
     // Use selected duration (3, 6, 9, 11, 12, 24 months) or default to 3 months
     const rentalTotal = rentals.reduce((total, item) => {
+      // Check if this is a monthly payment item
+      if (item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure) {
+        // For monthly payment: monthlyPrice * monthlyTenure
+        const monthlyTotal = item.monthlyPrice * item.monthlyTenure;
+        // Add installation charges if present (only for AC)
+        const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount)
+          ? item.installationCharges.amount
+          : 0;
+        return total + monthlyTotal + installationCharge;
+      }
+      
+      // Regular payment: use selected duration
       // Ensure selectedDuration is a number
       let duration = item.selectedDuration;
       if (typeof duration === 'string') {

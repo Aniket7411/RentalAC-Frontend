@@ -15,6 +15,10 @@ import BrowseACs from './pages/BrowseACs';
 import ACDetail from './pages/ACDetail';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import TermsConditions from './pages/TermsConditions';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import CancellationRefundPolicy from './pages/CancellationRefundPolicy';
+import DeliveryServicePolicy from './pages/DeliveryServicePolicy';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
@@ -59,6 +63,10 @@ function App() {
                   <Route path="/ac/:id" element={<ACDetail />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/contact" element={<Contact />} />
+                  <Route path="/terms-conditions" element={<TermsConditions />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/cancellation-refund-policy" element={<CancellationRefundPolicy />} />
+                  <Route path="/delivery-service-policy" element={<DeliveryServicePolicy />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />

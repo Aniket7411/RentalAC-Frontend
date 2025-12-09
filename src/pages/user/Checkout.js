@@ -127,13 +127,23 @@ const Checkout = () => {
                 ? rental.installationCharges.amount 
                 : 0;
 
+              // Calculate price based on payment type
+              let finalPrice = price;
+              if (rental.isMonthlyPayment && rental.monthlyPrice && rental.monthlyTenure) {
+                finalPrice = rental.monthlyPrice * rental.monthlyTenure;
+              }
+
               return {
                 type: 'rental',
                 productId: rental.id,
                 quantity: 1, // Always 1 per product
-                price: price,
+                price: finalPrice,
                 installationCharges: installationCharge, // Include installation charges
-                duration: selectedDuration, // Number: 3, 6, 9, 11, 12, or 24
+                duration: rental.isMonthlyPayment ? rental.monthlyTenure : selectedDuration, // Number: 3, 6, 9, 11, 12, or 24 (or monthly tenure)
+                // Monthly payment fields
+                isMonthlyPayment: rental.isMonthlyPayment || false,
+                monthlyPrice: rental.monthlyPrice || null,
+                monthlyTenure: rental.monthlyTenure || null,
                 // Include product details for admin reference
                 productDetails: {
                   brand: rental.brand,
@@ -144,6 +154,8 @@ const Checkout = () => {
                   description: rental.description,
                   images: rental.images || [],
                   installationCharges: rental.installationCharges || null, // Include full installation charges details
+                  monthlyPaymentEnabled: rental.monthlyPaymentEnabled || false,
+                  monthlyPrice: rental.monthlyPrice || null,
                 },
                 // Include delivery information for this rental
                 deliveryInfo: {
@@ -686,10 +698,21 @@ const Checkout = () => {
                       />
                       <div className="flex-1">
                         <p className="font-medium text-text-dark">{item.brand} {item.model}</p>
-                        {item.selectedDuration && (
-                          <p className="text-xs text-text-light mt-1">
-                            Duration: {item.selectedDuration} months
-                          </p>
+                        {item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure ? (
+                          <>
+                            <p className="text-xs text-blue-600 mt-1 font-medium">
+                              Monthly Payment: ₹{item.monthlyPrice.toLocaleString()}/month
+                            </p>
+                            <p className="text-xs text-text-light mt-1">
+                              Duration: {item.monthlyTenure} months
+                            </p>
+                          </>
+                        ) : (
+                          item.selectedDuration && (
+                            <p className="text-xs text-text-light mt-1">
+                              Duration: {item.selectedDuration} months
+                            </p>
+                          )
                         )}
                         {item.category === 'AC' && item.installationCharges && item.installationCharges.amount > 0 && (
                           <p className="text-xs text-blue-600 mt-1 font-medium">
@@ -700,6 +723,13 @@ const Checkout = () => {
                       <div className="text-right">
                         <p className="font-semibold text-text-dark">
                           ₹{(() => {
+                            if (item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure) {
+                              const monthlyTotal = item.monthlyPrice * item.monthlyTenure;
+                              const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount) 
+                                ? item.installationCharges.amount 
+                                : 0;
+                              return (monthlyTotal + installationCharge).toLocaleString();
+                            }
                             const selectedDuration = item.selectedDuration || 3;
                             const price = item.price && typeof item.price === 'object'
                               ? (item.price[selectedDuration] || item.price[3] || 0)
@@ -710,10 +740,16 @@ const Checkout = () => {
                             return (price + installationCharge).toLocaleString();
                           })()}
                         </p>
-                        {item.category === 'AC' && item.installationCharges && item.installationCharges.amount > 0 && (
+                        {item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure ? (
                           <p className="text-xs text-text-light mt-1">
-                            (Rental + Installation)
+                            (Monthly × {item.monthlyTenure} {item.category === 'AC' && item.installationCharges && item.installationCharges.amount > 0 ? '+ Installation' : ''})
                           </p>
+                        ) : (
+                          item.category === 'AC' && item.installationCharges && item.installationCharges.amount > 0 && (
+                            <p className="text-xs text-text-light mt-1">
+                              (Rental + Installation)
+                            </p>
+                          )
                         )}
                       </div>
                     </div>
@@ -787,6 +823,9 @@ const Checkout = () => {
                     <span>₹{(() => {
                       // Calculate rental total without installation charges
                       const rentalTotalWithoutInstallation = rentals.reduce((total, item) => {
+                        if (item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure) {
+                          return total + (item.monthlyPrice * item.monthlyTenure);
+                        }
                         const selectedDuration = item.selectedDuration || 3;
                         const price = item.price && typeof item.price === 'object'
                           ? (item.price[selectedDuration] || item.price[3] || 0)

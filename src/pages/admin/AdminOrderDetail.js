@@ -331,6 +331,24 @@ const AdminOrderDetail = () => {
                                 {productDetails?.productType && <p>Type: {productDetails.productType}</p>}
                                 {productDetails?.location && <p>Location: {productDetails.location}</p>}
                                 {item.duration && <p>Rental Duration: {item.duration} months</p>}
+                                {/* Monthly Payment Information */}
+                                {item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure ? (
+                                  <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <CreditCard className="w-4 h-4 text-blue-600" />
+                                      <span className="text-sm font-semibold text-blue-700">Monthly Payment Plan</span>
+                                    </div>
+                                    <div className="text-sm space-y-1">
+                                      <p><span className="font-medium text-gray-700">Monthly Payment:</span> <span className="text-blue-600 font-semibold">₹{item.monthlyPrice.toLocaleString()}/month</span></p>
+                                      <p><span className="font-medium text-gray-700">Tenure:</span> <span className="text-gray-900">{item.monthlyTenure} months</span></p>
+                                      <p><span className="font-medium text-gray-700">Total Amount:</span> <span className="text-gray-900">₹{(item.monthlyPrice * item.monthlyTenure).toLocaleString()}</span></p>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="mt-2 p-2 bg-gray-50 rounded-lg">
+                                    <p className="text-sm text-gray-600"><span className="font-medium">Payment Type:</span> One-time Payment</p>
+                                  </div>
+                                )}
                                 <p>Quantity: {item.quantity || 1}</p>
                               </div>
                               {item.deliveryInfo && (
@@ -347,6 +365,19 @@ const AdminOrderDetail = () => {
                               <p className="text-lg font-bold text-primary-blue">
                                 ₹{(item.price || 0).toLocaleString()}
                               </p>
+                              {item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure ? (
+                                <div className="mt-2 text-xs">
+                                  <p className="text-blue-600 font-semibold">Monthly Payment</p>
+                                  <p className="text-text-light">₹{item.monthlyPrice.toLocaleString()}/month × {item.monthlyTenure} months</p>
+                                </div>
+                              ) : (
+                                item.duration && (
+                                  <p className="text-xs text-text-light mt-1">for {item.duration} months</p>
+                                )
+                              )}
+                              {item.installationCharges > 0 && (
+                                <p className="text-xs text-blue-600 mt-1">+ ₹{item.installationCharges.toLocaleString()} installation</p>
+                              )}
                             </div>
                           </div>
                         ) : item.type === 'service' ? (
@@ -500,6 +531,22 @@ const AdminOrderDetail = () => {
                       {order.paymentStatus === 'paid' ? 'Paid' : 'Pending'}
                     </span>
                   </div>
+                  {/* Monthly Payment Items Summary */}
+                  {items.some(item => item.isMonthlyPayment) && (
+                    <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-xs font-semibold text-blue-700 mb-2 flex items-center gap-1">
+                        <CreditCard className="w-3 h-3" />
+                        Monthly Payment Items
+                      </p>
+                      <div className="space-y-1 text-xs">
+                        {items.filter(item => item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure).map((item, idx) => (
+                          <p key={idx} className="text-gray-700">
+                            • ₹{item.monthlyPrice.toLocaleString()}/month for {item.monthlyTenure} months
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
