@@ -233,12 +233,27 @@ const Home = () => {
       </section> */}
 
       {/* NEW Hero Section - Split Screen */}
-      <section className="relative w-full h-[60vh] sm:h-[70vh] md:h-[80vh] lg:h-[90vh] overflow-hidden flex flex-col md:flex-row">
+      <section
+        className="relative w-full h-[60vh] sm:h-[70vh] md:h-[80vh] lg:h-[90vh] overflow-hidden flex flex-col md:flex-row"
+        onMouseMove={(e) => {
+          if (!isDesktop) return;
+          const rect = e.currentTarget.getBoundingClientRect();
+          const mouseX = e.clientX - rect.left;
+          const percentage = (mouseX / rect.width) * 100;
+          // Only expand when mouse is in outer zones (<25% or >75%)
+          if (percentage < 25) {
+            setHoveredPanel('left');
+          } else if (percentage > 75) {
+            setHoveredPanel('right');
+          } else {
+            setHoveredPanel(null);
+          }
+        }}
+        onMouseLeave={() => isDesktop && setHoveredPanel(null)}
+      >
         {/* Left Panel: Rental */}
         <motion.div
           className="relative w-full md:w-1/2 h-[50vh] md:h-full overflow-hidden cursor-pointer group"
-          onMouseEnter={() => isDesktop && setHoveredPanel('left')}
-          onMouseLeave={() => isDesktop && setHoveredPanel(null)}
           animate={isDesktop ? {
             width: hoveredPanel === 'left' ? '65%' : hoveredPanel === 'right' ? '35%' : '50%',
           } : {}}
@@ -247,7 +262,7 @@ const Home = () => {
           {/* Background Image */}
           <div className="absolute inset-0">
             <img
-              src="/bannerleft.png"
+              src="/bannerleftimage.png"
               alt="Premium AC Rental"
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               onError={(e) => {
@@ -255,8 +270,8 @@ const Home = () => {
               }}
             />
             {/* Darker overlay for better text readability */}
-            <div className="absolute inset-0 bg-black/70"></div>
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40"></div>
+            <div className="absolute inset-0 bg-black/40"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/40 to-black/30"></div>
           </div>
 
           {/* Content */}
@@ -287,8 +302,6 @@ const Home = () => {
         {/* Right Panel: Services */}
         <motion.div
           className="relative w-full md:w-1/2 h-[50vh] md:h-full overflow-hidden cursor-pointer group"
-          onMouseEnter={() => isDesktop && setHoveredPanel('right')}
-          onMouseLeave={() => isDesktop && setHoveredPanel(null)}
           animate={isDesktop ? {
             width: hoveredPanel === 'right' ? '65%' : hoveredPanel === 'left' ? '35%' : '50%',
           } : {}}
@@ -305,8 +318,8 @@ const Home = () => {
               }}
             />
             {/* Darker overlay for better text readability */}
-            <div className="absolute inset-0 bg-black/70"></div>
-            <div className="absolute inset-0 bg-gradient-to-l from-black/80 via-black/60 to-black/40"></div>
+            <div className="absolute inset-0 bg-black/40"></div>
+            <div className="absolute inset-0 bg-gradient-to-l from-black/50 via-black/40 to-black/30"></div>
           </div>
 
           {/* Content */}
@@ -406,6 +419,288 @@ const Home = () => {
         </div>
       </section>
 
+
+      {/* Product Category Selection Section */}
+      <section className="py-4 sm:py-6 md:py-8 bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-6 sm:mb-8 md:mb-10"
+          >
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-text-dark mb-2 sm:mb-3">
+              Appliances on rent
+            </h2>
+            <p className="text-sm sm:text-base md:text-lg text-text-light">
+              Checkout our huge collection of appliances on rent
+            </p>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"
+          >
+            {/* AC Category */}
+            <div className="flex flex-col gap-3 md:gap-4">
+              <Link
+                to="/browse?category=AC"
+                className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+              >
+                <div className="aspect-video bg-gradient-to-br from-blue-50 to-blue-100 relative">
+                  <img
+                    src="/acimage.jpg"
+                    alt="Air Conditioners"
+                    className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4 md:p-5 lg:p-6">
+                    <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-1 sm:mb-2">Air Conditioners</h3>
+                    <p className="text-white/90 text-xs sm:text-sm md:text-base">Stay cool & comfortable</p>
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white mt-1 sm:mt-2 group-hover:translate-x-2 transition-transform" />
+                  </div>
+                </div>
+              </Link>
+              {/* AC Subcategories */}
+              <div className="grid grid-cols-2 gap-2 md:gap-3">
+                <Link
+                  to="/browse?category=AC&type=Split"
+                  className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div className="aspect-[4/3] bg-gradient-to-br from-blue-100 to-blue-200 relative">
+                    <img
+                      src="/splitac.jpg"
+                      alt="Split AC"
+                      className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent flex flex-col justify-end p-2 sm:p-3">
+                      <h4 className="text-xs sm:text-sm md:text-base font-bold text-white">Split AC</h4>
+                    </div>
+                  </div>
+                </Link>
+                <Link
+                  to="/browse?category=AC&type=Window"
+                  className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div className="aspect-[4/3] bg-gradient-to-br from-blue-100 to-blue-200 relative">
+                    <img
+                      src="/windowac.jfif"
+                      alt="Window AC"
+                      className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent flex flex-col justify-end p-2 sm:p-3">
+                      <h4 className="text-xs sm:text-sm md:text-base font-bold text-white">Window AC</h4>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            </div>
+
+            {/* Refrigerator Category */}
+            <div className="flex flex-col gap-3 md:gap-4">
+              <Link
+                to="/browse?category=Refrigerator"
+                className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+              >
+                <div className="aspect-video bg-gradient-to-br from-cyan-50 to-cyan-100 relative">
+                  <img
+                    src="/refrigrator.jpg"
+                    alt="Refrigerators"
+                    className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4 md:p-5 lg:p-6">
+                    <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-1 sm:mb-2">Refrigerators</h3>
+                    <p className="text-white/90 text-xs sm:text-sm md:text-base">Fresh storage solutions</p>
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white mt-1 sm:mt-2 group-hover:translate-x-2 transition-transform" />
+                  </div>
+                </div>
+              </Link>
+              {/* Refrigerator Subcategories */}
+              <div className="grid grid-cols-2 gap-2 md:gap-3">
+                <Link
+                  to="/browse?category=Refrigerator&type=Single Door"
+                  className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div className="aspect-[4/3] bg-gradient-to-br from-cyan-100 to-cyan-200 relative">
+                    <img
+                      src="/singledoor.jfif"
+                      alt="Single Door Refrigerator"
+                      className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent flex flex-col justify-end p-2 sm:p-3">
+                      <h4 className="text-xs sm:text-sm md:text-base font-bold text-white">Single Door</h4>
+                    </div>
+                  </div>
+                </Link>
+                <Link
+                  to="/browse?category=Refrigerator&type=Double Door"
+                  className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div className="aspect-[4/3] bg-gradient-to-br from-cyan-100 to-cyan-200 relative">
+                    <img
+                      src="/doubldoor.jfif"
+                      alt="Double Door Refrigerator"
+                      className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent flex flex-col justify-end p-2 sm:p-3">
+                      <h4 className="text-xs sm:text-sm md:text-base font-bold text-white">Double Door</h4>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            </div>
+
+            {/* Washing Machine Category */}
+            <div className="flex flex-col gap-3 md:gap-4">
+              <Link
+                to="/browse?category=Washing Machine"
+                className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+              >
+                <div className="aspect-video bg-gradient-to-br from-purple-50 to-purple-100 relative">
+                  <img
+                    src="https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80"
+                    alt="Washing Machines"
+                    className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4 md:p-5 lg:p-6">
+                    <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-1 sm:mb-2">Washing Machines</h3>
+                    <p className="text-white/90 text-xs sm:text-sm md:text-base">Clean clothes effortlessly</p>
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white mt-1 sm:mt-2 group-hover:translate-x-2 transition-transform" />
+                  </div>
+                </div>
+              </Link>
+              {/* Washing Machine Subcategories */}
+              <div className="grid grid-cols-2 gap-2 md:gap-3">
+                <Link
+                  to="/browse?category=Washing Machine&type=Automatic"
+                  className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div className="aspect-[4/3] bg-gradient-to-br from-purple-100 to-purple-200 relative">
+                    <img
+                      src="/fullyautomaticwashingmachine.jfif"
+                      alt="Fully Automatic Washing Machine"
+                      className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent flex flex-col justify-end p-2 sm:p-3">
+                      <h4 className="text-xs sm:text-sm md:text-base font-bold text-white">Fully Automatic</h4>
+                    </div>
+                  </div>
+                </Link>
+                <Link
+                  to="/browse?category=Washing Machine&type=Semi-Automatic"
+                  className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div className="aspect-[4/3] bg-gradient-to-br from-purple-100 to-purple-200 relative">
+                    <img
+                      src="https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=400&q=80"
+                      alt="Semi-Automatic Washing Machine"
+                      className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent flex flex-col justify-end p-2 sm:p-3">
+                      <h4 className="text-xs sm:text-sm md:text-base font-bold text-white">Semi-Automatic</h4>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+
+
+
+
+
+      {/* Services Section */}
+      <section className="py-4 sm:py-6 md:py-8 bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-6 sm:mb-8 md:mb-10"
+          >
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-text-dark mb-2 sm:mb-3">
+              AC Repair & Maintenance Services
+            </h2>
+            <p className="text-sm sm:text-base md:text-lg text-text-light mb-4 sm:mb-6">
+              Professional AC services at your doorstep
+            </p>
+            <Link
+              to="/service-request"
+              className="inline-flex items-center space-x-2 text-primary-blue hover:text-primary-blue-light font-semibold group transition-all"
+            >
+              <span>View All Services</span>
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </motion.div>
+
+          {loadingServices ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary-blue" />
+            </div>
+          ) : services.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {services.map((service, index) => (
+                <motion.div
+                  key={service._id || service.id}
+                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, margin: '-50px' }}
+                  transition={{ duration: 0.5, delay: index * 0.1, ease: 'easeOut' }}
+                  className="price-card"
+                >
+                  <ServiceCard service={service} onAddClick={handleServiceAdd} />
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-lg">
+              <Wrench className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">No services available at the moment</p>
+              <Link
+                to="/service-request"
+                className="inline-block mt-4 text-primary-blue hover:text-primary-blue-light"
+              >
+                View All Services
+              </Link>
+            </div>
+          )}
+        </div>
+      </section>
+
+
       {/* Value Proposition - Why Choose Us Section */}
       <section className="py-8 sm:py-10 md:py-12 lg:py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -468,155 +763,6 @@ const Home = () => {
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
-
-
-
-
-      {/* Product Category Selection Section */}
-      <section className="py-4 sm:py-6 md:py-8 bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-6 sm:mb-8 md:mb-10"
-          >
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-text-dark mb-2 sm:mb-3">
-              Appliances on rent
-            </h2>
-            <p className="text-sm sm:text-base md:text-lg text-text-light">
-              Checkout our huge collection of appliances on rent
-            </p>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6"
-          >
-            <Link
-              to="/browse?category=AC"
-              className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
-            >
-              <div className="aspect-video bg-gradient-to-br from-blue-50 to-blue-100 relative">
-                <img
-                  src="/acimage.jpg"
-                  alt="Air Conditioners"
-                  className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4 md:p-5 lg:p-6">
-                  <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-1 sm:mb-2">Air Conditioners</h3>
-                  <p className="text-white/90 text-xs sm:text-sm md:text-base">Stay cool & comfortable</p>
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white mt-1 sm:mt-2 group-hover:translate-x-2 transition-transform" />
-                </div>
-              </div>
-            </Link>
-
-            <Link
-              to="/browse?category=Refrigerator"
-              className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
-            >
-              <div className="aspect-video bg-gradient-to-br from-cyan-50 to-cyan-100 relative">
-                <img
-                  src="/refrigrator.jpg"
-                  alt="Refrigerators"
-                  className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4 md:p-5 lg:p-6">
-                  <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-1 sm:mb-2">Refrigerators</h3>
-                  <p className="text-white/90 text-xs sm:text-sm md:text-base">Fresh storage solutions</p>
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white mt-1 sm:mt-2 group-hover:translate-x-2 transition-transform" />
-                </div>
-              </div>
-            </Link>
-
-            <Link
-              to="/browse?category=Washing Machine"
-              className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
-            >
-              <div className="aspect-video bg-gradient-to-br from-purple-50 to-purple-100 relative">
-                <img
-                  src="https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800&q=80"
-                  alt="Washing Machines"
-                  className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4 md:p-5 lg:p-6">
-                  <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-1 sm:mb-2">Washing Machines</h3>
-                  <p className="text-white/90 text-xs sm:text-sm md:text-base">Clean clothes effortlessly</p>
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white mt-1 sm:mt-2 group-hover:translate-x-2 transition-transform" />
-                </div>
-              </div>
-            </Link>
-          </motion.div>
-        </div>
-      </section>
-      {/* Services Section */}
-      <section className="py-4 sm:py-6 md:py-8 bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 sm:mb-4 md:mb-6"
-          >
-            <div>
-              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-text-dark mb-2">AC Repair & Maintenance Services</h2>
-              <p className="text-xs sm:text-sm md:text-base text-text-light">Professional AC services at your doorstep</p>
-            </div>
-            <Link
-              to="/service-request"
-              className="mt-4 sm:mt-0 text-primary-blue hover:text-primary-blue-light flex items-center space-x-2 font-semibold group transition-all"
-            >
-              <span>View All Services</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </motion.div>
-
-          {loadingServices ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-primary-blue" />
-            </div>
-          ) : services.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {services.map((service, index) => (
-                <motion.div
-                  key={service._id || service.id}
-                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  viewport={{ once: true, margin: '-50px' }}
-                  transition={{ duration: 0.5, delay: index * 0.1, ease: 'easeOut' }}
-                  className="price-card"
-                >
-                  <ServiceCard service={service} onAddClick={handleServiceAdd} />
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 bg-white rounded-lg">
-              <Wrench className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">No services available at the moment</p>
-              <Link
-                to="/service-request"
-                className="inline-block mt-4 text-primary-blue hover:text-primary-blue-light"
-              >
-                View All Services
-              </Link>
-            </div>
-          )}
         </div>
       </section>
 

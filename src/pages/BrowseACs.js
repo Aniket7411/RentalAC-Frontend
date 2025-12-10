@@ -11,6 +11,7 @@ const BrowseACs = () => {
   const navigate = useNavigate();
   const categoryParam = searchParams.get('category');
   const categoriesParam = searchParams.get('categories');
+  const typeParam = searchParams.get('type');
 
   // Initialize selected categories from URL or default to all
   const getInitialCategories = () => {
@@ -23,6 +24,15 @@ const BrowseACs = () => {
     return ['AC', 'Refrigerator', 'Washing Machine']; // Show all by default
   };
 
+  // Initialize type filter from URL
+  const getInitialType = () => {
+    if (typeParam) {
+      // Handle comma-separated types or single type
+      return typeParam.split(',').filter(t => t.trim());
+    }
+    return [];
+  };
+
   const [acs, setAcs] = useState([]);
   const [filteredACs, setFilteredACs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +42,7 @@ const BrowseACs = () => {
   const [filters, setFilters] = useState({
     search: '',
     capacity: [], // Changed to array for multiple selections
-    type: [], // Changed to array for multiple selections
+    type: getInitialType(), // Initialize from URL
     location: '',
     duration: '3',
     condition: [], // Changed to array for multiple selections
@@ -45,7 +55,13 @@ const BrowseACs = () => {
     // Update categories from URL
     const categories = getInitialCategories();
     setSelectedCategories(categories);
-    loadACs();
+    
+    // Update type filter from URL
+    const types = getInitialType();
+    setFilters(prev => ({
+      ...prev,
+      type: types,
+    }));
 
     // Show modal after 2 minutes (120000 ms) of being on the page
     modalTimerRef.current = setTimeout(() => {
@@ -60,7 +76,7 @@ const BrowseACs = () => {
   }, [searchParams]);
 
   useEffect(() => {
-    // Update URL when categories change
+    // Update URL when categories change, but preserve type parameter from URL if it exists
     if (selectedCategories.length > 0) {
       const params = new URLSearchParams();
       if (selectedCategories.length === 1) {
@@ -68,7 +84,17 @@ const BrowseACs = () => {
       } else {
         params.set('categories', selectedCategories.join(','));
       }
-      navigate(`/browse?${params.toString()}`, { replace: true });
+      // Preserve type parameter from URL if it exists
+      const currentTypeParam = searchParams.get('type');
+      if (currentTypeParam) {
+        params.set('type', currentTypeParam);
+      }
+      const newUrl = `/browse?${params.toString()}`;
+      const currentUrl = window.location.pathname + window.location.search;
+      // Only navigate if URL actually changed to avoid unnecessary updates
+      if (newUrl !== currentUrl) {
+        navigate(newUrl, { replace: true });
+      }
     }
   }, [selectedCategories]);
 

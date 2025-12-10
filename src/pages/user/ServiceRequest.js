@@ -54,7 +54,7 @@ const ServiceRequest = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       <ToastContainer toasts={toasts} removeToast={removeToast} />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10">
+      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10">
         {/* Compact Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -64,7 +64,7 @@ const ServiceRequest = () => {
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-900 mb-2 sm:mb-3">
             AC Repair & Maintenance Services
           </h1>
-          <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-slate-600 max-w-4xl mx-auto">
             Professional AC services with certified technicians. Book now and get service within 1 hour.
           </p>
         </motion.div>

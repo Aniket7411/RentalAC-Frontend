@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, Clock, MapPin, User, CreditCard, Edit2, Check, ArrowRight, ArrowLeft } from 'lucide-react';
 import { formatPhoneNumber, getFormattedPhone, validatePhoneNumber } from '../utils/phoneFormatter';
 import { useToast } from '../hooks/useToast';
+import { ToastContainer } from './Toast';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
@@ -11,7 +12,7 @@ import SuccessModal from './SuccessModal';
 const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit, initialData }) => {
   const navigate = useNavigate();
   const { addServiceToCart } = useCart();
-  const { success: showSuccess, error: showError } = useToast();
+  const { toasts, removeToast, success: showSuccess, error: showError } = useToast();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     date: initialData?.date || '',
@@ -111,10 +112,12 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit, initialData }
       } else {
         // New booking mode: Add service to cart with booking details
         addServiceToCart(service, bookingDetails);
-        showSuccess('Service added to cart! Proceed to checkout to complete booking.');
-        setSuccessOpen(true);
-        // Close the booking modal immediately, success modal will show separately
-        handleClose();
+        // Show toast notification
+        showSuccess(`${service.title} has been added to cart! Please proceed to checkout.`);
+        // Close the booking modal after a brief delay to show the toast
+        setTimeout(() => {
+          handleClose();
+        }, 500);
       }
     } catch (error) {
       showError(error.message || 'Failed to process booking. Please try again.');
@@ -163,6 +166,7 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit, initialData }
 
   return (
     <AnimatePresence>
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
       {/* Main Booking Modal */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
@@ -472,16 +476,16 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit, initialData }
                 <button
                   onClick={handleSubmit}
                   disabled={isSubmitting}
-                  className="flex items-center space-x-2 px-3 w-auto py-1 bg-sky-500 text-white rounded-lg hover:bg-sky-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center space-x-2 px-6 py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
                 >
                   {isSubmitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Submitting...
+                      <span>Adding to Cart...</span>
                     </>
                   ) : (
                     <>
-                      Submit Booking
+                      <span>Add to Cart</span>
                       <Check className="w-4 h-4" />
                     </>
                   )}
@@ -492,16 +496,18 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit, initialData }
         </div>
       )}
 
-      {/* Success modal - shown separately after booking modal closes */}
-      <SuccessModal
-        isOpen={successOpen}
-        title="Added to Cart"
-        message="Service added to cart! Proceed to checkout to complete booking and select payment option."
-        onClose={() => {
-          setSuccessOpen(false);
-        }}
-        confirmText="OK"
-      />
+      {/* Success modal - only shown in edit mode */}
+      {initialData && onSubmit && (
+        <SuccessModal
+          isOpen={successOpen}
+          title="Updated"
+          message="Service booking details updated successfully!"
+          onClose={() => {
+            setSuccessOpen(false);
+          }}
+          confirmText="OK"
+        />
+      )}
     </AnimatePresence>
   );
 };

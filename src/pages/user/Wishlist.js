@@ -6,6 +6,8 @@ import { useCart } from '../../context/CartContext';
 import { FiHeart, FiShoppingCart, FiTrash2, FiAlertCircle } from 'react-icons/fi';
 import { Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useToast } from '../../hooks/useToast';
+import { ToastContainer } from '../../components/Toast';
 
 const Wishlist = () => {
   const { user, isAuthenticated } = useAuth();
@@ -14,6 +16,7 @@ const Wishlist = () => {
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [removingId, setRemovingId] = useState(null);
+  const { toasts, removeToast, success: showSuccess, error: showError } = useToast();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -43,9 +46,12 @@ const Wishlist = () => {
     try {
       const product = item.product || item;
       addRentalToCart(product);
+      showSuccess(`${product.brand} ${product.model || ''} added to cart successfully!`);
     } catch (error) {
       console.error('Error adding to cart:', error);
-      setError('Failed to add item to cart');
+      const errorMsg = error.message || 'Failed to add item to cart';
+      setError(errorMsg);
+      showError(errorMsg);
     }
   };
 
@@ -67,6 +73,7 @@ const Wishlist = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 md:py-12">
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl md:text-4xl font-bold text-text-dark mb-8">My Wishlist</h1>
 

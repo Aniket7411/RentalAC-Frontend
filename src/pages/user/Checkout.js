@@ -289,19 +289,10 @@ const Checkout = () => {
           clearCart();
 
           // Show prominent success notification (toast)
-          showSuccess(`🎉 Order #${createdOrderId} placed successfully! Redirecting to orders...`, 6000);
+          showSuccess(`🎉 Order #${createdOrderId} placed successfully!`, 5000);
 
-          // Show success modal immediately with delay to ensure visibility
-          setTimeout(() => {
-            setShowSuccessModal(true);
-          }, 100);
-
-          // Auto-redirect to orders page after showing notification (4 seconds)
-          // This gives user time to see the success message
-          setTimeout(() => {
-            setShowSuccessModal(false);
-            navigate('/user/orders');
-          }, 4000);
+          // Show success modal immediately
+          setShowSuccessModal(true);
         } catch (err) {
           console.error('Error creating order:', err);
           const errorMessage = err.response?.data?.message || err.message || 'Failed to place order';
@@ -918,13 +909,13 @@ const Checkout = () => {
       <SuccessModal
         isOpen={showSuccessModal}
         title="Order Placed Successfully! 🎉"
-        message={orderId ? `Your order #${orderId} has been placed successfully!` : 'Your order has been placed successfully!'}
+        message={orderId ? `Your order #${orderId} has been placed successfully! We are redirecting you to the orders page.` : 'Your order has been placed successfully! We are redirecting you to the orders page.'}
         onClose={() => {
           setShowSuccessModal(false);
           navigate('/user/orders');
         }}
         confirmText="View My Orders"
-        autoRedirectDelay={4000}
+        autoRedirectDelay={5000}
       />
     </div>
   );

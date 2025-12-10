@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, X, Sparkles, ArrowRight } from 'lucide-react';
 
-const SuccessModal = ({ isOpen, title = 'Success', message, onClose, confirmText = 'OK', autoRedirectDelay = 4000 }) => {
+const SuccessModal = ({ isOpen, title = 'Success', message, onClose, confirmText = 'OK', autoRedirectDelay = 5000 }) => {
   const [countdown, setCountdown] = useState(Math.ceil(autoRedirectDelay / 1000));
 
   useEffect(() => {
@@ -10,6 +10,9 @@ const SuccessModal = ({ isOpen, title = 'Success', message, onClose, confirmText
       setCountdown(Math.ceil(autoRedirectDelay / 1000));
       return;
     }
+
+    // Reset countdown when modal opens
+    setCountdown(Math.ceil(autoRedirectDelay / 1000));
 
     const interval = setInterval(() => {
       setCountdown((prev) => {
@@ -21,8 +24,18 @@ const SuccessModal = ({ isOpen, title = 'Success', message, onClose, confirmText
       });
     }, 1000);
 
-    return () => clearInterval(interval);
-  }, [isOpen, autoRedirectDelay]);
+    // Auto-close and redirect after delay
+    const redirectTimer = setTimeout(() => {
+      if (onClose) {
+        onClose();
+      }
+    }, autoRedirectDelay);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(redirectTimer);
+    };
+  }, [isOpen, autoRedirectDelay, onClose]);
 
   if (!isOpen) return null;
   return (

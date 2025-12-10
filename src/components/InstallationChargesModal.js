@@ -32,19 +32,24 @@ const InstallationChargesModal = ({ isOpen, onClose, onConfirm, installationChar
               <h2 className="text-2xl font-bold text-gray-900">
                 Installation Charges
               </h2>
-              <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition"
-              >
-                <X className="w-6 h-6" />
-              </button>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold text-gray-900">
+                  ₹{amount?.toLocaleString() || 0}
+                </span>
+                <button
+                  onClick={onClose}
+                  className="text-gray-400 hover:text-gray-600 transition ml-4"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
             </div>
 
             <div className="p-6 space-y-6">
               {/* What's included section */}
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  What's included in the ₹{amount?.toLocaleString() || 0} installation charge?
+                  What's included in the installation charge?
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {includedItems.map((item, index) => {
@@ -160,7 +165,7 @@ const InstallationChargesModal = ({ isOpen, onClose, onConfirm, installationChar
                     <FaIndianRupeeSign className="w-5 h-5 text-blue-600" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900">
-                    When do I pay for the extra materials?
+                    When do I pay?
                   </h3>
                 </div>
                 <div className="flex items-start gap-2 ml-12">
