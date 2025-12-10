@@ -87,7 +87,7 @@ const RazorpayPaymentCheckout = ({
         key: razorpayKey,
         amount: Math.round(orderData.amount * 100), // Convert to paise
         currency: orderData.currency || 'INR',
-        name: 'CoolRentals & Services',
+        name: 'ASH Enterprises',
         description: `Payment for Order ${orderData.orderId}`,
         order_id: orderData.razorpayOrderId,
         prefill: {
