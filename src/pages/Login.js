@@ -22,7 +22,7 @@ const Login = () => {
       if (isAuthenticated && isAdmin) {
         navigate('/admin/dashboard', { replace: true });
       } else if (isAuthenticated && isUser) {
-        navigate('/user/dashboard', { replace: true });
+        navigate('/', { replace: true }); // Redirect to home page
       }
     }
   }, [isAuthenticated, isAdmin, isUser, authLoading, navigate]);
@@ -54,9 +54,8 @@ const Login = () => {
           const user = result.user || JSON.parse(localStorage.getItem('user') || '{}');
           if (user.role === 'admin') {
             navigate('/admin/dashboard', { replace: true });
-          } else if (user.role === 'user') {
-            navigate('/user/dashboard', { replace: true });
           } else {
+            // Regular users redirect to home page
             navigate('/', { replace: true });
           }
         }

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { apiService } from '../../services/api';
-import { FiShoppingCart, FiAlertCircle, FiCheckCircle, FiCreditCard, FiClock, FiCalendar, FiMapPin, FiUser, FiPhone, FiTag } from 'react-icons/fi';
+import { FiShoppingCart, FiAlertCircle, FiCheckCircle, FiCreditCard, FiClock, FiCalendar, FiMapPin, FiTag } from 'react-icons/fi';
 import { Loader2, Wrench, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '../../hooks/useToast';
@@ -11,6 +11,7 @@ import { ToastContainer } from '../../components/Toast';
 import { Link } from 'react-router-dom';
 import LoginPromptModal from '../../components/LoginPromptModal';
 import SuccessModal from '../../components/SuccessModal';
+import RazorpayPaymentCheckout from '../../components/RazorpayPaymentCheckout';
 
 const Checkout = () => {
   const { user, isAuthenticated } = useAuth();
@@ -22,6 +23,8 @@ const Checkout = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [orderId, setOrderId] = useState(null);
+  const [createdOrder, setCreatedOrder] = useState(null);
+  const [showPaymentCheckout, setShowPaymentCheckout] = useState(false);
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponError, setCouponError] = useState('');
@@ -246,7 +249,7 @@ const Checkout = () => {
             paymentDiscount: paymentDiscount,
             finalTotal: finalTotal,
             paymentOption: selectedPaymentOption,
-            paymentStatus: selectedPaymentOption === 'payNow' ? 'paid' : 'pending',
+            paymentStatus: selectedPaymentOption === 'payNow' ? 'pending' : 'pending', // Will be updated to 'paid' after payment verification
             // Include complete user information for admin reference
             customerInfo: {
               userId: user.id || user._id,
@@ -281,10 +284,20 @@ const Checkout = () => {
             throw new Error(orderResponse.message || 'Failed to create order');
           }
 
-          // Store order ID for success message
+          // Store order ID and order data
           const createdOrderId = orderResponse.data?.orderId || orderData.orderId;
+          const orderDataResponse = orderResponse.data;
           setOrderId(createdOrderId);
+          setCreatedOrder(orderDataResponse);
 
+          // If payNow is selected, show payment checkout instead of completing order
+          if (selectedPaymentOption === 'payNow') {
+            setShowPaymentCheckout(true);
+            setLoading(false);
+            return; // Don't clear cart or show success yet - wait for payment
+          }
+
+          // For payLater, complete the order flow
           // Clear cart after successful order placement
           clearCart();
 
@@ -869,29 +882,72 @@ const Checkout = () => {
                 </div>
               </div>
 
-              <button
-                onClick={handlePlaceOrder}
-                disabled={loading}
-                className="w-full py-3 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition-all font-semibold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Placing Order...</span>
-                  </>
-                ) : (
-                  <>
-                    <FiShoppingCart className="w-5 h-5" />
-                    <span>Place Order</span>
-                  </>
-                )}
-              </button>
+              {showPaymentCheckout && createdOrder && selectedPaymentOption === 'payNow' ? (
+                <div className="space-y-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-sm text-blue-800 mb-3">
+                      <strong>Order #{orderId}</strong> has been created. Please complete the payment to confirm your order.
+                    </p>
+                  </div>
+                  <RazorpayPaymentCheckout
+                    orderId={orderId}
+                    amount={finalTotal}
+                    user={user}
+                    onPaymentSuccess={(paymentData) => {
+                      // Payment successful - clear cart and show success
+                      clearCart();
+                      showSuccess(`🎉 Payment successful! Order #${orderId} confirmed.`, 5000);
+                      setShowSuccessModal(true);
+                      setShowPaymentCheckout(false);
+                    }}
+                    onPaymentFailure={(error) => {
+                      // Payment failed - keep order but show error
+                      console.error('Payment failed:', error);
+                      // Order is already created, user can retry payment later
+                    }}
+                    onCancel={() => {
+                      // User cancelled payment - they can retry later
+                      setShowPaymentCheckout(false);
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      setShowPaymentCheckout(false);
+                      setCreatedOrder(null);
+                      setOrderId(null);
+                    }}
+                    className="w-full py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                  >
+                    Cancel & Go Back
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <button
+                    onClick={handlePlaceOrder}
+                    disabled={loading}
+                    className="w-full py-3 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition-all font-semibold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Placing Order...</span>
+                      </>
+                    ) : (
+                      <>
+                        <FiShoppingCart className="w-5 h-5" />
+                        <span>Place Order</span>
+                      </>
+                    )}
+                  </button>
 
-              <p className="text-xs text-text-light text-center mt-4">
-                {selectedPaymentOption === 'payNow'
-                  ? 'You will be redirected to payment gateway'
-                  : 'You can pay after service completion or on delivery'}
-              </p>
+                  <p className="text-xs text-text-light text-center mt-4">
+                    {selectedPaymentOption === 'payNow'
+                      ? 'You will be redirected to payment gateway after order creation'
+                      : 'You can pay after service completion or on delivery'}
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>

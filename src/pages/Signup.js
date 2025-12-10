@@ -27,7 +27,7 @@ const Signup = () => {
       if (isAuthenticated && isAdmin) {
         navigate('/admin/dashboard', { replace: true });
       } else if (isAuthenticated && isUser) {
-        navigate('/user/dashboard', { replace: true });
+        navigate('/', { replace: true }); // Redirect to home page
       }
     }
   }, [isAuthenticated, isAdmin, isUser, authLoading, navigate]);
@@ -88,7 +88,7 @@ const Signup = () => {
       if (result.success) {
         setSuccess(true);
         setTimeout(() => {
-          navigate('/user/dashboard');
+          navigate('/'); // Redirect to home page
         }, 1500);
       } else {
         setError(result.message || 'Signup failed. Please try again.');

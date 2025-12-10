@@ -198,13 +198,23 @@ const Home = () => {
         />
       )}
 
-      {/* Sticky Mobile Book Now Button - Positioned above chat icon with proper spacing */}
+      {/* Sticky Mobile Buttons - Stacked vertically on small screens */}
+      {/* Rent Now Button - Top */}
+      <Link
+        to="/browse?categories=AC%2CRefrigerator%2CWashing+Machine"
+        className="fixed right-4 md:hidden z-50 px-4 py-2.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full font-semibold text-xs shadow-2xl hover:from-green-600 hover:to-green-700 transition-all duration-300 hover:scale-105 active:scale-95"
+        style={{ bottom: '144px' }}
+      >
+        Rent Now
+      </Link>
+      
+      {/* Book Now Button - Middle */}
       <Link
         to="/service-request"
         className="fixed right-4 md:hidden z-50 px-4 py-2.5 bg-primary-blue text-white rounded-full font-semibold text-xs shadow-2xl hover:bg-primary-blue-light transition-all duration-300 hover:scale-105 active:scale-95"
         style={{ bottom: '80px' }}
       >
-        Book Now
+        Book Service
       </Link>
       {/* OLD Hero Banner Section - COMMENTED OUT */}
       {/* <section className="relative w-full h-[70vh] sm:h-[75vh] md:h-[80vh] lg:h-[85vh] overflow-hidden bg-gradient-to-br from-primary-blue via-blue-600 to-primary-blue-light">

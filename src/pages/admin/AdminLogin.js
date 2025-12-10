@@ -21,8 +21,8 @@ const AdminLogin = () => {
       if (isAuthenticated && isAdmin) {
         navigate('/admin/dashboard', { replace: true });
       } else if (isAuthenticated && isUser) {
-        // If regular user tries to access admin login, redirect to user dashboard
-        navigate('/user/dashboard', { replace: true });
+        // If regular user tries to access admin login, redirect to home page
+        navigate('/', { replace: true });
       }
     }
   }, [isAuthenticated, isAdmin, isUser, authLoading, navigate]);
