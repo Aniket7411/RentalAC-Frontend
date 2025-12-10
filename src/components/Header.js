@@ -55,13 +55,15 @@ const Header = () => {
                 <Link to="/contact" className="px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">Contact</Link>
                 <Link to="/service-request" className="px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">Book Services</Link>
                 <Link to="/user/cart" className="relative flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
-                  <FiShoppingCart className="w-5 h-5" />
+                  <div className="relative">
+                    <FiShoppingCart className="w-5 h-5" />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center z-10">
+                        {cartCount > 9 ? '9+' : cartCount}
+                      </span>
+                    )}
+                  </div>
                   <span>Cart</span>
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                      {cartCount > 9 ? '9+' : cartCount}
-                    </span>
-                  )}
                 </Link>
                 <Link to="/login" className="ml-2 px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-700 transition-all font-semibold shadow-md hover:shadow-lg">Login</Link>
               </>
@@ -117,13 +119,15 @@ const Header = () => {
                   <span>Dashboard</span>
                 </Link>
                 <Link to="/user/cart" className="relative flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
-                  <FiShoppingCart className="w-5 h-5" />
+                  <div className="relative">
+                    <FiShoppingCart className="w-5 h-5" />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center z-10">
+                        {cartCount > 9 ? '9+' : cartCount}
+                      </span>
+                    )}
+                  </div>
                   <span>Cart</span>
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                      {cartCount > 9 ? '9+' : cartCount}
-                    </span>
-                  )}
                 </Link>
                 <Link to="/user/wishlist" className="relative flex items-center space-x-2 px-4 py-2 text-neutral-900 hover:text-sky-500 transition-all rounded-lg hover:bg-slate-50 font-medium">
                   <FiHeart className="w-5 h-5" />
@@ -153,12 +157,14 @@ const Header = () => {
           {/* User Actions for Mobile - Show cart/wishlist even when menu is closed */}
           <div className="md:hidden flex items-center space-x-2 mr-2 flex-shrink-0">
             <Link to="/user/cart" className="relative p-2 text-neutral-900 hover:text-sky-500 transition-all">
-              <FiShoppingCart className="w-6 h-6" />
-              {cartCount > 0 && (
-                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {cartCount > 9 ? '9+' : cartCount}
-                </span>
-              )}
+              <div className="relative">
+                <FiShoppingCart className="w-6 h-6" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center z-10">
+                    {cartCount > 9 ? '9+' : cartCount}
+                  </span>
+                )}
+              </div>
             </Link>
             {isUser && (
               <Link to="/user/wishlist" className="relative p-2 text-neutral-900 hover:text-sky-500 transition-all">
