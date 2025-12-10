@@ -74,7 +74,7 @@ const ResetPassword = () => {
       }
     } catch (error) {
       console.error('Reset password error:', error);
-      setError('An unexpected error occurred. Please try again.');
+      setError('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -208,7 +208,7 @@ const ResetPassword = () => {
             )}
 
             {/* Request New Reset Link */}
-            {error && error.includes('expired') && (
+            {error && (error.includes('expired') || error.includes('Invalid')) && (
               <div className="mt-4 text-center">
                 <Link
                   to="/forgot-password"

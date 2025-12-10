@@ -35,12 +35,13 @@ const ForgotPassword = () => {
       
       if (result.success) {
         setSuccess(true);
+        setEmail(''); // Clear email after successful submission
       } else {
         setError(result.message || 'Failed to send reset link. Please try again.');
       }
     } catch (error) {
       console.error('Forgot password error:', error);
-      setError('An unexpected error occurred. Please try again.');
+      setError('Network error. Please try again.');
     } finally {
       setLoading(false);
     }

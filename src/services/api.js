@@ -102,6 +102,14 @@ export const apiService = {
         message: response.data.message || 'Password reset link sent to your email',
       };
     } catch (error) {
+      // Handle network errors
+      if (!error.response) {
+        return {
+          success: false,
+          message: 'Network error. Please try again.',
+        };
+      }
+      // Handle API errors (400, 500, etc.)
       return {
         success: false,
         message: error.response?.data?.message || 'Failed to send reset link. Please try again.',
@@ -117,9 +125,24 @@ export const apiService = {
         message: response.data.message || 'Password reset successfully',
       };
     } catch (error) {
+      // Handle network errors
+      if (!error.response) {
+        return {
+          success: false,
+          message: 'Network error. Please try again.',
+        };
+      }
+      // Handle API errors (400, 500, etc.)
+      const errorMessage = error.response?.data?.message;
+      if (errorMessage && errorMessage.includes('Invalid or expired')) {
+        return {
+          success: false,
+          message: 'Invalid or expired reset link',
+        };
+      }
       return {
         success: false,
-        message: error.response?.data?.message || 'Failed to reset password. The link may have expired. Please request a new one.',
+        message: errorMessage || 'Failed to reset password. The link may have expired. Please request a new one.',
       };
     }
   },
