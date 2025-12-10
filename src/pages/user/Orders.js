@@ -22,6 +22,12 @@ const Orders = () => {
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [cancelling, setCancelling] = useState(false);
+  // Filters
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'
+  const [typeFilter, setTypeFilter] = useState('all'); // 'all', 'rental', 'service'
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const { toasts, removeToast, success, error: showError } = useToast();
 
   useEffect(() => {
@@ -116,8 +122,13 @@ const Orders = () => {
       case 'completed':
       case 'delivered':
         return 'bg-green-100 text-green-800 border-green-200';
-      case 'pending':
+      case 'confirmed':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'processing':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'shipped':
+        return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+      case 'pending':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'cancelled':
         return 'bg-red-100 text-red-800 border-red-200';
@@ -125,6 +136,50 @@ const Orders = () => {
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
+  
+  const getPaymentStatusColor = (paymentStatus) => {
+    return paymentStatus === 'paid' 
+      ? 'bg-green-100 text-green-800 border-green-200'
+      : 'bg-yellow-100 text-yellow-800 border-yellow-200';
+  };
+  
+  // Filter orders
+  const getFilteredOrders = () => {
+    let filtered = orders;
+    
+    // Filter by status
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(order => 
+        order.status?.toLowerCase() === statusFilter.toLowerCase()
+      );
+    }
+    
+    // Filter by type (rental/service)
+    if (typeFilter !== 'all') {
+      if (typeFilter === 'rental') {
+        filtered = filtered.filter(order => 
+          order.items?.some(item => item.type === 'rental')
+        );
+      } else if (typeFilter === 'service') {
+        filtered = filtered.filter(order => 
+          order.items?.some(item => item.type === 'service')
+        );
+      }
+    }
+    
+    return filtered;
+  };
+  
+  // Pagination
+  const filteredOrders = getFilteredOrders();
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedOrders = filteredOrders.slice(startIndex, startIndex + itemsPerPage);
+  
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, typeFilter]);
 
   const handleCancelClick = (orderId) => {
     setSelectedOrderId(orderId);
@@ -213,6 +268,51 @@ const Orders = () => {
           <h1 className="text-3xl md:text-4xl font-bold text-text-dark mb-2">My Orders</h1>
           <p className="text-text-light">Manage and track your rental orders and service bookings</p>
         </div>
+        
+        {/* Filters - Only show for rentals tab */}
+        {activeTab === 'rentals' && orders.length > 0 && (
+          <div className="bg-white rounded-xl shadow-lg p-4 mb-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              {/* Status Filter */}
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-text-dark mb-2">Filter by Status</label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                >
+                  <option value="all">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="processing">Processing</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+              
+              {/* Type Filter */}
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-text-dark mb-2">Filter by Type</label>
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                >
+                  <option value="all">All Types</option>
+                  <option value="rental">Rental Only</option>
+                  <option value="service">Service Only</option>
+                </select>
+              </div>
+            </div>
+            
+            {/* Results count */}
+            <div className="mt-3 text-sm text-text-light">
+              Showing {paginatedOrders.length} of {filteredOrders.length} orders
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center space-x-2">
@@ -305,8 +405,25 @@ const Orders = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {orders.map((order, index) => (
-                    <motion.div
+                  {paginatedOrders.length === 0 ? (
+                    <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+                      <ShoppingBag className="w-20 h-20 text-gray-300 mx-auto mb-4" />
+                      <h2 className="text-2xl font-semibold text-text-dark mb-2">No orders found</h2>
+                      <p className="text-text-light mb-6">Try adjusting your filters</p>
+                      <button
+                        onClick={() => {
+                          setStatusFilter('all');
+                          setTypeFilter('all');
+                        }}
+                        className="inline-block px-6 py-3 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition-all font-semibold shadow-md hover:shadow-lg"
+                      >
+                        Clear Filters
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      {paginatedOrders.map((order, index) => (
+                        <motion.div
                       key={order.id || order._id || index}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -326,6 +443,9 @@ const Orders = () => {
                                   </h3>
                                   <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(order.status)}`}>
                                     {order.status || 'Pending'}
+                                  </span>
+                                  <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getPaymentStatusColor(order.paymentStatus)}`}>
+                                    {order.paymentStatus === 'paid' ? 'Paid' : 'Pending Payment'}
                                   </span>
                                 </div>
                                 <p className="text-sm text-text-light flex items-center gap-2">
@@ -439,6 +559,55 @@ const Orders = () => {
                       </div>
                     </motion.div>
                   ))}
+                  
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 mt-6">
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors text-sm font-medium"
+                      >
+                        Previous
+                      </button>
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => {
+                          let page;
+                          if (totalPages <= 10) {
+                            page = i + 1;
+                          } else if (currentPage <= 5) {
+                            page = i + 1;
+                          } else if (currentPage >= totalPages - 4) {
+                            page = totalPages - 9 + i;
+                          } else {
+                            page = currentPage - 4 + i;
+                          }
+                          return (
+                            <button
+                              key={page}
+                              onClick={() => setCurrentPage(page)}
+                              className={`px-4 py-2 border rounded-lg transition-colors text-sm ${
+                                currentPage === page
+                                  ? 'bg-primary-blue text-white border-primary-blue'
+                                  : 'border-gray-300 hover:bg-gray-50'
+                              }`}
+                            >
+                              {page}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                        className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors text-sm font-medium"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                    </>
+                  )}
                 </div>
               )}
             </motion.div>

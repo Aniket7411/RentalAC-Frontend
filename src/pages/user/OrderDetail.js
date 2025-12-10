@@ -308,7 +308,7 @@ const OrderDetail = () => {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-lg shadow-md p-6 mb-6"
         >
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex items-center space-x-3">
               {getStatusIcon(order.status)}
               <div>
@@ -316,7 +316,7 @@ const OrderDetail = () => {
                   Order #{order.orderId || order.id || 'N/A'}
                 </h1>
                 <p className="text-sm text-text-light mt-1">
-                  Placed on {new Date(order.createdAt || order.orderDate || order.date).toLocaleDateString('en-US', {
+                  Placed on {new Date(order.orderDate || order.createdAt || order.date).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
@@ -327,9 +327,18 @@ const OrderDetail = () => {
               </div>
             </div>
             <div className="flex flex-col items-end space-y-2">
-              <span className={`px-4 py-2 rounded-full text-sm font-semibold ${getStatusColor(order.status)}`}>
-                {order.status || 'Pending'}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className={`px-4 py-2 rounded-full text-sm font-semibold ${getStatusColor(order.status)}`}>
+                  {order.status || 'Pending'}
+                </span>
+                <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                  order.paymentStatus === 'paid' 
+                    ? 'bg-green-100 text-green-800 border border-green-200' 
+                    : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                }`}>
+                  {order.paymentStatus === 'paid' ? 'Paid' : 'Pending Payment'}
+                </span>
+              </div>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={handleDownloadInvoice}
@@ -433,24 +442,49 @@ const OrderDetail = () => {
                                       {item.duration && (
                                         <p><span className="font-medium">Rental Duration:</span> {item.duration} months</p>
                                       )}
-                                      {/* Monthly Payment Information */}
-                                      {item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure ? (
-                                        <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                          <div className="flex items-center gap-2 mb-2">
-                                            <FiInfo className="w-4 h-4 text-blue-600" />
-                                            <span className="text-sm font-semibold text-blue-700">Monthly Payment Plan</span>
+                                      {/* Payment Type & Monthly Payment Information */}
+                                      <div className="mt-2">
+                                        {item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure ? (
+                                          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                            <div className="flex items-center gap-2 mb-2">
+                                              <FiInfo className="w-4 h-4 text-blue-600" />
+                                              <span className="text-sm font-semibold text-blue-700">Monthly Payment Plan</span>
+                                            </div>
+                                            <div className="text-sm space-y-1">
+                                              <p><span className="font-medium text-gray-700">Payment Type:</span> <span className="text-blue-600 font-semibold">Monthly Payment</span></p>
+                                              <p><span className="font-medium text-gray-700">Monthly Price:</span> <span className="text-blue-600 font-semibold">₹{item.monthlyPrice.toLocaleString()}/month</span></p>
+                                              {item.securityDeposit > 0 && (
+                                                <p><span className="font-medium text-gray-700">Security Deposit:</span> <span className="text-blue-600 font-semibold">₹{(item.securityDeposit || 0).toLocaleString()}</span></p>
+                                              )}
+                                              <p><span className="font-medium text-gray-700">Tenure:</span> <span className="text-gray-900">{item.monthlyTenure} months</span></p>
+                                              <p><span className="font-medium text-gray-700">Upfront Payment (1 month + Security Deposit):</span> <span className="text-gray-900 font-semibold">₹{((item.monthlyPrice || 0) + (item.securityDeposit || 0)).toLocaleString()}</span></p>
+                                              {item.installationCharges && item.installationCharges.amount > 0 && (
+                                                <div className="mt-2 pt-2 border-t border-blue-200">
+                                                  <p><span className="font-medium text-gray-700">Installation Charges:</span> <span className="text-blue-600 font-semibold">₹{item.installationCharges.amount.toLocaleString()}</span></p>
+                                                  {item.installationCharges.includedItems && item.installationCharges.includedItems.length > 0 && (
+                                                    <p className="text-xs text-gray-600 mt-1">Includes: {item.installationCharges.includedItems.join(', ')}</p>
+                                                  )}
+                                                </div>
+                                              )}
+                                            </div>
                                           </div>
-                                          <div className="text-sm space-y-1">
-                                            <p><span className="font-medium text-gray-700">Monthly Payment:</span> <span className="text-blue-600 font-semibold">₹{item.monthlyPrice.toLocaleString()}/month</span></p>
-                                            <p><span className="font-medium text-gray-700">Tenure:</span> <span className="text-gray-900">{item.monthlyTenure} months</span></p>
-                                            <p><span className="font-medium text-gray-700">Total Amount:</span> <span className="text-gray-900">₹{(item.monthlyPrice * item.monthlyTenure).toLocaleString()}</span></p>
+                                        ) : (
+                                          <div className="p-2 bg-gray-50 rounded-lg">
+                                            <p className="text-sm text-gray-600"><span className="font-medium">Payment Type:</span> <span className="font-semibold">Advance Payment</span></p>
+                                            {item.duration && (
+                                              <p className="text-sm text-gray-600 mt-1"><span className="font-medium">Duration:</span> {item.duration} months</p>
+                                            )}
+                                            {item.installationCharges && item.installationCharges.amount > 0 && (
+                                              <div className="mt-2 pt-2 border-t border-gray-200">
+                                                <p className="text-sm"><span className="font-medium text-gray-700">Installation Charges:</span> <span className="text-blue-600 font-semibold">₹{item.installationCharges.amount.toLocaleString()}</span></p>
+                                                {item.installationCharges.includedItems && item.installationCharges.includedItems.length > 0 && (
+                                                  <p className="text-xs text-gray-600 mt-1">Includes: {item.installationCharges.includedItems.join(', ')}</p>
+                                                )}
+                                              </div>
+                                            )}
                                           </div>
-                                        </div>
-                                      ) : (
-                                        <div className="mt-2 p-2 bg-gray-50 rounded-lg">
-                                          <p className="text-sm text-gray-600"><span className="font-medium">Payment Type:</span> One-time Payment</p>
-                                        </div>
-                                      )}
+                                        )}
+                                      </div>
                                       <p><span className="font-medium">Quantity:</span> {item.quantity || 1}</p>
                                     </div>
 
@@ -553,20 +587,36 @@ const OrderDetail = () => {
                                   <div className="text-right">
                                     <p className="text-sm text-text-light mb-1">Item Price</p>
                                     <p className="text-xl font-bold text-primary-blue">
-                                      ₹{(item.price || 0).toLocaleString()}
+                                      ₹{(() => {
+                                        // Calculate total item price including installation charges
+                                        let itemPrice = item.price || 0;
+                                        if (item.installationCharges && item.installationCharges.amount) {
+                                          itemPrice += item.installationCharges.amount;
+                                        }
+                                        return itemPrice.toLocaleString();
+                                      })()}
                                     </p>
                                     {item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure ? (
-                                      <div className="mt-2 text-xs">
+                                      <div className="mt-2 text-xs space-y-1">
                                         <p className="text-blue-600 font-semibold">Monthly Payment</p>
                                         <p className="text-text-light">₹{item.monthlyPrice.toLocaleString()}/month × {item.monthlyTenure} months</p>
+                                        {item.securityDeposit > 0 && (
+                                          <p className="text-text-light">Security Deposit: ₹{(item.securityDeposit || 0).toLocaleString()}</p>
+                                        )}
+                                        <p className="text-text-light font-medium">Upfront: ₹{((item.monthlyPrice || 0) + (item.securityDeposit || 0)).toLocaleString()}</p>
+                                        {item.installationCharges && item.installationCharges.amount > 0 && (
+                                          <p className="text-blue-600 mt-1">+ Installation: ₹{item.installationCharges.amount.toLocaleString()}</p>
+                                        )}
                                       </div>
                                     ) : (
-                                      item.duration && (
-                                        <p className="text-xs text-text-light mt-1">for {item.duration} months</p>
-                                      )
-                                    )}
-                                    {item.installationCharges > 0 && (
-                                      <p className="text-xs text-blue-600 mt-1">+ ₹{item.installationCharges.toLocaleString()} installation</p>
+                                      <div className="mt-2 text-xs space-y-1">
+                                        {item.duration && (
+                                          <p className="text-text-light">Advance Payment for {item.duration} months</p>
+                                        )}
+                                        {item.installationCharges && item.installationCharges.amount > 0 && (
+                                          <p className="text-blue-600">+ Installation: ₹{item.installationCharges.amount.toLocaleString()}</p>
+                                        )}
+                                      </div>
                                     )}
                                   </div>
                                 </div>
@@ -843,22 +893,34 @@ const OrderDetail = () => {
                   <span>Subtotal</span>
                   <span>₹{(order.total || 0).toLocaleString()}</span>
                 </div>
-                {order.discount > 0 && (
+                {order.paymentDiscount > 0 && (
                   <div className="flex justify-between text-green-600">
-                    <span>Discount</span>
+                    <span>Payment Discount (5% Pay Now)</span>
+                    <span>-₹{order.paymentDiscount.toLocaleString()}</span>
+                  </div>
+                )}
+                {order.couponCode && order.couponDiscount > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Coupon Discount ({order.couponCode})</span>
+                    <span>-₹{order.couponDiscount.toLocaleString()}</span>
+                  </div>
+                )}
+                {order.discount > 0 && (order.discount !== (order.paymentDiscount || 0) + (order.couponDiscount || 0)) && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Total Discount</span>
                     <span>-₹{order.discount.toLocaleString()}</span>
                   </div>
                 )}
-                <div className="border-t border-gray-200 pt-3 flex justify-between text-lg font-bold text-text-dark">
-                  <span>Total</span>
-                  <span>₹{(order.finalTotal || order.total || 0).toLocaleString()}</span>
+                <div className="border-t-2 border-gray-300 pt-3 flex justify-between text-xl font-bold text-text-dark">
+                  <span>Final Total</span>
+                  <span className="text-primary-blue">₹{(order.finalTotal || order.total || 0).toLocaleString()}</span>
                 </div>
               </div>
 
               {/* Payment Information */}
               <div className="border-t border-gray-200 pt-4 mt-4">
                 <h3 className="text-sm font-semibold text-text-dark mb-3">Payment Information</h3>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-text-light flex items-center space-x-2">
                       <FiCreditCard className="w-4 h-4" />
@@ -870,11 +932,48 @@ const OrderDetail = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-text-light">Payment Status</span>
-                    <span className={`text-sm font-medium ${order.paymentStatus === 'paid' ? 'text-green-600' : 'text-yellow-600'
-                      }`}>
-                      {order.paymentStatus === 'paid' ? 'Paid' : 'Pending'}
+                    <span className={`text-sm font-semibold px-2 py-1 rounded ${
+                      order.paymentStatus === 'paid' 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {order.paymentStatus === 'paid' ? 'Paid' : 'Pending Payment'}
                     </span>
                   </div>
+                  
+                  {/* Payment Details (if paid) */}
+                  {order.paymentStatus === 'paid' && order.paymentDetails && (
+                    <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg space-y-2">
+                      <p className="text-xs font-semibold text-green-700 mb-2">Payment Details</p>
+                      {order.paymentDetails.gateway && (
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-600">Gateway:</span>
+                          <span className="font-medium text-gray-900 capitalize">{order.paymentDetails.gateway}</span>
+                        </div>
+                      )}
+                      {order.paymentDetails.transactionId && (
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-600">Transaction ID:</span>
+                          <span className="font-medium text-gray-900 font-mono text-[10px]">{order.paymentDetails.transactionId}</span>
+                        </div>
+                      )}
+                      {order.paymentDetails.paidAt && (
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-600">Paid At:</span>
+                          <span className="font-medium text-gray-900">
+                            {new Date(order.paymentDetails.paidAt).toLocaleString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
                   {/* Monthly Payment Items Summary */}
                   {order.items && order.items.some(item => item.isMonthlyPayment) && (
                     <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -885,11 +984,24 @@ const OrderDetail = () => {
                       <div className="space-y-1 text-xs">
                         {order.items.filter(item => item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure).map((item, idx) => (
                           <p key={idx} className="text-gray-700">
-                            • ₹{item.monthlyPrice.toLocaleString()}/month for {item.monthlyTenure} months
+                            • ₹{item.monthlyPrice.toLocaleString()}/month for {item.monthlyTenure} months (Security Deposit: ₹{(item.securityDeposit || 0).toLocaleString()})
                           </p>
                         ))}
                       </div>
                     </div>
+                  )}
+                  
+                  {/* Pay Now Button (if pending) */}
+                  {order.paymentStatus !== 'paid' && order.paymentOption === 'payNow' && (
+                    <button
+                      onClick={() => {
+                        // Navigate to payment page or trigger payment
+                        navigate(`/user/checkout?orderId=${order._id || order.id}`);
+                      }}
+                      className="w-full mt-3 px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition-colors text-sm font-semibold"
+                    >
+                      Pay Now
+                    </button>
                   )}
                 </div>
               </div>

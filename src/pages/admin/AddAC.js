@@ -55,6 +55,7 @@ const AddAC = () => {
     // Monthly payment option
     monthlyPaymentEnabled: false,
     monthlyPrice: '', // Monthly rental price
+    securityDeposit: '', // Security deposit for monthly payment
   });
   const [heroImagePreview, setHeroImagePreview] = useState('');
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -357,6 +358,7 @@ const AddAC = () => {
       if (formData.monthlyPaymentEnabled) {
         productData.monthlyPaymentEnabled = true;
         productData.monthlyPrice = parseFloat(formData.monthlyPrice) || 0;
+        productData.securityDeposit = parseFloat(formData.securityDeposit) || 0;
       } else {
         productData.monthlyPaymentEnabled = false;
       }
@@ -814,6 +816,7 @@ const AddAC = () => {
                         ...formData,
                         monthlyPaymentEnabled: e.target.checked,
                         monthlyPrice: e.target.checked ? formData.monthlyPrice : '',
+                        securityDeposit: e.target.checked ? formData.securityDeposit : '',
                       });
                     }}
                     className="w-5 h-5 text-primary-blue border-gray-300 rounded focus:ring-primary-blue"
@@ -828,7 +831,8 @@ const AddAC = () => {
               </div>
 
               {formData.monthlyPaymentEnabled && (
-                <div className="mb-6 ml-8">
+                <div className="mb-6 ml-8 space-y-4">
+                  <div>
                   <label className="block text-sm font-medium text-text-dark mb-2">
                     Monthly Rental Price (₹) <span className="text-red-500">*</span>
                   </label>
@@ -846,8 +850,31 @@ const AddAC = () => {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
                   />
                   <p className="text-xs text-text-light mt-1">
-                    This will be the monthly rental amount. Users will pay this amount each month for the selected tenure (minimum 3 months).
+                      This will be the monthly rental amount. Users will pay this amount each month for the selected tenure (3, 6, 9, 11, 12, or 24 months).
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-text-dark mb-2">
+                      Security Deposit (₹) <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.securityDeposit}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          securityDeposit: e.target.value,
+                        });
+                      }}
+                      min="0"
+                      placeholder="e.g., 5000"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                    />
+                    <p className="text-xs text-text-light mt-1">
+                      Security deposit required for monthly payment option. Users will pay: 1 month charge + security deposit upfront.
                   </p>
+                  </div>
                 </div>
               )}
             </div>

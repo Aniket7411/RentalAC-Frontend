@@ -327,7 +327,7 @@ const Home = () => {
                 to="/browse?category=AC"
                 className="cursor-hover inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 bg-transparent border-2 border-white text-white rounded-lg font-semibold text-sm sm:text-base md:text-lg hover:bg-white/10 transition-all duration-300"
               >
-                Explore Rentals
+                Rent Now
                 <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
               </Link>
             </motion.div>
@@ -673,69 +673,6 @@ const Home = () => {
 
 
 
-
-
-
-      {/* Services Section */}
-      <section className="py-4 sm:py-6 md:py-8 bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-6 sm:mb-8 md:mb-10"
-          >
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-text-dark mb-2 sm:mb-3">
-              AC Repair & Maintenance Services
-            </h2>
-            <p className="text-sm sm:text-base md:text-lg text-text-light mb-4 sm:mb-6">
-              Professional AC services at your doorstep
-            </p>
-            <Link
-              to="/service-request"
-              className="inline-flex items-center space-x-2 text-primary-blue hover:text-primary-blue-light font-semibold group transition-all"
-            >
-              <span>View All Services</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </motion.div>
-
-          {loadingServices ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-primary-blue" />
-            </div>
-          ) : services.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {services.map((service, index) => (
-                <motion.div
-                  key={service._id || service.id}
-                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  viewport={{ once: true, margin: '-50px' }}
-                  transition={{ duration: 0.5, delay: index * 0.1, ease: 'easeOut' }}
-                  className="price-card"
-                >
-                  <ServiceCard service={service} onAddClick={handleServiceAdd} />
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 bg-white rounded-lg">
-              <Wrench className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">No services available at the moment</p>
-              <Link
-                to="/service-request"
-                className="inline-block mt-4 text-primary-blue hover:text-primary-blue-light"
-              >
-                View All Services
-              </Link>
-            </div>
-          )}
-        </div>
-      </section>
-
-
       {/* Value Proposition - Why Choose Us Section */}
       <section className="py-8 sm:py-10 md:py-12 lg:py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -800,6 +737,69 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+
+
+      {/* Services Section */}
+      <section className="py-4 sm:py-6 md:py-8 bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-6 sm:mb-8 md:mb-10"
+          >
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-text-dark mb-2 sm:mb-3">
+              AC Repair & Maintenance Services
+            </h2>
+            <p className="text-sm sm:text-base md:text-lg text-text-light mb-4 sm:mb-6">
+              Professional AC services at your doorstep
+            </p>
+            <Link
+              to="/service-request"
+              className="inline-flex items-center space-x-2 text-primary-blue hover:text-primary-blue-light font-semibold group transition-all"
+            >
+              <span>View All Services</span>
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </motion.div>
+
+          {loadingServices ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary-blue" />
+            </div>
+          ) : services.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {services.map((service, index) => (
+                <motion.div
+                  key={service._id || service.id}
+                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, margin: '-50px' }}
+                  transition={{ duration: 0.5, delay: index * 0.1, ease: 'easeOut' }}
+                  className="price-card"
+                >
+                  <ServiceCard service={service} onAddClick={handleServiceAdd} />
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-lg">
+              <Wrench className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">No services available at the moment</p>
+              <Link
+                to="/service-request"
+                className="inline-block mt-4 text-primary-blue hover:text-primary-blue-light"
+              >
+                View All Services
+              </Link>
+            </div>
+          )}
+        </div>
+      </section>
+
+
 
 
       {/* Service Booking Modal */}

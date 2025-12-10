@@ -44,6 +44,9 @@ const ACDetail = () => {
   const [monthlyTenure, setMonthlyTenure] = useState(3); // Minimum 3 months for monthly payment
   const { toasts, removeToast, success, error: showError } = useToast();
 
+  // Valid tenure options for monthly payment: only 3, 6, 9, 11, 12, 24
+  const validMonthlyTenureOptions = [3, 6, 9, 11, 12, 24];
+
   useEffect(() => {
     loadAC();
   }, [id]);
@@ -163,7 +166,7 @@ const ACDetail = () => {
       // Use CartContext to add product (works for both logged-in and non-logged-in users)
       // Pass monthly payment info if selected
       const duration = isMonthlyPayment ? String(monthlyTenure) : String(selectedDuration);
-      addRentalToCart(ac, duration, isMonthlyPayment, isMonthlyPayment ? monthlyTenure : null);
+      addRentalToCart(ac, duration, isMonthlyPayment, isMonthlyPayment ? monthlyTenure : null, isMonthlyPayment ? securityDeposit : null);
       setAddedToCart(true);
       success('Product added to cart successfully!');
       setTimeout(() => setAddedToCart(false), 2000);
@@ -242,15 +245,41 @@ const ACDetail = () => {
   // Get price based on selected duration
   const getPrice = () => {
     if (!ac.price) return 0;
-    // If monthly payment is selected, calculate monthly price * tenure
+    // If monthly payment is selected, return monthly price (not total)
     if (isMonthlyPayment && ac.monthlyPaymentEnabled && ac.monthlyPrice) {
-      return ac.monthlyPrice * monthlyTenure;
+      return ac.monthlyPrice; // Return monthly price only
     }
     // Convert selectedDuration to string key
     const durationKey = String(selectedDuration);
     return ac.price[durationKey] || ac.price['3'] || 0;
   };
   const price = getPrice();
+  
+  // Get advance payment price for comparison
+  const getAdvancePrice = () => {
+    if (!ac.price) return 0;
+    const durationKey = String(monthlyTenure);
+    return ac.price[durationKey] || ac.price['3'] || 0;
+  };
+  const advancePrice = getAdvancePrice();
+  
+  // Get security deposit (only for monthly payment)
+  const getSecurityDeposit = () => {
+    if (isMonthlyPayment && ac.monthlyPaymentEnabled && ac.securityDeposit) {
+      return ac.securityDeposit;
+    }
+    return 0;
+  };
+  const securityDeposit = getSecurityDeposit();
+  
+  // Calculate monthly payment total: one month charge + security deposit
+  const getMonthlyPaymentTotal = () => {
+    if (isMonthlyPayment && ac.monthlyPaymentEnabled && ac.monthlyPrice) {
+      return ac.monthlyPrice + securityDeposit;
+    }
+    return 0;
+  };
+  const monthlyPaymentTotal = getMonthlyPaymentTotal();
 
   // Get tenure options for slider
   const tenureOptions = [3, 6, 9, 11, 12, 24];
@@ -456,7 +485,43 @@ const ACDetail = () => {
               </div>
             )}
 
-            {/* Pricing with Range Slider */}
+            {/* Payment Type Selection Buttons */}
+            {ac.status === 'Available' && (
+              <div className="mb-4">
+                <div className="flex gap-3 mb-4">
+                  {/* Pay Advance Button - Green, Left */}
+                  <button
+                    type="button"
+                    onClick={() => setIsMonthlyPayment(false)}
+                    className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm sm:text-base transition-all duration-300 ${
+                      !isMonthlyPayment
+                        ? 'bg-green-500 text-white shadow-lg scale-105'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Pay Advance
+                  </button>
+                  
+                  {/* Pay Monthly Button - Right */}
+                  {ac.monthlyPaymentEnabled && ac.monthlyPrice && (
+                    <button
+                      type="button"
+                      onClick={() => setIsMonthlyPayment(true)}
+                      className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm sm:text-base transition-all duration-300 ${
+                        isMonthlyPayment
+                          ? 'bg-primary-blue text-white shadow-lg scale-105'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Pay Monthly
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Pricing with Range Slider - Only for Advance Payment */}
+            {!isMonthlyPayment && (
             <div className="mb-2 sm:mb-3">
               <div className="flex items-center gap-2 mb-3">
                 <h3 className="font-semibold text-text-dark text-sm sm:text-base">Choose Tenure</h3>
@@ -501,76 +566,109 @@ const ACDetail = () => {
                 </div>
               </div>
 
-              {!isMonthlyPayment && (
                 <div className="text-xl sm:text-2xl md:text-3xl font-bold text-primary-blue">
                   ₹{price.toLocaleString()}
                   <span className="text-xs sm:text-sm md:text-base text-text-light font-normal ml-1">
                     (Total for {selectedDuration} months)
                   </span>
                 </div>
+                </div>
               )}
-            </div>
 
-            {/* Monthly Payment Option - Show below pricing if enabled */}
-            {ac.status === 'Available' && ac.monthlyPaymentEnabled && ac.monthlyPrice && (
-              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <label className="flex items-start space-x-3 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="paymentType"
-                    checked={isMonthlyPayment}
-                    onChange={(e) => setIsMonthlyPayment(e.target.checked)}
-                    className="mt-1 w-4 h-4 text-primary-blue border-gray-300 focus:ring-primary-blue"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-semibold text-text-dark">Pay Monthly</span>
-                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">New</span>
+            {/* Monthly Payment Option - Show when Pay Monthly is selected */}
+            {isMonthlyPayment && ac.status === 'Available' && ac.monthlyPaymentEnabled && ac.monthlyPrice && (
+              <div className="mb-2 sm:mb-3">
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="font-semibold text-text-dark text-sm sm:text-base">Choose Tenure</h3>
+                  <div className="relative group">
+                    <Info className="w-4 h-4 text-blue-500 cursor-help" />
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                      Select rental duration
                     </div>
-                    <p className="text-xs text-text-light mb-3">
-                      Pay on a monthly basis instead of upfront payment
-                    </p>
-                    {isMonthlyPayment && (
-                      <div className="mt-3">
-                        <label className="block text-sm font-medium text-text-dark mb-2">
-                          Select Tenure (Minimum 3 months) <span className="text-red-500">*</span>
-                        </label>
-                        <div className="flex gap-2 flex-wrap">
-                          {[3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 24].map((months) => (
-                            <button
-                              key={months}
-                              type="button"
-                              onClick={() => setMonthlyTenure(months)}
-                              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                                monthlyTenure === months
-                                  ? 'bg-primary-blue text-white shadow-md'
-                                  : 'bg-white text-gray-700 border border-gray-300 hover:border-primary-blue'
-                              }`}
-                            >
-                              {months} {months === 1 ? 'Month' : 'Months'}
-                            </button>
-                          ))}
-                        </div>
-                        <div className="mt-3 p-3 bg-white rounded-lg border border-gray-200">
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="text-sm text-gray-600">Monthly Payment:</span>
-                            <span className="text-lg font-bold text-primary-blue">
-                              ₹{ac.monthlyPrice.toLocaleString()}/month
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-                            <span className="text-sm font-medium text-gray-700">
-                              Total for {monthlyTenure} months:
-                            </span>
-                            <span className="text-xl font-bold text-primary-blue">
-                              ₹{(ac.monthlyPrice * monthlyTenure).toLocaleString()}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </div>
-                </label>
+                </div>
+
+                {/* Range Slider */}
+                <div className="mb-4">
+                  <div className="relative">
+                    <input
+                      type="range"
+                      min="0"
+                      max={validMonthlyTenureOptions.length - 1}
+                      step="1"
+                      value={validMonthlyTenureOptions.indexOf(monthlyTenure)}
+                      onChange={(e) => {
+                        const index = Number(e.target.value);
+                        setMonthlyTenure(validMonthlyTenureOptions[index]);
+                      }}
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                      style={{
+                        background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(validMonthlyTenureOptions.indexOf(monthlyTenure) / (validMonthlyTenureOptions.length - 1)) * 100}%, #e5e7eb ${(validMonthlyTenureOptions.indexOf(monthlyTenure) / (validMonthlyTenureOptions.length - 1)) * 100}%, #e5e7eb 100%)`
+                      }}
+                    />
+                    <div className="flex justify-between mt-2">
+                      {validMonthlyTenureOptions.map((option) => (
+                        <div key={option} className="flex flex-col items-center">
+                          <div
+                            className={`w-1 h-4 ${monthlyTenure === option ? 'bg-primary-blue' : 'bg-gray-400'}`}
+                          />
+                          <span className={`text-xs mt-1 ${monthlyTenure === option ? 'font-bold text-primary-blue' : 'text-gray-600'}`}>
+                            {option}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Monthly Payment Price Details */}
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Monthly Payment:</span>
+                    <span className="text-lg font-bold text-primary-blue">
+                      ₹{ac.monthlyPrice.toLocaleString()}/month
+                    </span>
+                  </div>
+                  
+                  {securityDeposit > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Security Deposit:</span>
+                      <span className="text-lg font-bold text-primary-blue">
+                        ₹{securityDeposit.toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                    <span className="text-sm font-medium text-gray-700">
+                      Total (1 month + Security Deposit):
+                    </span>
+                    <span className="text-xl font-bold text-primary-blue">
+                      ₹{monthlyPaymentTotal.toLocaleString()}
+                    </span>
+                  </div>
+                  
+                  {/* Show price difference with advance payment */}
+                  {advancePrice > 0 && (
+                    <div className="pt-2 border-t border-gray-200">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-xs text-gray-500">Advance Payment for {monthlyTenure} months:</span>
+                        <span className="text-sm font-semibold text-gray-700">
+                          ₹{advancePrice.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-500">Difference:</span>
+                        <span className={`text-sm font-semibold ${
+                          (ac.monthlyPrice * monthlyTenure) > advancePrice ? 'text-red-600' : 'text-green-600'
+                        }`}>
+                          {((ac.monthlyPrice * monthlyTenure) > advancePrice ? '+' : '')}
+                          ₹{Math.abs((ac.monthlyPrice * monthlyTenure) - advancePrice).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

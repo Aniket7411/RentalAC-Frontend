@@ -152,7 +152,7 @@ export const CartProvider = ({ children }) => {
   };
 
   // Add rental product to cart (works for both logged-in and non-logged-in users)
-  const addRentalToCart = (product, selectedDuration = '3', isMonthlyPayment = false, monthlyTenure = null) => {
+  const addRentalToCart = (product, selectedDuration = '3', isMonthlyPayment = false, monthlyTenure = null, securityDeposit = null) => {
     // No authentication check - allow cart for all users
     try {
       const cart = [...cartItems];
@@ -169,9 +169,10 @@ export const CartProvider = ({ children }) => {
       const validTenureOptions = [3, 6, 9, 11, 12, 24];
       const finalDuration = validTenureOptions.includes(durationNumber) ? durationNumber : 3;
 
-      // For monthly payment, ensure minimum 3 months
+      // For monthly payment, ensure minimum 3 months and valid tenure options
+      const validMonthlyTenureOptions = [3, 6, 9, 11, 12, 24];
       const finalMonthlyTenure = isMonthlyPayment && monthlyTenure 
-        ? Math.max(3, monthlyTenure) 
+        ? (validMonthlyTenureOptions.includes(monthlyTenure) ? monthlyTenure : 3)
         : null;
 
       const cartItem = {
@@ -202,6 +203,7 @@ export const CartProvider = ({ children }) => {
         monthlyPrice: isMonthlyPayment ? (product.monthlyPrice || 0) : null,
         monthlyTenure: finalMonthlyTenure,
         monthlyPaymentEnabled: product.monthlyPaymentEnabled || false, // Store for reference
+        securityDeposit: isMonthlyPayment ? (securityDeposit || product.securityDeposit || 0) : null, // Security deposit only for monthly payment
       };
 
       if (existingItem) {
@@ -331,8 +333,10 @@ export const CartProvider = ({ children }) => {
     const rentalTotal = rentals.reduce((total, item) => {
       // Check if this is a monthly payment item
       if (item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure) {
-        // For monthly payment: monthlyPrice * monthlyTenure
-        const monthlyTotal = item.monthlyPrice * item.monthlyTenure;
+        // For monthly payment: one month charge + security deposit
+        const oneMonthCharge = item.monthlyPrice;
+        const securityDeposit = item.securityDeposit || 0;
+        const monthlyTotal = oneMonthCharge + securityDeposit;
         // Add installation charges if present (only for AC)
         const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount)
           ? item.installationCharges.amount

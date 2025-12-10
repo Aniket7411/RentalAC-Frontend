@@ -288,9 +288,9 @@ const BrowseACs = () => {
   };
 
   const categoryInfo = {
-    'AC': { icon: Snowflake, label: 'Air Conditioners', color: 'from-blue-400 to-purple-500' },
-    'Refrigerator': { icon: Package, label: 'Refrigerators', color: 'from-cyan-400 to-purple-500' },
-    'Washing Machine': { icon: Droplets, label: 'Washing Machines', color: 'from-purple-400 to-pink-500' },
+    'AC': { icon: Snowflake, label: 'Air Conditioners', color: 'from-blue-400 to-blue-500' },
+    'Refrigerator': { icon: Package, label: 'Refrigerators', color: 'from-cyan-400 to-blue-500' },
+    'Washing Machine': { icon: Droplets, label: 'Washing Machines', color: 'from-blue-400 to-blue-500' },
   };
 
   return (
@@ -304,12 +304,12 @@ const BrowseACs = () => {
               {/* Filter Header */}
               <div className="flex justify-between items-center mb-5 pb-4 border-b border-gray-200 sticky top-0 bg-white/95 backdrop-blur-sm z-10 -mt-1 pt-1">
                 <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-purple-600" />
+                  <Filter className="w-4 h-4 text-primary-blue" />
                   Filters
                 </h2>
                 <button
                   onClick={clearFilters}
-                  className="text-xs text-purple-600 hover:text-purple-700 font-semibold transition-colors hover:underline"
+                  className="text-xs text-primary-blue hover:text-primary-blue-light font-semibold transition-colors hover:underline"
                 >
                   Clear All
                 </button>
@@ -388,7 +388,7 @@ const BrowseACs = () => {
                         key={dur}
                         onClick={() => handleFilterChange('duration', filters.duration === dur ? '3' : dur)}
                         className={`px-2.5 py-2 rounded-lg text-xs font-semibold transition-all text-center ${filters.duration === dur
-                          ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
+                          ? 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white shadow-md'
                           : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                           }`}
                       >
@@ -398,7 +398,7 @@ const BrowseACs = () => {
                     <button
                       onClick={() => handleFilterChange('duration', filters.duration === '3' ? '6' : '3')}
                       className={`col-span-2 px-2.5 py-2 rounded-lg text-xs font-semibold transition-all text-center ${filters.duration === '3'
-                        ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
+                        ? 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white shadow-md'
                         : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                         }`}
                     >
@@ -421,7 +421,7 @@ const BrowseACs = () => {
                             key={cap}
                             onClick={() => toggleArrayFilter('capacity', cap)}
                             className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all text-center whitespace-nowrap ${isSelected
-                              ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
+                              ? 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white shadow-md'
                               : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                               }`}
                           >
@@ -447,7 +447,7 @@ const BrowseACs = () => {
                             key={type}
                             onClick={() => toggleArrayFilter('type', type)}
                             className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all text-center whitespace-nowrap ${isSelected
-                              ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
+                              ? 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white shadow-md'
                               : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                               }`}
                           >
@@ -469,7 +469,7 @@ const BrowseACs = () => {
                     placeholder="City/Area"
                     value={filters.location}
                     onChange={(e) => handleFilterChange('location', e.target.value)}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-400 text-sm bg-white shadow-sm transition-all"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue text-sm bg-white shadow-sm transition-all"
                   />
                 </div>
               </div>
@@ -485,7 +485,7 @@ const BrowseACs = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="mb-4 lg:mb-6 flex-shrink-0"
               >
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 bg-clip-text text-transparent mb-1 lg:mb-2">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold bg-gradient-to-r from-primary-blue via-blue-600 to-primary-blue-light bg-clip-text text-transparent mb-1 lg:mb-2">
                   Browse Products
                 </h1>
                 <p className="text-gray-600 text-sm md:text-base lg:text-base">
@@ -514,7 +514,7 @@ const BrowseACs = () => {
                     placeholder="Search by brand, model, location..."
                     value={filters.search}
                     onChange={(e) => handleFilterChange('search', e.target.value)}
-                    className="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-400 shadow-sm hover:shadow-md transition-all bg-white"
+                    className="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue shadow-sm hover:shadow-md transition-all bg-white"
                   />
                 </div>
 
@@ -523,7 +523,7 @@ const BrowseACs = () => {
                   <button
                     onClick={() => handleFilterChange('priceSort', filters.priceSort === 'low-to-high' ? '' : 'low-to-high')}
                     className={`flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all shadow-sm hover:shadow-md ${filters.priceSort === 'low-to-high'
-                      ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
+                      ? 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white'
                       : 'bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-700 hover:bg-gray-50'
                       }`}
                   >
@@ -534,7 +534,7 @@ const BrowseACs = () => {
                   <button
                     onClick={() => handleFilterChange('priceSort', filters.priceSort === 'high-to-low' ? '' : 'high-to-low')}
                     className={`flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all shadow-sm hover:shadow-md ${filters.priceSort === 'high-to-low'
-                      ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
+                      ? 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white'
                       : 'bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-700 hover:bg-gray-50'
                       }`}
                   >
@@ -548,7 +548,7 @@ const BrowseACs = () => {
                 <button
                   onClick={() => setShowFilters(!showFilters)}
                   className={`md:hidden flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all shadow-sm hover:shadow-md ${showFilters
-                    ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
+                    ? 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white'
                     : 'bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-700 hover:bg-gray-50'
                     }`}
                 >
@@ -591,7 +591,7 @@ const BrowseACs = () => {
               <div className="flex-1">
                 {loading ? (
                   <div className="flex justify-center items-center h-64">
-                    <Loader2 className="w-12 h-12 animate-spin text-purple-600" />
+                    <Loader2 className="w-12 h-12 animate-spin text-primary-blue" />
                   </div>
                 ) : (filters.condition.length > 0 || filters.capacity.length > 0 || filters.type.length > 0 || filters.priceSort ? filteredACs.length > 0 : acs.length > 0) ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 md:gap-6 pb-8">
@@ -610,12 +610,12 @@ const BrowseACs = () => {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="bg-white/90 backdrop-blur-sm p-12 rounded-2xl shadow-lg text-center border border-purple-100"
+                    className="bg-white/90 backdrop-blur-sm p-12 rounded-2xl shadow-lg text-center border border-blue-100"
                   >
                     <p className="text-gray-600 text-lg mb-4">No products found matching your criteria.</p>
                     <button
                       onClick={clearFilters}
-                      className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all font-semibold shadow-md hover:shadow-lg"
+                      className="px-6 py-3 bg-gradient-to-r from-primary-blue to-primary-blue-light text-white rounded-xl hover:from-primary-blue-light hover:to-primary-blue transition-all font-semibold shadow-md hover:shadow-lg"
                     >
                       Clear filters
                     </button>
@@ -631,14 +631,14 @@ const BrowseACs = () => {
       {showFilters && (
         <div className="md:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setShowFilters(false)}>
           <div className="absolute left-0 top-0 bottom-0 w-80 bg-white shadow-2xl overflow-y-auto p-4" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-4 pb-3 border-b border-purple-100">
+            <div className="flex justify-between items-center mb-4 pb-3 border-b border-blue-100">
               <h2 className="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-2">
-                <Filter className="w-4 h-4 text-purple-600" />
+                <Filter className="w-4 h-4 text-primary-blue" />
                 Filters
               </h2>
               <button
                 onClick={() => setShowFilters(false)}
-                className="text-purple-600 hover:text-purple-700"
+                className="text-primary-blue hover:text-primary-blue-light"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -716,7 +716,7 @@ const BrowseACs = () => {
                       key={dur}
                       onClick={() => handleFilterChange('duration', filters.duration === dur ? '3' : dur)}
                       className={`px-2.5 py-2 rounded-lg text-xs font-semibold transition-all text-center ${filters.duration === dur
-                        ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
+                        ? 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white shadow-md'
                         : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                         }`}
                     >
@@ -740,7 +740,7 @@ const BrowseACs = () => {
                           key={cap}
                           onClick={() => toggleArrayFilter('capacity', cap)}
                           className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all text-center whitespace-nowrap ${isSelected
-                            ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
+                            ? 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white shadow-md'
                             : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                             }`}
                         >
@@ -766,7 +766,7 @@ const BrowseACs = () => {
                           key={type}
                           onClick={() => toggleArrayFilter('type', type)}
                           className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all text-center whitespace-nowrap ${isSelected
-                            ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md'
+                            ? 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white shadow-md'
                             : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
                             }`}
                         >
@@ -788,7 +788,7 @@ const BrowseACs = () => {
                   placeholder="City/Area"
                   value={filters.location}
                   onChange={(e) => handleFilterChange('location', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-400 text-xs bg-white/80"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue/50 focus:border-primary-blue text-xs bg-white/80"
                 />
               </div>
             </div>

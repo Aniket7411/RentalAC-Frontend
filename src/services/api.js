@@ -12,6 +12,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 30000, // 30 seconds timeout (backend should respond in < 3 seconds after fix)
 });
 
 // Add token to requests if available
@@ -759,6 +760,8 @@ export const apiService = {
   },
 
   // Create Order
+  // Backend fix: Email notifications are now non-blocking, so API responds quickly (< 3 seconds)
+  // Order creation succeeds even if email notification fails
   createOrder: async (orderData) => {
     try {
       const response = await api.post('/orders', orderData);
@@ -768,6 +771,20 @@ export const apiService = {
         data: response.data.data || response.data,
       };
     } catch (error) {
+      // Handle timeout errors specifically
+      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        return {
+          success: false,
+          message: 'Request timeout. Please check your connection and try again.',
+        };
+      }
+      // Handle network errors
+      if (!error.response) {
+        return {
+          success: false,
+          message: 'Network error. Please check your connection and try again.',
+        };
+      }
       return {
         success: false,
         message: error.response?.data?.message || 'Failed to create order',

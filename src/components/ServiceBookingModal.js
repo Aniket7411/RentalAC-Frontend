@@ -25,7 +25,6 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit, initialData }
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successOpen, setSuccessOpen] = useState(false);
 
   const timeSlots = [
     { value: '10-12', label: '10 AM - 12 PM' },
@@ -104,20 +103,20 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit, initialData }
       if (initialData && onSubmit) {
         // Edit mode: Update existing cart item via onSubmit handler
         await onSubmit(bookingDetails);
-        showSuccess('Service booking details updated!');
-        setSuccessOpen(true);
+        showSuccess('Service booking details updated successfully!');
+        // Close modal immediately after update
         setTimeout(() => {
           handleClose();
-        }, 1500);
+        }, 800);
       } else {
         // New booking mode: Add service to cart with booking details
         addServiceToCart(service, bookingDetails);
         // Show toast notification
-        showSuccess(`${service.title} has been added to cart! Please proceed to checkout.`);
-        // Close the booking modal after a brief delay to show the toast
+        showSuccess(`✅ ${service.title} has been added to cart! Please proceed to checkout.`, 3000);
+        // Close the booking modal smoothly after showing notification
         setTimeout(() => {
           handleClose();
-        }, 500);
+        }, 1000);
       }
     } catch (error) {
       showError(error.message || 'Failed to process booking. Please try again.');
@@ -127,6 +126,7 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit, initialData }
   };
 
   const handleClose = () => {
+    // Reset form state
     setStep(1);
     setFormData({
       date: initialData?.date || '',
@@ -135,10 +135,13 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit, initialData }
       address: initialData?.address || '',
       contactName: initialData?.contactName || '',
       contactPhone: initialData?.contactPhone || '',
-      paymentOption: initialData?.paymentOption || 'payLater',
     });
     setErrors({});
-    onClose();
+    setIsSubmitting(false);
+    // Close the modal
+    if (onClose) {
+      onClose();
+    }
   };
 
   // Update form data when initialData changes
@@ -162,29 +165,43 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit, initialData }
     return today.toISOString().split('T')[0];
   };
 
-  if (!isOpen && !successOpen) return null;
+  if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
+    <>
       <ToastContainer toasts={toasts} removeToast={removeToast} />
-      {/* Main Booking Modal */}
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          {/* Submitting overlay */}
-          {isSubmitting && (
-            <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-              <div className="bg-white rounded-xl shadow p-4 flex items-center space-x-3">
-                <Loader2 className="w-5 h-5 animate-spin text-sky-500" />
-                <span className="text-neutral-900">Submitting your booking...</span>
-              </div>
-            </div>
-          )}
+      <AnimatePresence>
+        {/* Main Booking Modal */}
+        {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+            onClick={(e) => {
+              // Close modal when clicking backdrop
+              if (e.target === e.currentTarget && !isSubmitting) {
+                handleClose();
+              }
+            }}
           >
+            {/* Submitting overlay */}
+            {isSubmitting && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+                <div className="bg-white rounded-xl shadow p-4 flex items-center space-x-3">
+                  <Loader2 className="w-5 h-5 animate-spin text-sky-500" />
+                  <span className="text-neutral-900">Submitting your booking...</span>
+                </div>
+              </div>
+            )}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", duration: 0.3 }}
+              className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
             {/* Header */}
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
               <h2 className="text-2xl font-bold text-neutral-900">Book Service</h2>
@@ -493,22 +510,10 @@ const ServiceBookingModal = ({ service, isOpen, onClose, onSubmit, initialData }
               )}
             </div>
           </motion.div>
-        </div>
-      )}
-
-      {/* Success modal - only shown in edit mode */}
-      {initialData && onSubmit && (
-        <SuccessModal
-          isOpen={successOpen}
-          title="Updated"
-          message="Service booking details updated successfully!"
-          onClose={() => {
-            setSuccessOpen(false);
-          }}
-          confirmText="OK"
-        />
-      )}
-    </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

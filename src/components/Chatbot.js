@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Search, Send, Phone } from 'lucide-react';
+import { MessageCircle, Search, Phone } from 'lucide-react';
 import { apiService } from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -80,26 +80,19 @@ const Chatbot = () => {
 
   return (
     <>
-      {/* Chatbot Toggle Button - Fixed bottom right, positioned below Book Now on mobile */}
+      {/* Need Help Button - Fixed bottom right, styled like Rent Now */}
       <motion.button
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[60] w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-2xl flex items-center justify-center transition-all ${
-          isOpen
-            ? 'bg-red-500 hover:bg-red-600'
-            : 'bg-primary-blue hover:bg-primary-blue-light'
+        className={`fixed right-4 z-[60] px-4 py-2.5 bg-gradient-to-r from-primary-blue to-primary-blue-light text-white rounded-full font-semibold text-xs shadow-2xl hover:from-primary-blue-light hover:to-primary-blue transition-all duration-300 hover:scale-105 active:scale-95 ${
+          isOpen ? 'md:bottom-24 bottom-20' : 'md:bottom-6 bottom-4'
         }`}
-        style={{ bottom: '16px' }}
-        aria-label="Open chatbot"
+        aria-label="Need Help"
       >
-        {isOpen ? (
-          <X className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-        ) : (
-          <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-        )}
+        {isOpen ? 'Close' : 'Need Help'}
       </motion.button>
 
       {/* Chatbot Window */}

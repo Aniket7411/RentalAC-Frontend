@@ -340,8 +340,11 @@ const AdminOrderDetail = () => {
                                     </div>
                                     <div className="text-sm space-y-1">
                                       <p><span className="font-medium text-gray-700">Monthly Payment:</span> <span className="text-blue-600 font-semibold">₹{item.monthlyPrice.toLocaleString()}/month</span></p>
+                                      {item.securityDeposit > 0 && (
+                                        <p><span className="font-medium text-gray-700">Security Deposit:</span> <span className="text-blue-600 font-semibold">₹{(item.securityDeposit || 0).toLocaleString()}</span></p>
+                                      )}
                                       <p><span className="font-medium text-gray-700">Tenure:</span> <span className="text-gray-900">{item.monthlyTenure} months</span></p>
-                                      <p><span className="font-medium text-gray-700">Total Amount:</span> <span className="text-gray-900">₹{(item.monthlyPrice * item.monthlyTenure).toLocaleString()}</span></p>
+                                      <p><span className="font-medium text-gray-700">Total Amount (1 month + Security Deposit):</span> <span className="text-gray-900">₹{((item.monthlyPrice || 0) + (item.securityDeposit || 0)).toLocaleString()}</span></p>
                                     </div>
                                   </div>
                                 ) : (
@@ -369,6 +372,9 @@ const AdminOrderDetail = () => {
                                 <div className="mt-2 text-xs">
                                   <p className="text-blue-600 font-semibold">Monthly Payment</p>
                                   <p className="text-text-light">₹{item.monthlyPrice.toLocaleString()}/month × {item.monthlyTenure} months</p>
+                                  {item.securityDeposit > 0 && (
+                                    <p className="text-text-light">Security Deposit: ₹{(item.securityDeposit || 0).toLocaleString()}</p>
+                                  )}
                                 </div>
                               ) : (
                                 item.duration && (
@@ -541,7 +547,7 @@ const AdminOrderDetail = () => {
                       <div className="space-y-1 text-xs">
                         {items.filter(item => item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure).map((item, idx) => (
                           <p key={idx} className="text-gray-700">
-                            • ₹{item.monthlyPrice.toLocaleString()}/month for {item.monthlyTenure} months
+                            • ₹{item.monthlyPrice.toLocaleString()}/month for {item.monthlyTenure} months (Security Deposit: ₹{(item.securityDeposit || 0).toLocaleString()})
                           </p>
                         ))}
                       </div>

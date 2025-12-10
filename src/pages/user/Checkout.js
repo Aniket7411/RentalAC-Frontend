@@ -133,7 +133,10 @@ const Checkout = () => {
               // Calculate price based on payment type
               let finalPrice = price;
               if (rental.isMonthlyPayment && rental.monthlyPrice && rental.monthlyTenure) {
-                finalPrice = rental.monthlyPrice * rental.monthlyTenure;
+                // Monthly payment: one month charge + security deposit
+                const oneMonthCharge = rental.monthlyPrice;
+                const securityDeposit = rental.securityDeposit || 0;
+                finalPrice = oneMonthCharge + securityDeposit;
               }
 
               return {
@@ -147,6 +150,7 @@ const Checkout = () => {
                 isMonthlyPayment: rental.isMonthlyPayment || false,
                 monthlyPrice: rental.monthlyPrice || null,
                 monthlyTenure: rental.monthlyTenure || null,
+                securityDeposit: rental.isMonthlyPayment ? (rental.securityDeposit || 0) : null,
                 // Include product details for admin reference
                 productDetails: {
                   brand: rental.brand,
@@ -279,6 +283,8 @@ const Checkout = () => {
 
           console.log('Placing order with data:', JSON.stringify(orderData, null, 2));
 
+          // Backend fix: Email notifications are now non-blocking, so API responds quickly (< 3 seconds)
+          // Order creation will succeed even if email notification fails
           const orderResponse = await apiService.createOrder(orderData);
           if (!orderResponse.success) {
             throw new Error(orderResponse.message || 'Failed to create order');
@@ -710,6 +716,11 @@ const Checkout = () => {
                             <p className="text-xs text-blue-600 mt-1 font-medium">
                               Monthly Payment: ₹{item.monthlyPrice.toLocaleString()}/month
                             </p>
+                            {item.securityDeposit > 0 && (
+                              <p className="text-xs text-blue-600 mt-1 font-medium">
+                                Security Deposit: ₹{(item.securityDeposit || 0).toLocaleString()}
+                              </p>
+                            )}
                             <p className="text-xs text-text-light mt-1">
                               Duration: {item.monthlyTenure} months
                             </p>
@@ -731,7 +742,10 @@ const Checkout = () => {
                         <p className="font-semibold text-text-dark">
                           ₹{(() => {
                             if (item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure) {
-                              const monthlyTotal = item.monthlyPrice * item.monthlyTenure;
+                              // Monthly payment: one month charge + security deposit
+                              const oneMonthCharge = item.monthlyPrice;
+                              const securityDeposit = item.securityDeposit || 0;
+                              const monthlyTotal = oneMonthCharge + securityDeposit;
                               const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount) 
                                 ? item.installationCharges.amount 
                                 : 0;
@@ -831,7 +845,10 @@ const Checkout = () => {
                       // Calculate rental total without installation charges
                       const rentalTotalWithoutInstallation = rentals.reduce((total, item) => {
                         if (item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure) {
-                          return total + (item.monthlyPrice * item.monthlyTenure);
+                          // Monthly payment: one month charge + security deposit
+                          const oneMonthCharge = item.monthlyPrice;
+                          const securityDeposit = item.securityDeposit || 0;
+                          return total + oneMonthCharge + securityDeposit;
                         }
                         const selectedDuration = item.selectedDuration || 3;
                         const price = item.price && typeof item.price === 'object'
