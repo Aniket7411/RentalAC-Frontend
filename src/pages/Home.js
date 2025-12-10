@@ -509,7 +509,7 @@ const Home = () => {
                 >
                   <div className="aspect-[4/3] bg-gradient-to-br from-blue-100 to-blue-200 relative">
                     <img
-                      src="/splitac.jpg"
+                      src="/splitacnew.png"
                       alt="Split AC"
                       className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
                       onError={(e) => {
@@ -527,7 +527,7 @@ const Home = () => {
                 >
                   <div className="aspect-[4/3] bg-gradient-to-br from-blue-100 to-blue-200 relative">
                     <img
-                      src="/windowac.jfif"
+                      src="/windowacnew.png"
                       alt="Window AC"
                       className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
                       onError={(e) => {
@@ -590,7 +590,7 @@ const Home = () => {
                 >
                   <div className="aspect-[4/3] bg-gradient-to-br from-cyan-100 to-cyan-200 relative">
                     <img
-                      src="/doubldoor.jfif"
+                      src="/doublerefridgenew.png"
                       alt="Double Door Refrigerator"
                       className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
                       onError={(e) => {
@@ -635,7 +635,7 @@ const Home = () => {
                 >
                   <div className="aspect-[4/3] bg-gradient-to-br from-purple-100 to-purple-200 relative">
                     <img
-                      src="/fullyautomaticwashingmachine.jfif"
+                      src="/fullywashingnew.png"
                       alt="Fully Automatic Washing Machine"
                       className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
                       onError={(e) => {
@@ -653,7 +653,7 @@ const Home = () => {
                 >
                   <div className="aspect-[4/3] bg-gradient-to-br from-purple-100 to-purple-200 relative">
                     <img
-                      src="https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=400&q=80"
+                      src="/semiwahingnew.png"
                       alt="Semi-Automatic Washing Machine"
                       className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500"
                       onError={(e) => {
