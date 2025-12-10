@@ -59,7 +59,7 @@ const HeroCarousel = () => {
   };
 
   return (
-    <div className="relative w-full h-[500px] sm:h-[600px] md:h-[700px] overflow-hidden rounded-2xl md:rounded-3xl shadow-2xl">
+    <div className="relative w-full h-[600px] sm:h-[650px] md:h-[700px] overflow-hidden rounded-2xl md:rounded-3xl shadow-2xl">
       <AnimatePresence mode="wait">
         {slides.map((slide, index) => {
           if (index !== currentIndex) return null;

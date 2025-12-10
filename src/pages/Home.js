@@ -113,7 +113,7 @@ const Home = () => {
   // Check for available coupons and show modal if coupons exist
   useEffect(() => {
     let timer;
-    
+
     const checkAndShowCoupons = async () => {
       const hasSeenCoupons = localStorage.getItem('hasSeenCoupons');
       if (!hasSeenCoupons) {
@@ -135,9 +135,9 @@ const Home = () => {
         }
       }
     };
-    
+
     checkAndShowCoupons();
-    
+
     return () => {
       if (timer) {
         clearTimeout(timer);
@@ -207,7 +207,7 @@ const Home = () => {
       >
         Rent Now
       </Link>
-      
+
       {/* Book Now Button - Middle */}
       <Link
         to="/service-request"
@@ -269,7 +269,7 @@ const Home = () => {
 
       {/* NEW Hero Section - Split Screen */}
       <section
-        className="relative w-full h-[60vh] sm:h-[70vh] md:h-[80vh] lg:h-[90vh] overflow-hidden flex flex-col md:flex-row"
+        className="relative w-full h-[75vh] sm:h-[75vh] md:h-[80vh] lg:h-[90vh] overflow-hidden flex flex-col md:flex-row"
         onMouseMove={(e) => {
           if (!isDesktop) return;
           const rect = e.currentTarget.getBoundingClientRect();
@@ -288,7 +288,7 @@ const Home = () => {
       >
         {/* Left Panel: Rental */}
         <motion.div
-          className="relative w-full md:w-1/2 h-[50vh] md:h-full overflow-hidden cursor-pointer group"
+          className="relative w-full md:w-1/2 h-[60vh] md:h-full overflow-hidden cursor-pointer group"
           animate={isDesktop ? {
             width: hoveredPanel === 'left' ? '65%' : hoveredPanel === 'right' ? '35%' : '50%',
           } : {}}
@@ -320,9 +320,9 @@ const Home = () => {
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 md:mb-5 leading-tight">
                 Don't Buy. Just Rent.
               </h2>
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl mb-6 sm:mb-8 text-white/90 leading-relaxed">
+              {/* <p className="text-sm sm:text-base md:text-lg lg:text-xl mb-6 sm:mb-8 text-white/90 leading-relaxed">
                 Premium Split & Window ACs starting at flexible monthly plans. Free relocation included.
-              </p>
+              </p> */}
               <Link
                 to="/browse?category=AC"
                 className="cursor-hover inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 bg-transparent border-2 border-white text-white rounded-lg font-semibold text-sm sm:text-base md:text-lg hover:bg-white/10 transition-all duration-300"
@@ -336,7 +336,7 @@ const Home = () => {
 
         {/* Right Panel: Services */}
         <motion.div
-          className="relative w-full md:w-1/2 h-[50vh] md:h-full overflow-hidden cursor-pointer group"
+          className="relative w-full md:w-1/2 h-[60vh] md:h-full overflow-hidden cursor-pointer group"
           animate={isDesktop ? {
             width: hoveredPanel === 'right' ? '65%' : hoveredPanel === 'left' ? '35%' : '50%',
           } : {}}
@@ -368,9 +368,9 @@ const Home = () => {
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 md:mb-5 leading-tight">
                 Expert AC Care & Repair.
               </h2>
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl mb-6 sm:mb-8 text-white/90 leading-relaxed">
+              {/* <p className="text-sm sm:text-base md:text-lg lg:text-xl mb-6 sm:mb-8 text-white/90 leading-relaxed">
                 From Foam Wash to Gas Charging. Mumbai's most trusted technicians.
-              </p>
+              </p> */}
               <Link
                 to="/service-request"
                 className="cursor-hover inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 bg-primary-blue text-white rounded-lg font-semibold text-sm sm:text-base md:text-lg hover:bg-primary-blue-light transition-all duration-300 shadow-lg hover:shadow-xl"
