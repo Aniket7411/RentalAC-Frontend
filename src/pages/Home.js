@@ -23,6 +23,7 @@ const Home = () => {
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
   const [showCouponModal, setShowCouponModal] = useState(false);
+  const [hasCoupons, setHasCoupons] = useState(false);
 
   useEffect(() => {
     // Custom cursor effect
@@ -109,16 +110,39 @@ const Home = () => {
     loadData();
   }, []);
 
-  // Show coupon modal once on page load (check localStorage)
+  // Check for available coupons and show modal if coupons exist
   useEffect(() => {
-    const hasSeenCoupons = localStorage.getItem('hasSeenCoupons');
-    if (!hasSeenCoupons) {
-      // Show modal after a short delay for better UX
-      const timer = setTimeout(() => {
-        setShowCouponModal(true);
-      }, 2000); // 2 seconds delay
-      return () => clearTimeout(timer);
-    }
+    let timer;
+    
+    const checkAndShowCoupons = async () => {
+      const hasSeenCoupons = localStorage.getItem('hasSeenCoupons');
+      if (!hasSeenCoupons) {
+        try {
+          // Check if there are any available coupons
+          const response = await apiService.getAvailableCoupons();
+          if (response.success && response.data && response.data.length > 0) {
+            setHasCoupons(true);
+            // Show modal after a short delay for better UX
+            timer = setTimeout(() => {
+              setShowCouponModal(true);
+            }, 2000); // 2 seconds delay
+          } else {
+            setHasCoupons(false);
+          }
+        } catch (error) {
+          console.error('Error checking coupons:', error);
+          setHasCoupons(false);
+        }
+      }
+    };
+    
+    checkAndShowCoupons();
+    
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
   }, []);
 
   const handleCloseCouponModal = () => {
@@ -174,10 +198,11 @@ const Home = () => {
         />
       )}
 
-      {/* Sticky Mobile Book Now Button - Positioned above chat icon */}
+      {/* Sticky Mobile Book Now Button - Positioned above chat icon with proper spacing */}
       <Link
         to="/service-request"
-        className="fixed bottom-24 right-4 md:hidden z-50 px-5 py-2.5 bg-primary-blue text-white rounded-full font-semibold text-sm shadow-2xl hover:bg-primary-blue-light transition-all duration-300 hover:scale-105 active:scale-95"
+        className="fixed right-4 md:hidden z-50 px-4 py-2.5 bg-primary-blue text-white rounded-full font-semibold text-xs shadow-2xl hover:bg-primary-blue-light transition-all duration-300 hover:scale-105 active:scale-95"
+        style={{ bottom: '80px' }}
       >
         Book Now
       </Link>

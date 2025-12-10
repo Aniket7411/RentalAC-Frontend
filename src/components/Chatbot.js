@@ -92,6 +92,7 @@ const Chatbot = () => {
             ? 'bg-red-500 hover:bg-red-600'
             : 'bg-primary-blue hover:bg-primary-blue-light'
         }`}
+        style={{ bottom: '16px' }}
         aria-label="Open chatbot"
       >
         {isOpen ? (
