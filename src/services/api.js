@@ -6,6 +6,7 @@ import { uploadMultipleFilesToCloudinary } from '../utils/cloudinary';
 const API_BASE_URL = "https://rental-backend-new.onrender.com/api"
 
 // Create axios instance with default config
+console.log(API_BASE_URL);
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
