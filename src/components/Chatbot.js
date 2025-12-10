@@ -80,14 +80,14 @@ const Chatbot = () => {
 
   return (
     <>
-      {/* Chatbot Toggle Button - Fixed bottom right */}
+      {/* Chatbot Toggle Button - Fixed bottom right, positioned below Book Now on mobile */}
       <motion.button
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-6 z-[60] w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-2xl flex items-center justify-center transition-all ${
+        className={`fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[60] w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-2xl flex items-center justify-center transition-all ${
           isOpen
             ? 'bg-red-500 hover:bg-red-600'
             : 'bg-primary-blue hover:bg-primary-blue-light'
@@ -108,7 +108,7 @@ const Chatbot = () => {
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="fixed bottom-24 right-6 z-[55] w-[calc(100vw-3rem)] sm:w-96 h-[calc(100vh-8rem)] max-h-[600px] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
+            className="fixed bottom-20 right-4 md:bottom-24 md:right-6 z-[55] w-[calc(100vw-2rem)] sm:w-96 h-[calc(100vh-7rem)] max-h-[600px] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-primary-blue to-primary-blue-light text-white p-4 flex items-center justify-between">

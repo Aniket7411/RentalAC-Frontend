@@ -162,7 +162,7 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background-light">
+    <div className="min-h-screen bg-background-light overflow-x-hidden" style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}>
       {/* Custom Cursor - Desktop Only */}
       {isDesktop && (
         <div
@@ -174,10 +174,10 @@ const Home = () => {
         />
       )}
 
-      {/* Sticky Mobile Book Now Button */}
+      {/* Sticky Mobile Book Now Button - Positioned above chat icon */}
       <Link
         to="/service-request"
-        className="fixed bottom-4 right-4 md:hidden z-50 px-6 py-3 bg-primary-blue text-white rounded-full font-semibold shadow-2xl hover:bg-primary-blue-light transition-all duration-300 hover:scale-105 active:scale-95"
+        className="fixed bottom-24 right-4 md:hidden z-50 px-5 py-2.5 bg-primary-blue text-white rounded-full font-semibold text-sm shadow-2xl hover:bg-primary-blue-light transition-all duration-300 hover:scale-105 active:scale-95"
       >
         Book Now
       </Link>
