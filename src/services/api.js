@@ -108,6 +108,21 @@ export const apiService = {
     }
   },
 
+  resetPassword: async (token, newPassword) => {
+    try {
+      const response = await api.post('/auth/reset-password', { token, newPassword });
+      return {
+        success: true,
+        message: response.data.message || 'Password reset successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to reset password. The link may have expired. Please request a new one.',
+      };
+    }
+  },
+
   // ACs - Public endpoints
   getACs: async (filters = {}) => {
     try {

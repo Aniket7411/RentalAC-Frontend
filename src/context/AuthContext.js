@@ -85,6 +85,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const resetPassword = async (token, newPassword) => {
+    try {
+      const response = await apiService.resetPassword(token, newPassword);
+      return response;
+    } catch (error) {
+      console.error('Reset password error:', error);
+      return {
+        success: false,
+        message: error.message || 'An error occurred. Please try again.'
+      };
+    }
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
@@ -102,6 +115,7 @@ export const AuthProvider = ({ children }) => {
     login,
     signup,
     forgotPassword,
+    resetPassword,
     logout,
     updateUser,
     isAuthenticated: !!user,
