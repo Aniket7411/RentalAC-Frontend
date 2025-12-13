@@ -411,7 +411,7 @@ const ACDetail = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-5 border border-gray-100 sticky top-4 self-start"
+            className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4 md:p-5 border border-gray-100 sticky top-4 self-start flex flex-col"
           >
             <div className="flex items-start justify-between mb-2 sm:mb-3">
               <div className="flex-1">
@@ -447,107 +447,9 @@ const ACDetail = () => {
               <span className="text-xs sm:text-sm truncate">{ac.location}</span>
             </div>
 
-            {ac.description && (
-              <div className="mb-2 pb-2 border-b border-gray-200">
-                <button
-                  onClick={() => setShowDescription(!showDescription)}
-                  className="w-full cursor-pointer list-none flex items-center justify-between"
-                >
-                  <h3 className="font-semibold text-text-dark text-sm sm:text-base">Description</h3>
-                  {showDescription ? (
-                    <Minus className="w-4 h-4 text-gray-400" />
-                  ) : (
-                    <Plus className="w-4 h-4 text-gray-400" />
-                  )}
-                </button>
-                {showDescription && (
-                  <p className="text-text-light leading-relaxed text-xs sm:text-sm mt-2">{ac.description}</p>
-                )}
-              </div>
-            )}
-
-            {/* Features & Specs - Compact & Collapsible */}
-            {(ac.features?.specs?.length > 0 || ac.features?.dimensions || ac.features?.safety?.length > 0 || ac.energyRating || ac.operationType || ac.loadType) && (
-              <div className="mb-2 pb-2 border-b border-gray-200">
-                <button
-                  onClick={() => setShowFeatures(!showFeatures)}
-                  className="w-full cursor-pointer list-none flex items-center justify-between"
-                >
-                  <h3 className="font-semibold text-text-dark text-sm sm:text-base">Features & Specifications</h3>
-                  {showFeatures ? (
-                    <Minus className="w-4 h-4 text-gray-400" />
-                  ) : (
-                    <Plus className="w-4 h-4 text-gray-400" />
-                  )}
-                </button>
-                {showFeatures && (
-                  <div className="space-y-1.5 mt-2">
-                    {ac.features?.specs?.length > 0 && (
-                      <div>
-                        <h4 className="text-xs font-medium text-text-dark mb-0.5">Specifications</h4>
-                        <ul className="list-disc list-inside text-xs text-text-light space-y-0.5">
-                          {ac.features.specs.slice(0, 3).map((spec, idx) => (
-                            <li key={idx}>{spec}</li>
-                          ))}
-                          {ac.features.specs.length > 3 && (
-                            <li className="text-primary-blue cursor-pointer">+{ac.features.specs.length - 3} more</li>
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                    {ac.features?.dimensions && (
-                      <div>
-                        <h4 className="text-xs font-medium text-text-dark mb-0.5">Dimensions</h4>
-                        <p className="text-xs text-text-light">{ac.features.dimensions}</p>
-                      </div>
-                    )}
-                    {ac.energyRating && (
-                      <div>
-                        <h4 className="text-xs font-medium text-text-dark mb-0.5">Energy Rating</h4>
-                        <p className="text-xs text-text-light">{ac.energyRating}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Payment Type Selection Buttons */}
-            {ac.status === 'Available' && (
-              <div className="mb-3">
-                <div className="flex gap-3 mb-3">
-                  {/* Pay Advance Button - Green, Left */}
-                  <button
-                    type="button"
-                    onClick={() => setIsMonthlyPayment(false)}
-                    className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm sm:text-base transition-all duration-300 ${!isMonthlyPayment
-                      ? 'bg-green-500 text-white shadow-lg scale-105'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                  >
-                    Pay Advance
-                  </button>
-
-                  {/* Pay Monthly Button - Right */}
-                  {ac.monthlyPaymentEnabled && ac.monthlyPrice && (
-                    <button
-                      type="button"
-                      onClick={() => setIsMonthlyPayment(true)}
-                      className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm sm:text-base transition-all duration-300 ${isMonthlyPayment
-                        ? 'bg-primary-blue text-white shadow-lg scale-105'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                    >
-                      Pay Monthly
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-
             {/* Pricing with Range Slider - Only for Advance Payment */}
             {!isMonthlyPayment && (
-              <div className="mb-3">
+              <div className="mb-3 order-1 lg:order-6">
                 <div className="flex items-center gap-2 mb-3">
                   <h3 className="font-semibold text-text-dark text-sm sm:text-base">Choose Tenure</h3>
                   <div className="relative group">
@@ -602,7 +504,7 @@ const ACDetail = () => {
 
             {/* Monthly Payment Option - Show when Pay Monthly is selected */}
             {isMonthlyPayment && ac.status === 'Available' && ac.monthlyPaymentEnabled && ac.monthlyPrice && (
-              <div className="mb-3">
+              <div className="mb-3 order-1 lg:order-6">
                 <div className="flex items-center gap-2 mb-3">
                   <h3 className="font-semibold text-text-dark text-sm sm:text-base">Choose Tenure</h3>
                   <div className="relative group">
@@ -743,25 +645,28 @@ const ACDetail = () => {
               </div>
             )}
 
-            {/* Add to Cart Button - Always shown (works for both logged-in and non-logged-in users) */}
-            {ac.status === 'Available' && (
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleAddToCartClick}
-                disabled={addedToCart}
-                className={`w-full py-2.5 sm:py-3 md:py-3.5 rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-300 font-semibold text-sm sm:text-base md:text-lg mb-3 ${addedToCart
-                  ? 'bg-green-500 text-white cursor-not-allowed'
-                  : 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white'
-                  }`}
-              >
-                {addedToCart ? 'Added to Cart ✓' : 'Add to Cart'}
-              </motion.button>
+            {ac.description && (
+              <div className="mb-2 pb-2 border-b border-gray-200 order-2 lg:order-2">
+                <button
+                  onClick={() => setShowDescription(!showDescription)}
+                  className="w-full cursor-pointer list-none flex items-center justify-between"
+                >
+                  <h3 className="font-semibold text-text-dark text-sm sm:text-base">Description</h3>
+                  {showDescription ? (
+                    <Minus className="w-4 h-4 text-gray-400" />
+                  ) : (
+                    <Plus className="w-4 h-4 text-gray-400" />
+                  )}
+                </button>
+                {showDescription && (
+                  <p className="text-text-light leading-relaxed text-xs sm:text-sm mt-2">{ac.description}</p>
+                )}
+              </div>
             )}
 
-            {/* Collapsible Safety and Dimensions Section */}
+            {/* Collapsible Safety and Dimensions Section - Additional Details */}
             {((ac.features?.safety && ac.features.safety.length > 0) || ac.features?.dimensions) && (
-              <div className="mt-2 pt-3 border-t border-gray-200">
+              <div className="mb-2 pb-2 border-b border-gray-200 order-3 lg:order-3">
                 <button
                   onClick={() => setShowAdditionalDetails(!showAdditionalDetails)}
                   className="w-full cursor-pointer list-none flex items-center justify-between text-sm font-semibold text-text-dark hover:text-primary-blue transition-colors"
@@ -808,6 +713,101 @@ const ACDetail = () => {
                   </div>
                 )}
               </div>
+            )}
+
+            {/* Features & Specs - Compact & Collapsible */}
+            {(ac.features?.specs?.length > 0 || ac.features?.dimensions || ac.features?.safety?.length > 0 || ac.energyRating || ac.operationType || ac.loadType) && (
+              <div className="mb-2 pb-2 border-b border-gray-200 order-4 lg:order-4">
+                <button
+                  onClick={() => setShowFeatures(!showFeatures)}
+                  className="w-full cursor-pointer list-none flex items-center justify-between"
+                >
+                  <h3 className="font-semibold text-text-dark text-sm sm:text-base">Features & Specifications</h3>
+                  {showFeatures ? (
+                    <Minus className="w-4 h-4 text-gray-400" />
+                  ) : (
+                    <Plus className="w-4 h-4 text-gray-400" />
+                  )}
+                </button>
+                {showFeatures && (
+                  <div className="space-y-1.5 mt-2">
+                    {ac.features?.specs?.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-medium text-text-dark mb-0.5">Specifications</h4>
+                        <ul className="list-disc list-inside text-xs text-text-light space-y-0.5">
+                          {ac.features.specs.slice(0, 3).map((spec, idx) => (
+                            <li key={idx}>{spec}</li>
+                          ))}
+                          {ac.features.specs.length > 3 && (
+                            <li className="text-primary-blue cursor-pointer">+{ac.features.specs.length - 3} more</li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                    {ac.features?.dimensions && (
+                      <div>
+                        <h4 className="text-xs font-medium text-text-dark mb-0.5">Dimensions</h4>
+                        <p className="text-xs text-text-light">{ac.features.dimensions}</p>
+                      </div>
+                    )}
+                    {ac.energyRating && (
+                      <div>
+                        <h4 className="text-xs font-medium text-text-dark mb-0.5">Energy Rating</h4>
+                        <p className="text-xs text-text-light">{ac.energyRating}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Payment Type Selection Buttons */}
+            {ac.status === 'Available' && (
+              <div className="mb-3 order-5 lg:order-5">
+                <div className="flex gap-3 mb-3">
+                  {/* Pay Advance Button - Green, Left */}
+                  <button
+                    type="button"
+                    onClick={() => setIsMonthlyPayment(false)}
+                    className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm sm:text-base transition-all duration-300 ${!isMonthlyPayment
+                      ? 'bg-green-500 text-white shadow-lg scale-105'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                  >
+                    Pay Advance
+                  </button>
+
+                  {/* Pay Monthly Button - Right */}
+                  {ac.monthlyPaymentEnabled && ac.monthlyPrice && (
+                    <button
+                      type="button"
+                      onClick={() => setIsMonthlyPayment(true)}
+                      className={`flex-1 py-3 px-4 rounded-lg font-semibold text-sm sm:text-base transition-all duration-300 ${isMonthlyPayment
+                        ? 'bg-primary-blue text-white shadow-lg scale-105'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                    >
+                      Pay Monthly
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Add to Cart Button - Always shown (works for both logged-in and non-logged-in users) */}
+            {ac.status === 'Available' && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleAddToCartClick}
+                disabled={addedToCart}
+                className={`w-full py-2.5 sm:py-3 md:py-3.5 rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-300 font-semibold text-sm sm:text-base md:text-lg mb-3 order-6 lg:order-none ${addedToCart
+                  ? 'bg-green-500 text-white cursor-not-allowed'
+                  : 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white'
+                  }`}
+              >
+                {addedToCart ? 'Added to Cart ✓' : 'Add to Cart'}
+              </motion.button>
             )}
           </motion.div>
         </div>

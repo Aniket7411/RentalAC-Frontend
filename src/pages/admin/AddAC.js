@@ -289,7 +289,7 @@ const AddAC = () => {
     setError('');
     setSuccess(false);
 
-    if (!formData.name || !formData.brand || !formData.capacity || !formData.location) {
+    if (!formData.name || !formData.capacity || !formData.location) {
       setError('Please fill all required fields');
       return;
     }
@@ -522,13 +522,12 @@ const AddAC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-text-dark mb-2">
-                  Brand <span className="text-red-500">*</span>
+                  Brand
                 </label>
                 <select
                   name="brand"
                   value={formData.brand}
                   onChange={handleChange}
-                  required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
                 >
                   <option value="">Select Brand</option>

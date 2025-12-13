@@ -46,7 +46,7 @@ const BrowseACs = () => {
     location: '',
     duration: '3',
     condition: [], // Changed to array for multiple selections
-    priceSort: '',
+    priceSort: 'low-to-high',
   });
   const [showFilters, setShowFilters] = useState(false);
   const modalTimerRef = useRef(null);
