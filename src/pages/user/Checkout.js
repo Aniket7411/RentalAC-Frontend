@@ -281,8 +281,6 @@ const Checkout = () => {
                 : 'Order contains services',
           };
 
-          console.log('Placing order with data:', JSON.stringify(orderData, null, 2));
-
           // Backend fix: Email notifications are now non-blocking, so API responds quickly (< 3 seconds)
           // Order creation will succeed even if email notification fails
           const orderResponse = await apiService.createOrder(orderData);
