@@ -449,7 +449,7 @@ const ACDetail = () => {
 
             {/* Pricing with Range Slider - Only for Advance Payment */}
             {!isMonthlyPayment && (
-              <div className="mb-3 order-4 lg:order-4">
+              <div className="mb-3 order-2 lg:order-4">
                 <div className="flex items-center gap-2 mb-3">
                   <h3 className="font-semibold text-text-dark text-sm sm:text-base">Choose Tenure</h3>
                   <div className="relative group">
@@ -504,7 +504,7 @@ const ACDetail = () => {
 
             {/* Monthly Payment Option - Show when Pay Monthly is selected */}
             {isMonthlyPayment && ac.status === 'Available' && ac.monthlyPaymentEnabled && ac.monthlyPrice && (
-              <div className="mb-3 order-4 lg:order-4">
+              <div className="mb-3 order-2 lg:order-4">
                 <div className="flex items-center gap-2 mb-3">
                   <h3 className="font-semibold text-text-dark text-sm sm:text-base">Choose Tenure</h3>
                   <div className="relative group">
@@ -646,7 +646,7 @@ const ACDetail = () => {
             )}
 
             {ac.description && (
-              <div className="mb-2 pb-2 border-b border-gray-200 order-2 lg:order-2">
+              <div className="mb-2 pb-2 border-b border-gray-200 order-3 lg:order-2">
                 <button
                   onClick={() => setShowDescription(!showDescription)}
                   className="w-full cursor-pointer list-none flex items-center justify-between"
@@ -717,7 +717,7 @@ const ACDetail = () => {
 
             {/* Features & Specs - Compact & Collapsible */}
             {(ac.features?.specs?.length > 0 || ac.features?.dimensions || ac.features?.safety?.length > 0 || ac.energyRating || ac.operationType || ac.loadType) && (
-              <div className="mb-2 pb-2 border-b border-gray-200 order-3 lg:order-3">
+              <div className="mb-2 pb-2 border-b border-gray-200 order-4 lg:order-3">
                 <button
                   onClick={() => setShowFeatures(!showFeatures)}
                   className="w-full cursor-pointer list-none flex items-center justify-between"
