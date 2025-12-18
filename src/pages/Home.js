@@ -317,15 +317,14 @@ const Home = () => {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="max-w-lg"
             >
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 md:mb-5 leading-tight">
-                Don't Buy. Just Rent.
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 md:mb-5 leading-tight">Rent Smart, Live Easy
               </h2>
               {/* <p className="text-sm sm:text-base md:text-lg lg:text-xl mb-6 sm:mb-8 text-white/90 leading-relaxed">
                 Premium Split & Window ACs starting at flexible monthly plans. Free relocation included.
               </p> */}
               <Link
                 to="/browse?category=AC"
-                className="cursor-hover inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 bg-transparent border-2 border-white text-white rounded-lg font-semibold text-sm sm:text-base md:text-lg hover:bg-white/10 transition-all duration-300"
+                className="cursor-hover inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 bg-primary-blue text-white rounded-lg font-semibold text-sm sm:text-base md:text-lg hover:bg-primary-blue-light transition-all duration-300 shadow-lg hover:shadow-xl"
               >
                 Rent Now
                 <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
