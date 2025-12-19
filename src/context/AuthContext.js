@@ -53,6 +53,40 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // OTP-based login methods
+  const sendOTP = async (phoneNumber) => {
+    try {
+      const response = await apiService.sendOTP(phoneNumber);
+      return response;
+    } catch (error) {
+      console.error('Send OTP error:', error);
+      return {
+        success: false,
+        message: error.message || 'An error occurred while sending OTP. Please try again.'
+      };
+    }
+  };
+
+  const verifyOTP = async (phoneNumber, otp, sessionId) => {
+    try {
+      const response = await apiService.verifyOTP(phoneNumber, otp, sessionId);
+      
+      if (response.success) {
+        setUser(response.user);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        localStorage.setItem('token', response.token);
+        return { success: true, user: response.user };
+      }
+      return { success: false, message: response.message || 'OTP verification failed' };
+    } catch (error) {
+      console.error('Verify OTP error:', error);
+      return {
+        success: false,
+        message: error.message || 'An error occurred during OTP verification. Please try again.'
+      };
+    }
+  };
+
   const signup = async (userData) => {
     try {
       const response = await apiService.userSignup(userData);
@@ -65,6 +99,40 @@ export const AuthProvider = ({ children }) => {
       return { success: false, message: response.message || 'Signup failed' };
     } catch (error) {
       console.error('Signup error:', error);
+      return {
+        success: false,
+        message: error.message || 'An error occurred during signup. Please try again.'
+      };
+    }
+  };
+
+  // OTP-based signup methods
+  const sendSignupOTP = async (phoneNumber, name = null, email = null) => {
+    try {
+      const response = await apiService.sendSignupOTP(phoneNumber, name, email);
+      return response;
+    } catch (error) {
+      console.error('Send signup OTP error:', error);
+      return {
+        success: false,
+        message: error.message || 'An error occurred while sending OTP. Please try again.'
+      };
+    }
+  };
+
+  const verifySignupOTP = async (phoneNumber, otp, sessionId, userData = {}) => {
+    try {
+      const response = await apiService.verifySignupOTP(phoneNumber, otp, sessionId, userData);
+      
+      if (response.success) {
+        setUser(response.user);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        localStorage.setItem('token', response.token);
+        return { success: true, user: response.user };
+      }
+      return { success: false, message: response.message || 'Signup failed' };
+    } catch (error) {
+      console.error('Verify signup OTP error:', error);
       return {
         success: false,
         message: error.message || 'An error occurred during signup. Please try again.'
@@ -118,6 +186,11 @@ export const AuthProvider = ({ children }) => {
     resetPassword,
     logout,
     updateUser,
+    // OTP methods
+    sendOTP,
+    verifyOTP,
+    sendSignupOTP,
+    verifySignupOTP,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',
     isUser: user?.role === 'user',

@@ -43,7 +43,7 @@ const ACDetail = () => {
   const [isMonthlyPayment, setIsMonthlyPayment] = useState(false); // Monthly payment option
   const [monthlyTenure, setMonthlyTenure] = useState(3); // Minimum 3 months for monthly payment
   const [showDescription, setShowDescription] = useState(true);
-  const [showFeatures, setShowFeatures] = useState(true);
+  const [showFeatures, setShowFeatures] = useState(false);
   const [showAdditionalDetails, setShowAdditionalDetails] = useState(false);
   const { toasts, removeToast, success, error: showError } = useToast();
 
@@ -257,6 +257,10 @@ const ACDetail = () => {
     return ac.price[durationKey] || ac.price['3'] || 0;
   };
   const price = getPrice();
+
+  // Calculate discount and saving amount
+  const discountPercent = (ac?.discount && ac.discount > 0) ? ac.discount : 5;
+  const savingAmount = price > 0 ? Math.round((price * discountPercent) / 100) : 0;
 
   // Get advance payment price for comparison
   const getAdvancePrice = () => {
@@ -796,18 +800,36 @@ const ACDetail = () => {
 
             {/* Add to Cart Button - Always shown (works for both logged-in and non-logged-in users) */}
             {ac.status === 'Available' && (
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleAddToCartClick}
-                disabled={addedToCart}
-                className={`w-full py-2.5 sm:py-3 md:py-3.5 rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-300 font-semibold text-sm sm:text-base md:text-lg mb-3 order-5 lg:order-5 ${addedToCart
-                  ? 'bg-green-500 text-white cursor-not-allowed'
-                  : 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white'
-                  }`}
-              >
-                {addedToCart ? 'Added to Cart ✓' : 'Add to Cart'}
-              </motion.button>
+              <>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleAddToCartClick}
+                  disabled={addedToCart}
+                  className={`w-full py-2.5 sm:py-3 md:py-3.5 rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-300 font-semibold text-sm sm:text-base md:text-lg mb-2 order-5 lg:order-5 ${addedToCart
+                    ? 'bg-green-500 text-white cursor-not-allowed'
+                    : 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white'
+                    }`}
+                >
+                  {addedToCart ? 'Added to Cart ✓' : 'Add to Cart'}
+                </motion.button>
+                {/* Discount Display */}
+                <div className="mb-3 order-5 lg:order-5">
+                  <div className="flex flex-col items-center justify-center gap-1 text-sm sm:text-base">
+                    <div className="flex items-center justify-center gap-2">
+                      <Sparkles className="w-4 h-4 text-green-600" />
+                      <span className="font-semibold text-green-600">
+                        {(ac.discount && ac.discount > 0) ? `${ac.discount}%` : '5%'} instant discount
+                      </span>
+                    </div>
+                    {savingAmount > 0 && (
+                      <span className="text-xs sm:text-sm font-medium text-green-700">
+                        Save ₹{savingAmount.toLocaleString('en-IN')}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </>
             )}
           </motion.div>
         </div>

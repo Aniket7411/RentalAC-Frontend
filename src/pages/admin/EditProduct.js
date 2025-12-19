@@ -538,20 +538,15 @@ const EditProduct = () => {
                 <label className="block text-sm font-medium text-text-dark mb-2">
                   Brand <span className="text-red-500">*</span>
                 </label>
-                <select
+                <input
+                  type="text"
                   name="brand"
                   value={formData.brand}
                   onChange={handleChange}
                   required
+                  placeholder="e.g., LG, Samsung, Daikin, etc."
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
-                >
-                  <option value="">Select Brand</option>
-                  {brands.map((brand) => (
-                    <option key={brand} value={brand}>
-                      {brand}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
             </div>
 

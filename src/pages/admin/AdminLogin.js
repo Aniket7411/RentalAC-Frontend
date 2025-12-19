@@ -41,7 +41,7 @@ const AdminLogin = () => {
     setLoading(true);
 
     try {
-      const result = await login(formData.email, formData.password, 'admin');
+      const result = await login(formData.email, formData.password);
 
       if (result.success) {
         // Check if there's a stored redirect path

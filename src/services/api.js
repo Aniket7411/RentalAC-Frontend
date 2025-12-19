@@ -60,6 +60,45 @@ export const apiService = {
     }
   },
 
+  // OTP-based Login - Send OTP to phone number
+  sendOTP: async (phoneNumber) => {
+    try {
+      const response = await api.post('/auth/send-otp', { phone: phoneNumber });
+      return {
+        success: true,
+        message: response.data.message || 'OTP sent successfully',
+        sessionId: response.data.sessionId, // Store session ID for verification
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to send OTP. Please try again.',
+      };
+    }
+  },
+
+  // OTP-based Login - Verify OTP
+  verifyOTP: async (phoneNumber, otp, sessionId = null) => {
+    try {
+      const response = await api.post('/auth/verify-otp', {
+        phone: phoneNumber,
+        otp,
+        sessionId
+      });
+      return {
+        success: true,
+        token: response.data.token,
+        user: response.data.user,
+        message: response.data.message || 'OTP verified successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Invalid OTP. Please try again.',
+      };
+    }
+  },
+
   // Admin Authentication (kept for backward compatibility)
   adminLogin: async (email, password) => {
     try {
@@ -90,6 +129,50 @@ export const apiService = {
       return {
         success: false,
         message: error.response?.data?.message || 'Signup failed. Please try again.',
+      };
+    }
+  },
+
+  // OTP-based Signup - Send OTP for new user registration
+  sendSignupOTP: async (phoneNumber, name = null, email = null) => {
+    try {
+      const response = await api.post('/auth/send-signup-otp', {
+        phone: phoneNumber,
+        name,
+        email
+      });
+      return {
+        success: true,
+        message: response.data.message || 'OTP sent successfully',
+        sessionId: response.data.sessionId,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to send OTP. Please try again.',
+      };
+    }
+  },
+
+  // OTP-based Signup - Verify OTP and create account
+  verifySignupOTP: async (phoneNumber, otp, sessionId, userData = {}) => {
+    try {
+      const response = await api.post('/auth/verify-signup-otp', {
+        phone: phoneNumber,
+        otp,
+        sessionId,
+        ...userData // name, email (optional), etc.
+      });
+      return {
+        success: true,
+        token: response.data.token,
+        user: response.data.user,
+        message: response.data.message || 'Account created successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Invalid OTP or signup failed. Please try again.',
       };
     }
   },
