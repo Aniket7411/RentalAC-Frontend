@@ -1450,7 +1450,8 @@ export const apiService = {
       return {
         success: true,
         data: {
-          instantPaymentDiscount: 10, // Default 10%
+          instantPaymentDiscount: 10, // Default 10% for Pay Now
+          advancePaymentDiscount: 5, // Default 5% for Pay Advance
         },
       };
     }

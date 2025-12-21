@@ -13,7 +13,8 @@ export const useSettings = () => {
 
 export const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState({
-    instantPaymentDiscount: 10, // Default 10%
+    instantPaymentDiscount: 10, // Default 10% for Pay Now
+    advancePaymentDiscount: 5, // Default 5% for Pay Advance
   });
   const [loading, setLoading] = useState(true);
 
@@ -27,6 +28,7 @@ export const SettingsProvider = ({ children }) => {
       if (response.success && response.data) {
         setSettings({
           instantPaymentDiscount: response.data.instantPaymentDiscount || 10,
+          advancePaymentDiscount: response.data.advancePaymentDiscount || 5,
         });
       }
     } catch (error) {
@@ -46,6 +48,7 @@ export const SettingsProvider = ({ children }) => {
     loading,
     refreshSettings,
     instantPaymentDiscount: settings.instantPaymentDiscount,
+    advancePaymentDiscount: settings.advancePaymentDiscount,
   };
 
   return (

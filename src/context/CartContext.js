@@ -14,7 +14,7 @@ export const useCart = () => {
 
 export const CartProvider = ({ children }) => {
   const { user, isAuthenticated } = useAuth();
-  const { instantPaymentDiscount } = useSettings();
+  const { instantPaymentDiscount, advancePaymentDiscount } = useSettings();
   const [cartItems, setCartItems] = useState([]);
 
   // Load cart from localStorage on mount

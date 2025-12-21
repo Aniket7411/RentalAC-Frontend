@@ -7,7 +7,8 @@ import { ToastContainer } from '../../components/Toast';
 
 const ManageSettings = () => {
   const [settings, setSettings] = useState({
-    instantPaymentDiscount: 10, // Default 10%
+    instantPaymentDiscount: 10, // Default 10% for Pay Now
+    advancePaymentDiscount: 5, // Default 5% for Pay Advance
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -26,17 +27,20 @@ const ManageSettings = () => {
       if (response.success) {
         setSettings({
           instantPaymentDiscount: response.data?.instantPaymentDiscount || 10,
+          advancePaymentDiscount: response.data?.advancePaymentDiscount || 5,
         });
       } else {
         // If settings don't exist, use defaults
         setSettings({
           instantPaymentDiscount: 10,
+          advancePaymentDiscount: 5,
         });
       }
     } catch (err) {
       // Use defaults if API fails
       setSettings({
         instantPaymentDiscount: 10,
+        advancePaymentDiscount: 5,
       });
     } finally {
       setLoading(false);
@@ -114,15 +118,15 @@ const ManageSettings = () => {
             <h2 className="text-2xl font-semibold text-text-dark">Payment Settings</h2>
           </div>
 
-          {/* Instant Payment Discount */}
+          {/* Instant Payment Discount (Pay Now) */}
           <div className="mb-8">
             <label className="block text-sm font-semibold text-text-dark mb-4">
               <div className="flex items-center space-x-2 mb-2">
                 <Percent className="w-5 h-5 text-primary-blue" />
-                <span>Instant Payment Discount</span>
+                <span>Instant Payment Discount (Pay Now)</span>
               </div>
               <p className="text-sm text-text-light font-normal mt-1">
-                Discount percentage applied when customers choose "Pay Now" or "Pay Advance" option. 
+                Discount percentage applied when customers choose "Pay Now" option (full payment upfront). 
                 This discount is applied to the total order amount.
               </p>
             </label>
@@ -166,6 +170,58 @@ const ManageSettings = () => {
             </div>
           </div>
 
+          {/* Advance Payment Discount */}
+          <div className="mb-8">
+            <label className="block text-sm font-semibold text-text-dark mb-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <Percent className="w-5 h-5 text-green-600" />
+                <span>Advance Payment Discount (Pay Advance)</span>
+              </div>
+              <p className="text-sm text-text-light font-normal mt-1">
+                Discount percentage applied when customers choose "Pay Advance" option (₹999 advance payment). 
+                This discount is applied to the total order amount. You can change this based on offers or promotions.
+              </p>
+            </label>
+            
+            <div className="mt-4">
+              <div className="flex items-center space-x-4">
+                <div className="flex-1 max-w-xs">
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      value={settings.advancePaymentDiscount}
+                      onChange={(e) => handleChange('advancePaymentDiscount', e.target.value)}
+                      className="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-xl text-text-dark text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300"
+                      placeholder="5"
+                    />
+                    <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-text-light text-lg font-semibold">
+                      %
+                    </span>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <p className="text-sm text-green-800">
+                      <span className="font-semibold">Example:</span> If a customer orders ₹10,000 worth of products 
+                      and chooses "Pay Advance", they will get a discount of ₹{((10000 * settings.advancePaymentDiscount) / 100).toLocaleString()} 
+                      (₹{(10000 - (10000 * settings.advancePaymentDiscount) / 100).toLocaleString()} final amount).
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-4 flex items-center space-x-2 text-sm text-text-light">
+                <AlertCircle className="w-4 h-4" />
+                <span>
+                  Current discount: <span className="font-semibold text-green-600">{settings.advancePaymentDiscount}%</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
           {/* Save Button */}
           <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
             <button
@@ -195,19 +251,27 @@ const ManageSettings = () => {
           transition={{ delay: 0.1 }}
           className="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-6"
         >
-          <h3 className="text-lg font-semibold text-blue-900 mb-2">About Instant Payment Discount</h3>
+          <h3 className="text-lg font-semibold text-blue-900 mb-2">About Payment Discounts</h3>
           <ul className="space-y-2 text-sm text-blue-800">
             <li className="flex items-start space-x-2">
               <span className="font-semibold">•</span>
-              <span>This discount is automatically applied when customers select "Pay Now" or "Pay Advance" payment options.</span>
+              <span><strong>Pay Now Discount:</strong> Applied when customers pay the full amount upfront.</span>
             </li>
             <li className="flex items-start space-x-2">
               <span className="font-semibold">•</span>
-              <span>The discount is calculated on the total order amount (before any coupon discounts).</span>
+              <span><strong>Pay Advance Discount:</strong> Applied when customers pay ₹999 advance and remaining after installation.</span>
             </li>
             <li className="flex items-start space-x-2">
               <span className="font-semibold">•</span>
-              <span>Changes to this setting will apply to all new orders placed after saving.</span>
+              <span>Both discounts are calculated on the total order amount (before any coupon discounts).</span>
+            </li>
+            <li className="flex items-start space-x-2">
+              <span className="font-semibold">•</span>
+              <span>You can adjust these discounts based on offers, promotions, or business needs.</span>
+            </li>
+            <li className="flex items-start space-x-2">
+              <span className="font-semibold">•</span>
+              <span>Changes to these settings will apply to all new orders placed after saving.</span>
             </li>
             <li className="flex items-start space-x-2">
               <span className="font-semibold">•</span>

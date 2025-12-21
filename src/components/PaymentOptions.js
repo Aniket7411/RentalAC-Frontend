@@ -5,12 +5,17 @@ import { useSettings } from '../context/SettingsContext';
 
 const PaymentOptions = ({ totalAmount, onPaymentSelect, selectedOption, setSelectedOption }) => {
   const [error, setError] = useState('');
-  const { instantPaymentDiscount } = useSettings();
+  const { instantPaymentDiscount, advancePaymentDiscount } = useSettings();
 
-  const discountMultiplier = 1 - (instantPaymentDiscount / 100);
-  const fullPaymentAmount = totalAmount * discountMultiplier;
+  // Pay Now (Full Payment) - uses instantPaymentDiscount
+  const fullDiscountMultiplier = 1 - (instantPaymentDiscount / 100);
+  const fullPaymentAmount = totalAmount * fullDiscountMultiplier;
+  
+  // Pay Advance - uses advancePaymentDiscount
+  const advanceDiscountMultiplier = 1 - (advancePaymentDiscount / 100);
+  const advanceDiscountedTotal = totalAmount * advanceDiscountMultiplier;
   const advanceAmount = 999;
-  const remainingAmount = totalAmount - advanceAmount;
+  const remainingAmount = advanceDiscountedTotal - advanceAmount;
 
   const handleOptionSelect = (option) => {
     setSelectedOption(option);
@@ -95,9 +100,12 @@ const PaymentOptions = ({ totalAmount, onPaymentSelect, selectedOption, setSelec
             <div className="flex items-center space-x-2 mb-2">
               <FiCreditCard className="w-5 h-5 text-primary-blue" />
               <h4 className="font-semibold text-text-dark">Pay ₹999 Advance</h4>
+              <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded">
+                {advancePaymentDiscount}% OFF
+              </span>
             </div>
             <p className="text-sm text-text-light mb-2">
-              Pay ₹999 now and the remaining amount after installation
+              Pay ₹999 now and the remaining amount after installation. Get {advancePaymentDiscount}% discount on total amount.
             </p>
             <div className="space-y-1">
               <div className="flex items-baseline space-x-2">
@@ -114,8 +122,16 @@ const PaymentOptions = ({ totalAmount, onPaymentSelect, selectedOption, setSelec
               </div>
               <div className="flex items-baseline space-x-2 pt-2 border-t border-gray-200">
                 <span className="text-sm font-semibold text-text-dark">Total Amount:</span>
-                <span className="text-lg font-bold text-primary-blue">
+                <span className="text-lg font-bold text-primary-blue line-through">
                   ₹{totalAmount.toLocaleString()}
+                </span>
+                <span className="text-lg font-bold text-green-600 ml-2">
+                  ₹{advanceDiscountedTotal.toLocaleString()}
+                </span>
+              </div>
+              <div className="flex items-baseline space-x-2 pt-1">
+                <span className="text-sm text-green-600 font-semibold">
+                  Save ₹{(totalAmount - advanceDiscountedTotal).toLocaleString()}
                 </span>
               </div>
             </div>
@@ -128,7 +144,7 @@ const PaymentOptions = ({ totalAmount, onPaymentSelect, selectedOption, setSelec
           <p className="text-sm text-blue-800">
             {selectedOption === 'full'
               ? `You will pay ₹${fullPaymentAmount.toLocaleString()} now and save ₹${(totalAmount - fullPaymentAmount).toLocaleString()}.`
-              : `You will pay ₹${advanceAmount.toLocaleString()} now and ₹${remainingAmount.toLocaleString()} after installation.`
+              : `You will pay ₹${advanceAmount.toLocaleString()} now and ₹${remainingAmount.toLocaleString()} after installation. Total discount: ₹${(totalAmount - advanceDiscountedTotal).toLocaleString()}.`
             }
           </p>
         </div>
