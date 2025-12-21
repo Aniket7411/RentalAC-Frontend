@@ -330,47 +330,86 @@ export const CartProvider = ({ children }) => {
     });
     const services = cartItems.filter(item => item.type === 'service');
 
-    // Since quantity is always 1, we just sum the prices
-    // Use selected duration (3, 6, 9, 11, 12, 24 months) or default to 3 months
+    // Calculate rental total with product discounts applied
     const rentalTotal = rentals.reduce((total, item) => {
+      let basePrice = 0;
+      
       // Check if this is a monthly payment item
       if (item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure) {
         // For monthly payment: one month charge + security deposit
         const oneMonthCharge = item.monthlyPrice;
         const securityDeposit = item.securityDeposit || 0;
-        const monthlyTotal = oneMonthCharge + securityDeposit;
-        // Add installation charges if present (only for AC)
-        const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount)
-          ? item.installationCharges.amount
-          : 0;
-        return total + monthlyTotal + installationCharge;
+        basePrice = oneMonthCharge + securityDeposit;
+      } else {
+        // Regular payment: use selected duration
+        // Ensure selectedDuration is a number
+        let duration = item.selectedDuration;
+        if (typeof duration === 'string') {
+          duration = parseInt(duration, 10);
+        }
+        const selectedDuration = duration || 3;
+        basePrice = item.price && typeof item.price === 'object'
+          ? (item.price[selectedDuration] || item.price[3] || 0)
+          : (item.price || 0);
       }
-
-      // Regular payment: use selected duration
-      // Ensure selectedDuration is a number
-      let duration = item.selectedDuration;
-      if (typeof duration === 'string') {
-        duration = parseInt(duration, 10);
-      }
-      const selectedDuration = duration || 3;
-      const price = item.price && typeof item.price === 'object'
-        ? (item.price[selectedDuration] || item.price[3] || 0)
-        : (item.price || 0);
+      
       // Add installation charges if present (only for AC)
       const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount)
         ? item.installationCharges.amount
         : 0;
-      return total + price + installationCharge; // quantity is always 1
+      
+      // Apply product discount if available
+      const productDiscount = item.discount || 0;
+      const priceWithInstallation = basePrice + installationCharge;
+      const priceAfterProductDiscount = productDiscount > 0
+        ? priceWithInstallation * (1 - productDiscount / 100)
+        : priceWithInstallation;
+      
+      return total + priceAfterProductDiscount; // quantity is always 1
     }, 0);
 
+    // Services don't have product discounts (they have fixed prices)
     const serviceTotal = services.reduce((total, item) => {
       return total + (item.servicePrice || 0); // quantity is always 1
     }, 0);
 
+    // Calculate product discount total for display
+    const productDiscountTotal = rentals.reduce((total, item) => {
+      if (!item.discount || item.discount <= 0) return total;
+      
+      let basePrice = 0;
+      if (item.isMonthlyPayment && item.monthlyPrice && item.monthlyTenure) {
+        const oneMonthCharge = item.monthlyPrice;
+        const securityDeposit = item.securityDeposit || 0;
+        basePrice = oneMonthCharge + securityDeposit;
+      } else {
+        let duration = item.selectedDuration;
+        if (typeof duration === 'string') {
+          duration = parseInt(duration, 10);
+        }
+        const selectedDuration = duration || 3;
+        basePrice = item.price && typeof item.price === 'object'
+          ? (item.price[selectedDuration] || item.price[3] || 0)
+          : (item.price || 0);
+      }
+      
+      const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount)
+        ? item.installationCharges.amount
+        : 0;
+      
+      const priceWithInstallation = basePrice + installationCharge;
+      const discountAmount = priceWithInstallation * (item.discount / 100);
+      return total + discountAmount;
+    }, 0);
+
+    const subtotal = rentalTotal + serviceTotal;
+
     return {
       rentalTotal,
       serviceTotal,
-      total: rentalTotal + serviceTotal,
+      subtotal, // Subtotal after product discounts
+      total: subtotal, // Total before payment discounts (payment discounts applied at checkout)
+      productDiscountTotal, // Total product discount amount for display
       rentalCount: rentals.length,
       serviceCount: services.length,
       totalItems: cartItems.length,
@@ -379,7 +418,7 @@ export const CartProvider = ({ children }) => {
 
   // Get payment benefits
   const getPaymentBenefits = () => {
-    const discountDecimal = instantPaymentDiscount / 100;
+    const instantDiscountDecimal = instantPaymentDiscount / 100;
     return {
       payNow: {
         title: 'Pay Now',
@@ -389,7 +428,7 @@ export const CartProvider = ({ children }) => {
           `${instantPaymentDiscount}% discount on total amount`,
           'Faster delivery/booking confirmation',
         ],
-        discount: discountDecimal,
+        discount: instantDiscountDecimal,
       },
       payLater: {
         title: 'Pay Later',

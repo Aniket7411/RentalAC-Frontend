@@ -7,7 +7,6 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
-import { useSettings } from '../context/SettingsContext';
 import { useToast } from '../hooks/useToast';
 import { ToastContainer } from '../components/Toast';
 import ACCard from '../components/ACCard';
@@ -19,7 +18,6 @@ const ACDetail = () => {
   const { isAuthenticated } = useAuth();
   const { addRentalToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
-  const { instantPaymentDiscount } = useSettings();
   const [ac, setAc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -261,8 +259,8 @@ const ACDetail = () => {
   const price = getPrice();
 
   // Calculate discount and saving amount
-  // Use product-specific discount if available, otherwise use instant payment discount from settings
-  const discountPercent = (ac?.discount && ac.discount > 0) ? ac.discount : instantPaymentDiscount;
+  // Use product-specific discount if available
+  const discountPercent = (ac?.discount && ac.discount > 0) ? ac.discount : 0;
   const savingAmount = price > 0 ? Math.round((price * discountPercent) / 100) : 0;
 
   // Get advance payment price for comparison
@@ -755,20 +753,22 @@ const ACDetail = () => {
                 >
                   {addedToCart ? 'Added to Cart ✓' : 'Add to Cart'}
                 </motion.button>
-                {/* Discount Display */}
-                <div className={`mb-3 ${isMonthlyPayment ? 'order-4 lg:order-4' : 'order-5 lg:order-5'}`}>
-                  <div className="flex items-center justify-center gap-2 text-sm sm:text-base">
-                    <Sparkles className="w-4 h-4 text-green-600" />
-                    <span className="font-semibold text-green-600">
-                      {(ac.discount && ac.discount > 0) ? `${ac.discount}%` : `${instantPaymentDiscount}%`} instant discount
-                    </span>
-                    {savingAmount > 0 && (
-                      <span className="text-xs sm:text-sm font-medium text-green-700">
-                        Save ₹{savingAmount.toLocaleString('en-IN')}
+                {/* Discount Display - Only show if product has a discount */}
+                {ac?.discount && ac.discount > 0 && (
+                  <div className={`mb-3 ${isMonthlyPayment ? 'order-4 lg:order-4' : 'order-5 lg:order-5'}`}>
+                    <div className="flex items-center justify-center gap-2 text-sm sm:text-base">
+                      <Sparkles className="w-4 h-4 text-green-600" />
+                      <span className="font-semibold text-green-600">
+                        {ac.discount}% discount
                       </span>
-                    )}
+                      {savingAmount > 0 && (
+                        <span className="text-xs sm:text-sm font-medium text-green-700">
+                          Save ₹{savingAmount.toLocaleString('en-IN')}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Save More with Advance Payment Card - Show only when monthly payment is selected */}
                 {isMonthlyPayment && ac.price && advancePrice > 0 && (

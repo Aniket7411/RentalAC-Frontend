@@ -7,7 +7,7 @@ import { ToastContainer } from '../../components/Toast';
 
 const ManageSettings = () => {
   const [settings, setSettings] = useState({
-    instantPaymentDiscount: 10, // Default 10% for Pay Now
+    instantPaymentDiscount: 10, // Default 10% for Pay Now (instant payment)
     advancePaymentDiscount: 5, // Default 5% for Pay Advance
   });
   const [loading, setLoading] = useState(true);
@@ -127,7 +127,7 @@ const ManageSettings = () => {
               </div>
               <p className="text-sm text-text-light font-normal mt-1">
                 Discount percentage applied when customers choose "Pay Now" option (full payment upfront). 
-                This discount is applied to the total order amount.
+                This discount is applied to the total order amount after product discounts. You can change this based on offers or promotions.
               </p>
             </label>
             
@@ -255,7 +255,11 @@ const ManageSettings = () => {
           <ul className="space-y-2 text-sm text-blue-800">
             <li className="flex items-start space-x-2">
               <span className="font-semibold">•</span>
-              <span><strong>Pay Now Discount:</strong> Applied when customers pay the full amount upfront.</span>
+              <span><strong>Product Discount:</strong> Each product can have its own discount field (set when adding/editing products). This is separate from payment discounts.</span>
+            </li>
+            <li className="flex items-start space-x-2">
+              <span className="font-semibold">•</span>
+              <span><strong>Pay Now Discount:</strong> Applied when customers pay the full amount upfront (instant payment).</span>
             </li>
             <li className="flex items-start space-x-2">
               <span className="font-semibold">•</span>
@@ -263,11 +267,11 @@ const ManageSettings = () => {
             </li>
             <li className="flex items-start space-x-2">
               <span className="font-semibold">•</span>
-              <span>Both discounts are calculated on the total order amount (before any coupon discounts).</span>
+              <span>Payment discounts are calculated on the total order amount (after product discounts, before coupon discounts).</span>
             </li>
             <li className="flex items-start space-x-2">
               <span className="font-semibold">•</span>
-              <span>You can adjust these discounts based on offers, promotions, or business needs.</span>
+              <span>You can adjust payment discounts based on offers, promotions, or business needs.</span>
             </li>
             <li className="flex items-start space-x-2">
               <span className="font-semibold">•</span>

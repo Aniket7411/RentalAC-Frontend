@@ -13,7 +13,7 @@ export const useSettings = () => {
 
 export const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState({
-    instantPaymentDiscount: 10, // Default 10% for Pay Now
+    instantPaymentDiscount: 10, // Default 10% for Pay Now (instant payment)
     advancePaymentDiscount: 5, // Default 5% for Pay Advance
   });
   const [loading, setLoading] = useState(true);

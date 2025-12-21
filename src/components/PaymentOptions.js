@@ -8,8 +8,8 @@ const PaymentOptions = ({ totalAmount, onPaymentSelect, selectedOption, setSelec
   const { instantPaymentDiscount, advancePaymentDiscount } = useSettings();
 
   // Pay Now (Full Payment) - uses instantPaymentDiscount
-  const fullDiscountMultiplier = 1 - (instantPaymentDiscount / 100);
-  const fullPaymentAmount = totalAmount * fullDiscountMultiplier;
+  const instantDiscountMultiplier = 1 - (instantPaymentDiscount / 100);
+  const fullPaymentAmount = totalAmount * instantDiscountMultiplier;
   
   // Pay Advance - uses advancePaymentDiscount
   const advanceDiscountMultiplier = 1 - (advancePaymentDiscount / 100);

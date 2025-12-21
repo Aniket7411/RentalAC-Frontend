@@ -38,19 +38,29 @@ const Checkout = () => {
 
   const totals = calculateTotals();
   const paymentBenefits = getPaymentBenefits();
-  const paymentDiscount = selectedPaymentOption === 'payNow' ? totals.total * paymentBenefits.payNow.discount : 0;
+  
+  // Payment discount is applied on subtotal (after product discounts)
+  // For Pay Now: use instant payment discount
+  // For Pay Advance: use advance payment discount (handled separately)
+  const paymentDiscount = selectedPaymentOption === 'payNow' 
+    ? totals.subtotal * paymentBenefits.payNow.discount 
+    : 0;
 
-  // Calculate coupon discount
+  // Calculate coupon discount (applied on subtotal after product discounts)
   const couponDiscount = appliedCoupon ? (() => {
     if (appliedCoupon.type === 'percentage') {
-      return totals.total * (appliedCoupon.value / 100);
+      return totals.subtotal * (appliedCoupon.value / 100);
     } else {
       return appliedCoupon.value; // Fixed amount
     }
   })() : 0;
-
-  const totalDiscount = paymentDiscount + couponDiscount;
-  const finalTotal = totals.total - totalDiscount;
+  
+  // Total discount = product discount + payment discount + coupon discount
+  const totalDiscount = (totals.productDiscountTotal || 0) + paymentDiscount + couponDiscount;
+  
+  // Final total = subtotal - payment discount - coupon discount
+  // (Product discounts are already applied in subtotal)
+  const finalTotal = totals.subtotal - paymentDiscount - couponDiscount;
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -71,7 +81,7 @@ const Checkout = () => {
 
       setLoadingCoupons(true);
       try {
-        const orderTotal = totals.total;
+        const orderTotal = totals.subtotal; // Use subtotal (after product discounts) for coupon eligibility
         const response = await apiService.getAvailableCoupons(user?.id, null, orderTotal);
         if (response.success) {
           setAvailableCoupons(response.data || []);
@@ -84,7 +94,7 @@ const Checkout = () => {
     };
 
     fetchAvailableCoupons();
-  }, [isAuthenticated, cartItems.length, totals.total, user?.id]);
+  }, [isAuthenticated, cartItems.length, totals.subtotal, user?.id]);
 
   const handlePlaceOrder = async () => {
     if (cartItems.length === 0) {
@@ -248,8 +258,9 @@ const Checkout = () => {
           const orderData = {
             orderId: generateOrderId(), // Generate orderId on frontend
             items: orderItems,
-            total: totals.total,
-            discount: totalDiscount,
+            total: totals.subtotal, // Subtotal after product discounts
+            productDiscount: totals.productDiscountTotal || 0, // Product discount amount
+            discount: totalDiscount, // Total discount (product + payment + coupon)
             couponCode: appliedCoupon?.code || null,
             couponDiscount: couponDiscount,
             paymentDiscount: paymentDiscount,
@@ -355,7 +366,7 @@ const Checkout = () => {
         return item.type === 'rental' ||
           (item.type !== 'service' && (item.brand || item.model || item.price));
       });
-      const response = await apiService.validateCoupon(couponToApply, totals.total, rentals);
+      const response = await apiService.validateCoupon(couponToApply, totals.subtotal, rentals);
 
       if (!response.success) {
         setCouponError(response.message || 'Invalid coupon code');
@@ -365,7 +376,7 @@ const Checkout = () => {
       const coupon = response.data;
 
       // Check minimum amount if required
-      if (coupon.minAmount && totals.total < coupon.minAmount) {
+      if (coupon.minAmount && totals.subtotal < coupon.minAmount) {
         setCouponError(`Minimum order amount of ₹${coupon.minAmount} required`);
         return;
       }
@@ -549,7 +560,7 @@ const Checkout = () => {
                             }
                           };
 
-                          const isEligible = !coupon.minAmount || totals.total >= coupon.minAmount;
+                          const isEligible = !coupon.minAmount || totals.subtotal >= coupon.minAmount;
 
                           return (
                             <motion.div
@@ -880,9 +891,21 @@ const Checkout = () => {
                     <span>₹{totals.serviceTotal.toLocaleString()}</span>
                   </div>
                 )}
+                {/* Product Discount Display */}
+                {totals.productDiscountTotal > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Product Discount</span>
+                    <span>-₹{totals.productDiscountTotal.toLocaleString()}</span>
+                  </div>
+                )}
+                {/* Subtotal after product discounts */}
+                <div className="flex justify-between text-text-dark font-semibold border-t border-gray-200 pt-2">
+                  <span>Subtotal</span>
+                  <span>₹{totals.subtotal.toLocaleString()}</span>
+                </div>
                 {paymentDiscount > 0 && (
                   <div className="flex justify-between text-green-600">
-                    <span>Payment Discount ({instantPaymentDiscount}%)</span>
+                    <span>Payment Discount ({instantPaymentDiscount}% Pay Now)</span>
                     <span>-₹{paymentDiscount.toLocaleString()}</span>
                   </div>
                 )}
