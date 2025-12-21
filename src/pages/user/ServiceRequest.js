@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
-import { Loader2, Wrench, Clock, Shield, Users, Zap, Droplets, Wind, Sparkles } from 'lucide-react';
+import { Loader2, Wrench, Clock, Shield, Users, Zap, Droplets, Wind, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '../../hooks/useToast';
 import { ToastContainer } from '../../components/Toast';
@@ -28,6 +28,9 @@ const ServiceRequest = () => {
   const [selectedService, setSelectedService] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
+  const tabsScrollRef = useRef(null);
   const { toasts, removeToast, success: showSuccess, error: showError } = useToast();
 
   useEffect(() => {
@@ -209,6 +212,40 @@ const ServiceRequest = () => {
     setFilteredServices([...filtered]);
   }, [selectedCategory, services, getServiceCategory]);
 
+  // Check scroll position for tabs to show/hide arrows
+  const checkScrollPosition = useCallback(() => {
+    const scrollContainer = tabsScrollRef.current;
+    if (!scrollContainer) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = scrollContainer;
+    setShowLeftArrow(scrollLeft > 0);
+    setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+  }, []);
+
+  // Scroll tabs left/right
+  const scrollTabs = (direction) => {
+    const scrollContainer = tabsScrollRef.current;
+    if (!scrollContainer) return;
+
+    const scrollAmount = 200; // pixels to scroll
+    const newScrollLeft = scrollContainer.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
+    scrollContainer.scrollTo({ left: newScrollLeft, behavior: 'smooth' });
+  };
+
+  // Check scroll position on mount and when window resizes
+  useEffect(() => {
+    checkScrollPosition();
+    const scrollContainer = tabsScrollRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', checkScrollPosition);
+      window.addEventListener('resize', checkScrollPosition);
+      return () => {
+        scrollContainer.removeEventListener('scroll', checkScrollPosition);
+        window.removeEventListener('resize', checkScrollPosition);
+      };
+    }
+  }, [checkScrollPosition, services]); // Re-check when services load
+
   const handleAddClick = (service) => {
     setSelectedService(service);
     setShowBookingModal(true);
@@ -245,7 +282,7 @@ const ServiceRequest = () => {
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <div className="w-full">
         {/* Top Half-Screen Split: Left (Title & Description) + Right (Video) */}
-        <div className="flex flex-col-reverse lg:flex-row h-[30vh] sm:h-[40vh] lg:h-[50vh] min-h-[250px] lg:min-h-[400px]">
+        <div className="flex flex-col-reverse lg:flex-row h-[35vh] sm:h-[45vh] lg:h-[55vh] min-h-[280px] lg:min-h-[450px]">
           {/* Left Side: Title, Description, and Cards (Large screens) */}
           <div className="w-full lg:w-1/2 flex flex-col justify-center px-4 sm:px-6 lg:px-8 lg:py-10 order-2 lg:order-1">
             <motion.div
@@ -324,12 +361,37 @@ const ServiceRequest = () => {
             transition={{ delay: 0.3 }}
             className="mb-6 sm:mb-8"
           >
-            <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-4">
-              <div className="flex flex-wrap gap-2 sm:gap-3">
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-4 overflow-hidden relative">
+              {/* Left Arrow - Show on small/medium screens when scrollable */}
+              {showLeftArrow && (
+                <button
+                  onClick={() => scrollTabs('left')}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-lg border border-slate-200 hover:bg-gray-50 transition-all lg:hidden"
+                  aria-label="Scroll left"
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-700" />
+                </button>
+              )}
+
+              {/* Right Arrow - Show on small/medium screens when scrollable */}
+              {showRightArrow && (
+                <button
+                  onClick={() => scrollTabs('right')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-lg border border-slate-200 hover:bg-gray-50 transition-all lg:hidden"
+                  aria-label="Scroll right"
+                >
+                  <ChevronRight className="w-5 h-5 text-gray-700" />
+                </button>
+              )}
+
+              <div
+                ref={tabsScrollRef}
+                className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide lg:flex-wrap lg:overflow-x-visible"
+              >
                 {/* All Services Tab */}
                 <button
                   onClick={() => setSelectedCategory(null)}
-                  className={`px-4 py-2.5 rounded-lg font-semibold text-sm sm:text-base transition-all duration-200 flex items-center gap-2 ${selectedCategory === null
+                  className={`px-4 py-2.5 rounded-lg font-semibold text-sm sm:text-base transition-all duration-200 flex items-center gap-2 flex-shrink-0 whitespace-nowrap ${selectedCategory === null
                     ? 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
@@ -352,7 +414,7 @@ const ServiceRequest = () => {
                     <button
                       key={category}
                       onClick={() => setSelectedCategory(category)}
-                      className={`px-4 py-2.5 rounded-lg font-semibold text-sm sm:text-base transition-all duration-200 flex items-center gap-2 ${selectedCategory === category
+                      className={`px-4 py-2.5 rounded-lg font-semibold text-sm sm:text-base transition-all duration-200 flex items-center gap-2 flex-shrink-0 whitespace-nowrap ${selectedCategory === category
                         ? 'bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-md'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}

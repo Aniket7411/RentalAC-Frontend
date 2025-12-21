@@ -372,12 +372,26 @@ const ManageServices = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Service Image</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
+                <div className="space-y-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                  <div className="text-center text-sm text-gray-500">OR</div>
+                  <input
+                    type="url"
+                    value={formData.imageUrl}
+                    onChange={(e) => {
+                      const url = e.target.value;
+                      setFormData({ ...formData, imageUrl: url });
+                      if (url) setImagePreview(url);
+                    }}
+                    placeholder="Paste image URL here (e.g., https://images.unsplash.com/...)"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
                 {uploadingImage && (
                   <div className="mt-2 flex items-center space-x-2 text-gray-600">
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -406,7 +420,7 @@ const ManageServices = () => {
 
               {/* Benefits Tag Input */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Benefits (as list)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">What's included (as list)</label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {(formData.benefits || []).map((b, idx) => (
                     <span key={idx} className="inline-flex items-center space-x-1 bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm">
@@ -430,7 +444,7 @@ const ManageServices = () => {
                       type="text"
                       value={benefitInput}
                       onChange={(e) => setBenefitInput(e.target.value)}
-                      placeholder="Type benefit"
+                      placeholder="Type what's included"
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                     <button
@@ -618,7 +632,7 @@ const ManageServices = () => {
 
               {selectedService.benefits && (
                 <div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Benefits</h4>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">What's included</h4>
                   {Array.isArray(selectedService.benefits) ? (
                     <ul className="list-disc list-inside text-gray-700 space-y-1">
                       {selectedService.benefits.map((item, idx) => (

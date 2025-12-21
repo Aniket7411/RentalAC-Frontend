@@ -895,7 +895,7 @@ const OrderDetail = () => {
                 </div>
                 {order.paymentDiscount > 0 && (
                   <div className="flex justify-between text-green-600">
-                    <span>Payment Discount (5% Pay Now)</span>
+                    <span>Payment Discount (Pay Now)</span>
                     <span>-₹{order.paymentDiscount.toLocaleString()}</span>
                   </div>
                 )}

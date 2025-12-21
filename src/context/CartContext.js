@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import { useSettings } from './SettingsContext';
 
 const CartContext = createContext();
 
@@ -13,6 +14,7 @@ export const useCart = () => {
 
 export const CartProvider = ({ children }) => {
   const { user, isAuthenticated } = useAuth();
+  const { instantPaymentDiscount } = useSettings();
   const [cartItems, setCartItems] = useState([]);
 
   // Load cart from localStorage on mount
@@ -171,7 +173,7 @@ export const CartProvider = ({ children }) => {
 
       // For monthly payment, ensure minimum 3 months and valid tenure options
       const validMonthlyTenureOptions = [3, 6, 9, 11, 12, 24];
-      const finalMonthlyTenure = isMonthlyPayment && monthlyTenure 
+      const finalMonthlyTenure = isMonthlyPayment && monthlyTenure
         ? (validMonthlyTenureOptions.includes(monthlyTenure) ? monthlyTenure : 3)
         : null;
 
@@ -343,7 +345,7 @@ export const CartProvider = ({ children }) => {
           : 0;
         return total + monthlyTotal + installationCharge;
       }
-      
+
       // Regular payment: use selected duration
       // Ensure selectedDuration is a number
       let duration = item.selectedDuration;
@@ -377,16 +379,17 @@ export const CartProvider = ({ children }) => {
 
   // Get payment benefits
   const getPaymentBenefits = () => {
+    const discountDecimal = instantPaymentDiscount / 100;
     return {
       payNow: {
         title: 'Pay Now',
         benefits: [
           'Instant order confirmation',
           'Priority service scheduling',
-          '5% discount on total amount',
+          `${instantPaymentDiscount}% discount on total amount`,
           'Faster delivery/booking confirmation',
         ],
-        discount: 0.05, // 5% discount
+        discount: discountDecimal,
       },
       payLater: {
         title: 'Pay Later',

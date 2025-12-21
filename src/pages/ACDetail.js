@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useSettings } from '../context/SettingsContext';
 import { useToast } from '../hooks/useToast';
 import { ToastContainer } from '../components/Toast';
 import ACCard from '../components/ACCard';
@@ -18,6 +19,7 @@ const ACDetail = () => {
   const { isAuthenticated } = useAuth();
   const { addRentalToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { instantPaymentDiscount } = useSettings();
   const [ac, setAc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -259,7 +261,8 @@ const ACDetail = () => {
   const price = getPrice();
 
   // Calculate discount and saving amount
-  const discountPercent = (ac?.discount && ac.discount > 0) ? ac.discount : 5;
+  // Use product-specific discount if available, otherwise use instant payment discount from settings
+  const discountPercent = (ac?.discount && ac.discount > 0) ? ac.discount : instantPaymentDiscount;
   const savingAmount = price > 0 ? Math.round((price * discountPercent) / 100) : 0;
 
   // Get advance payment price for comparison
@@ -373,7 +376,7 @@ const ACDetail = () => {
             )}
 
             {/* Service Benefit Cards - Hidden on small screens, shown on larger screens */}
-            <div className="hidden lg:block p-3 sm:p-4 md:p-5">
+            <div className="hidden lg:block p-3 sm:p-4 md:p-5 pb-2">
               <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 {/* Card 1: Products as good as new */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 flex flex-col items-center text-center">
@@ -508,145 +511,84 @@ const ACDetail = () => {
 
             {/* Monthly Payment Option - Show when Pay Monthly is selected */}
             {isMonthlyPayment && ac.status === 'Available' && ac.monthlyPaymentEnabled && ac.monthlyPrice && (
-              <div className="mb-3 order-2 lg:order-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <h3 className="font-semibold text-text-dark text-sm sm:text-base">Choose Tenure</h3>
-                  <div className="relative group">
-                    <Info className="w-4 h-4 text-blue-500 cursor-help" />
-                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
-                      Select rental duration
-                    </div>
-                  </div>
-                </div>
-
-                {/* Range Slider */}
-                <div className="mb-3">
-                  <div className="relative">
-                    <input
-                      type="range"
-                      min="0"
-                      max={validMonthlyTenureOptions.length - 1}
-                      step="1"
-                      value={validMonthlyTenureOptions.indexOf(monthlyTenure)}
-                      onChange={(e) => {
-                        const index = Number(e.target.value);
-                        setMonthlyTenure(validMonthlyTenureOptions[index]);
-                      }}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                      style={{
-                        background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(validMonthlyTenureOptions.indexOf(monthlyTenure) / (validMonthlyTenureOptions.length - 1)) * 100}%, #e5e7eb ${(validMonthlyTenureOptions.indexOf(monthlyTenure) / (validMonthlyTenureOptions.length - 1)) * 100}%, #e5e7eb 100%)`
-                      }}
-                    />
-                    <div className="flex justify-between mt-2">
-                      {validMonthlyTenureOptions.map((option) => (
-                        <div key={option} className="flex flex-col items-center">
-                          <div
-                            className={`w-1 h-4 ${monthlyTenure === option ? 'bg-primary-blue' : 'bg-gray-400'}`}
-                          />
-                          <span className={`text-xs mt-1 ${monthlyTenure === option ? 'font-bold text-primary-blue' : 'text-gray-600'}`}>
-                            {option}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Monthly Payment Price Details - Compact */}
-                <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm text-gray-600">Monthly Payment:</span>
-                    <span className="text-lg font-bold text-primary-blue">
-                      ₹{ac.monthlyPrice.toLocaleString()}/month
-                    </span>
-                  </div>
-
-                  {securityDeposit > 0 && (
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm text-gray-600">Security Deposit:</span>
-                      <span className="text-lg font-bold text-primary-blue">
-                        ₹{securityDeposit.toLocaleString()}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="flex justify-between items-center pt-2 border-t border-blue-300">
-                    <span className="text-sm font-medium text-gray-700">
-                      Total (1 month + Deposit):
-                    </span>
-                    <span className="text-xl font-bold text-primary-blue">
-                      ₹{monthlyPaymentTotal.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Savings Comparison Table */}
-                {ac.price && advancePrice > 0 && (
-                  <div className="mb-3 p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border-2 border-green-300 shadow-sm">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Sparkles className="w-4 h-4 text-green-600" />
-                      <h4 className="text-sm font-bold text-gray-800">💰 Save More with Advance Payment</h4>
-                    </div>
-                    <p className="text-xs text-gray-600 mb-3">Compare your monthly payment vs advance payment options:</p>
-                    <div className="space-y-2">
-                      {/* Current Monthly Option */}
-                      <div className="flex justify-between items-center p-2 bg-white rounded border border-gray-300">
-                        <div className="flex-1">
-                          <span className="text-xs font-medium text-gray-700">Monthly Payment ({monthlyTenure} months)</span>
-                          <span className="text-xs text-gray-500 block">₹{ac.monthlyPrice.toLocaleString()}/month × {monthlyTenure}</span>
-                        </div>
-                        <span className="text-sm font-bold text-gray-700">
-                          ₹{(ac.monthlyPrice * monthlyTenure).toLocaleString()}
-                        </span>
+              <>
+                {/* 1. Choose Tenure */}
+                <div className="mb-3 order-2 lg:order-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <h3 className="font-semibold text-text-dark text-sm sm:text-base">Choose Tenure</h3>
+                    <div className="relative group">
+                      <Info className="w-4 h-4 text-blue-500 cursor-help" />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                        Select rental duration
                       </div>
+                    </div>
+                  </div>
 
-                      {/* Advance Payment Option for Selected Tenure */}
-                      <div className="flex justify-between items-center p-2.5 bg-green-100 rounded-lg border-2 border-green-500 shadow-sm">
-                        <div className="flex-1">
-                          <span className="text-xs font-bold text-green-800">✨ Advance Payment ({monthlyTenure} months)</span>
-                          <span className="text-xs text-green-700 block font-medium">Pay upfront & save</span>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-sm font-bold text-green-800 block">
-                            ₹{advancePrice.toLocaleString()}
-                          </span>
-                          <span className="text-xs font-bold text-green-600 bg-green-200 px-1.5 py-0.5 rounded">
-                            Save ₹{((ac.monthlyPrice * monthlyTenure) - advancePrice).toLocaleString()}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Other Tenure Options Comparison - Show top 2 savings */}
-                      {validMonthlyTenureOptions
-                        .filter(opt => opt !== monthlyTenure && ac.price[String(opt)])
-                        .map((option) => {
-                          const optionAdvancePrice = ac.price[String(option)] || 0;
-                          const optionMonthlyTotal = ac.monthlyPrice * option;
-                          const savings = optionMonthlyTotal - optionAdvancePrice;
-                          return { option, savings, optionAdvancePrice };
-                        })
-                        .filter(item => item.savings > 0)
-                        .sort((a, b) => b.savings - a.savings)
-                        .slice(0, 2)
-                        .map(({ option, savings, optionAdvancePrice }) => (
-                          <div key={option} className="flex justify-between items-center p-2 bg-white rounded border border-gray-200">
-                            <div className="flex-1">
-                              <span className="text-xs text-gray-600">{option} months advance:</span>
-                            </div>
-                            <div className="text-right">
-                              <span className="text-xs font-semibold text-gray-700">
-                                ₹{optionAdvancePrice.toLocaleString()}
-                              </span>
-                              <span className="text-xs text-green-600 block font-medium">
-                                Save ₹{savings.toLocaleString()}
-                              </span>
-                            </div>
+                  {/* Range Slider */}
+                  <div className="mb-3">
+                    <div className="relative">
+                      <input
+                        type="range"
+                        min="0"
+                        max={validMonthlyTenureOptions.length - 1}
+                        step="1"
+                        value={validMonthlyTenureOptions.indexOf(monthlyTenure)}
+                        onChange={(e) => {
+                          const index = Number(e.target.value);
+                          setMonthlyTenure(validMonthlyTenureOptions[index]);
+                        }}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                        style={{
+                          background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(validMonthlyTenureOptions.indexOf(monthlyTenure) / (validMonthlyTenureOptions.length - 1)) * 100}%, #e5e7eb ${(validMonthlyTenureOptions.indexOf(monthlyTenure) / (validMonthlyTenureOptions.length - 1)) * 100}%, #e5e7eb 100%)`
+                        }}
+                      />
+                      <div className="flex justify-between mt-2">
+                        {validMonthlyTenureOptions.map((option) => (
+                          <div key={option} className="flex flex-col items-center">
+                            <div
+                              className={`w-1 h-4 ${monthlyTenure === option ? 'bg-primary-blue' : 'bg-gray-400'}`}
+                            />
+                            <span className={`text-xs mt-1 ${monthlyTenure === option ? 'font-bold text-primary-blue' : 'text-gray-600'}`}>
+                              {option}
+                            </span>
                           </div>
                         ))}
+                      </div>
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+
+                {/* 2. Total Detail */}
+                <div className="mb-3 order-2 lg:order-4">
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <h3 className="font-semibold text-text-dark text-sm sm:text-base mb-3">Total Detail</h3>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-600">Monthly Payment:</span>
+                      <span className="text-lg font-bold text-primary-blue">
+                        ₹{ac.monthlyPrice.toLocaleString()}/month
+                      </span>
+                    </div>
+
+                    {securityDeposit > 0 && (
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm text-gray-600">Security Deposit:</span>
+                        <span className="text-lg font-bold text-primary-blue">
+                          ₹{securityDeposit.toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center pt-2 border-t border-blue-300">
+                      <span className="text-sm font-medium text-gray-700">
+                        Total (1 month + Deposit):
+                      </span>
+                      <span className="text-xl font-bold text-primary-blue">
+                        ₹{monthlyPaymentTotal.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
 
             {ac.description && (
@@ -721,7 +663,7 @@ const ACDetail = () => {
 
             {/* Features & Specs - Compact & Collapsible */}
             {(ac.features?.specs?.length > 0 || ac.features?.dimensions || ac.features?.safety?.length > 0 || ac.energyRating || ac.operationType || ac.loadType) && (
-              <div className="mb-2 pb-2 border-b border-gray-200 order-4 lg:order-3">
+              <div className={`mb-2 pb-2 border-b border-gray-200 ${isMonthlyPayment ? 'order-6' : 'order-4'} lg:order-3`}>
                 <button
                   onClick={() => setShowFeatures(!showFeatures)}
                   className="w-full cursor-pointer list-none flex items-center justify-between"
@@ -765,9 +707,9 @@ const ACDetail = () => {
               </div>
             )}
 
-            {/* Payment Type Selection Buttons */}
+            {/* Payment Type Selection Buttons - Show after Total Detail for monthly payment */}
             {ac.status === 'Available' && (
-              <div className="mb-3 order-6 lg:order-6">
+              <div className={`mb-3 ${isMonthlyPayment ? 'order-3 lg:order-4' : 'order-6 lg:order-6'}`}>
                 <div className="flex gap-3 mb-3">
                   {/* Pay Advance Button - Green, Left */}
                   <button
@@ -806,7 +748,7 @@ const ACDetail = () => {
                   whileTap={{ scale: 0.98 }}
                   onClick={handleAddToCartClick}
                   disabled={addedToCart}
-                  className={`w-full py-2.5 sm:py-3 md:py-3.5 rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-300 font-semibold text-sm sm:text-base md:text-lg mb-2 order-5 lg:order-5 ${addedToCart
+                  className={`w-full py-2.5 sm:py-3 md:py-3.5 rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-300 font-semibold text-sm sm:text-base md:text-lg mb-2 ${isMonthlyPayment ? 'order-4 lg:order-4' : 'order-5 lg:order-5'} ${addedToCart
                     ? 'bg-green-500 text-white cursor-not-allowed'
                     : 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white'
                     }`}
@@ -814,14 +756,12 @@ const ACDetail = () => {
                   {addedToCart ? 'Added to Cart ✓' : 'Add to Cart'}
                 </motion.button>
                 {/* Discount Display */}
-                <div className="mb-3 order-5 lg:order-5">
-                  <div className="flex flex-col items-center justify-center gap-1 text-sm sm:text-base">
-                    <div className="flex items-center justify-center gap-2">
-                      <Sparkles className="w-4 h-4 text-green-600" />
-                      <span className="font-semibold text-green-600">
-                        {(ac.discount && ac.discount > 0) ? `${ac.discount}%` : '5%'} instant discount
-                      </span>
-                    </div>
+                <div className={`mb-3 ${isMonthlyPayment ? 'order-4 lg:order-4' : 'order-5 lg:order-5'}`}>
+                  <div className="flex items-center justify-center gap-2 text-sm sm:text-base">
+                    <Sparkles className="w-4 h-4 text-green-600" />
+                    <span className="font-semibold text-green-600">
+                      {(ac.discount && ac.discount > 0) ? `${ac.discount}%` : `${instantPaymentDiscount}%`} instant discount
+                    </span>
                     {savingAmount > 0 && (
                       <span className="text-xs sm:text-sm font-medium text-green-700">
                         Save ₹{savingAmount.toLocaleString('en-IN')}
@@ -829,6 +769,75 @@ const ACDetail = () => {
                     )}
                   </div>
                 </div>
+
+                {/* Save More with Advance Payment Card - Show only when monthly payment is selected */}
+                {isMonthlyPayment && ac.price && advancePrice > 0 && (
+                  <div className={`mb-3 ${isMonthlyPayment ? 'order-5 lg:order-5' : ''}`}>
+                    <div className="p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border-2 border-green-300 shadow-sm">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Sparkles className="w-4 h-4 text-green-600" />
+                        <h4 className="text-sm font-bold text-gray-800">💰 Save More with Advance Payment</h4>
+                      </div>
+                      <p className="text-xs text-gray-600 mb-3">Compare your monthly payment vs advance payment options:</p>
+                      <div className="space-y-2">
+                        {/* Current Monthly Option */}
+                        <div className="flex justify-between items-center p-2 bg-white rounded border border-gray-300">
+                          <div className="flex-1">
+                            <span className="text-xs font-medium text-gray-700">Monthly Payment ({monthlyTenure} months)</span>
+                            <span className="text-xs text-gray-500 block">₹{ac.monthlyPrice.toLocaleString()}/month × {monthlyTenure}</span>
+                          </div>
+                          <span className="text-sm font-bold text-gray-700">
+                            ₹{(ac.monthlyPrice * monthlyTenure).toLocaleString()}
+                          </span>
+                        </div>
+
+                        {/* Advance Payment Option for Selected Tenure */}
+                        <div className="flex justify-between items-center p-2.5 bg-green-100 rounded-lg border-2 border-green-500 shadow-sm">
+                          <div className="flex-1">
+                            <span className="text-xs font-bold text-green-800">✨ Advance Payment ({monthlyTenure} months)</span>
+                            <span className="text-xs text-green-700 block font-medium">Pay upfront & save</span>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-sm font-bold text-green-800 block">
+                              ₹{advancePrice.toLocaleString()}
+                            </span>
+                            <span className="text-xs font-bold text-green-600 bg-green-200 px-1.5 py-0.5 rounded">
+                              Save ₹{((ac.monthlyPrice * monthlyTenure) - advancePrice).toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Other Tenure Options Comparison - Show top 2 savings */}
+                        {validMonthlyTenureOptions
+                          .filter(opt => opt !== monthlyTenure && ac.price[String(opt)])
+                          .map((option) => {
+                            const optionAdvancePrice = ac.price[String(option)] || 0;
+                            const optionMonthlyTotal = ac.monthlyPrice * option;
+                            const savings = optionMonthlyTotal - optionAdvancePrice;
+                            return { option, savings, optionAdvancePrice };
+                          })
+                          .filter(item => item.savings > 0)
+                          .sort((a, b) => b.savings - a.savings)
+                          .slice(0, 2)
+                          .map(({ option, savings, optionAdvancePrice }) => (
+                            <div key={option} className="flex justify-between items-center p-2 bg-white rounded border border-gray-200">
+                              <div className="flex-1">
+                                <span className="text-xs text-gray-600">{option} months advance:</span>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-xs font-semibold text-gray-700">
+                                  ₹{optionAdvancePrice.toLocaleString()}
+                                </span>
+                                <span className="text-xs text-green-600 block font-medium">
+                                  Save ₹{savings.toLocaleString()}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </motion.div>
@@ -880,7 +889,7 @@ const ACDetail = () => {
         </motion.div>
 
         {/* FAQ and Recommended Products Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8 mt-8 sm:mt-10 md:mt-12">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8 mt-4 sm:mt-6 md:mt-8">
           {/* FAQ Section - 3/5 width */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

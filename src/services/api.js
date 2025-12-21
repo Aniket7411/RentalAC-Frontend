@@ -1338,6 +1338,123 @@ export const apiService = {
       };
     }
   },
+
+  // Admin - User Management
+  getAllUsers: async (filters = {}) => {
+    try {
+      const response = await api.get('/admin/users', { params: filters });
+      return {
+        success: true,
+        data: response.data?.data || response.data || [],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch users',
+        data: [],
+      };
+    }
+  },
+
+  getUserById: async (userId) => {
+    try {
+      const response = await api.get(`/admin/users/${userId}`);
+      return {
+        success: true,
+        data: response.data?.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch user',
+        data: null,
+      };
+    }
+  },
+
+  getUserOrdersByAdmin: async (userId) => {
+    try {
+      const response = await api.get(`/admin/users/${userId}/orders`);
+      return {
+        success: true,
+        data: response.data?.data || response.data || [],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch user orders',
+        data: [],
+      };
+    }
+  },
+
+  getUserStats: async (userId) => {
+    try {
+      const response = await api.get(`/admin/users/${userId}/stats`);
+      return {
+        success: true,
+        data: response.data?.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch user statistics',
+        data: null,
+      };
+    }
+  },
+
+  // Admin - Settings Management
+  getSettings: async () => {
+    try {
+      const response = await api.get('/admin/settings');
+      return {
+        success: true,
+        data: response.data?.data || response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch settings',
+        data: null,
+      };
+    }
+  },
+
+  updateSettings: async (settings) => {
+    try {
+      const response = await api.put('/admin/settings', settings);
+      return {
+        success: true,
+        data: response.data?.data || response.data,
+        message: response.data?.message || 'Settings updated successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to update settings',
+      };
+    }
+  },
+
+  // Public - Get Settings (for frontend discount calculation)
+  getPublicSettings: async () => {
+    try {
+      const response = await api.get('/settings');
+      return {
+        success: true,
+        data: response.data?.data || response.data,
+      };
+    } catch (error) {
+      // Return default if API fails
+      return {
+        success: true,
+        data: {
+          instantPaymentDiscount: 10, // Default 10%
+        },
+      };
+    }
+  },
 };
 
 export default api;

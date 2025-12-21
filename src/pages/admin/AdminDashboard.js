@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { apiService } from '../../services/api';
-import { ShoppingBag, Users, Plus, List, TrendingUp, AlertCircle, Package, Tag } from 'lucide-react';
+import { ShoppingBag, Users, Plus, List, TrendingUp, AlertCircle, Package, Tag, UserCircle, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const AdminDashboard = () => {
@@ -250,6 +250,26 @@ const AdminDashboard = () => {
                             <div>
                                 <p className="text-sm font-semibold">Manage Coupons</p>
                                 <p className="text-xs text-text-light group-hover:text-white">Create and manage discount coupons</p>
+                            </div>
+                        </Link>
+                        <Link
+                            to="/admin/manage-users"
+                            className="flex items-center space-x-2 p-3 border-2 border-dashed border-primary-blue rounded-xl hover:bg-primary-blue hover:text-white transition group"
+                        >
+                            <UserCircle className="w-5 h-5 text-primary-blue group-hover:text-white" />
+                            <div>
+                                <p className="text-sm font-semibold">Manage Users</p>
+                                <p className="text-xs text-text-light group-hover:text-white">View user details and order history</p>
+                            </div>
+                        </Link>
+                        <Link
+                            to="/admin/settings"
+                            className="flex items-center space-x-2 p-3 border-2 border-dashed border-primary-blue rounded-xl hover:bg-primary-blue hover:text-white transition group"
+                        >
+                            <Settings className="w-5 h-5 text-primary-blue group-hover:text-white" />
+                            <div>
+                                <p className="text-sm font-semibold">Settings</p>
+                                <p className="text-xs text-text-light group-hover:text-white">Manage system settings and preferences</p>
                             </div>
                         </Link>
                     </div>

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
+import { SettingsProvider } from './context/SettingsContext';
 import Header from './components/Header';
 import ScrollToTop from './components/ScrollToTop';
 import Footer from './components/Footer';
@@ -46,13 +47,16 @@ import ManageServices from './pages/admin/ManageServices';
 import Tickets from './pages/admin/Tickets';
 import ManageFAQs from './pages/admin/ManageFAQs';
 import ManageCoupons from './pages/admin/ManageCoupons';
+import ManageUsers from './pages/admin/ManageUsers';
+import ManageSettings from './pages/admin/ManageSettings';
 
 function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <WishlistProvider>
-          <Router>
+      <SettingsProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <Router>
             <div className="min-h-screen flex flex-col bg-gray-50 overflow-x-hidden w-full max-w-full">
               <Header />
               <main className="flex-grow w-full max-w-full overflow-x-hidden pt-16 md:pt-20">
@@ -222,6 +226,22 @@ function App() {
                       </ProtectedRoute>
                     }
                   />
+                  <Route
+                    path="/admin/manage-users"
+                    element={
+                      <ProtectedRoute requireAdmin={true}>
+                        <ManageUsers />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/settings"
+                    element={
+                      <ProtectedRoute requireAdmin={true}>
+                        <ManageSettings />
+                      </ProtectedRoute>
+                    }
+                  />
                 </Routes>
               </main>
               <Footer />
@@ -230,6 +250,7 @@ function App() {
           </Router>
         </WishlistProvider>
       </CartProvider>
+      </SettingsProvider>
     </AuthProvider>
   );
 }

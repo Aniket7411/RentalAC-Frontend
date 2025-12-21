@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { useSettings } from '../../context/SettingsContext';
 import { apiService } from '../../services/api';
 import { FiShoppingCart, FiAlertCircle, FiCheckCircle, FiCreditCard, FiClock, FiCalendar, FiMapPin, FiTag } from 'react-icons/fi';
 import { Loader2, Wrench, ArrowLeft } from 'lucide-react';
@@ -16,6 +17,7 @@ import RazorpayPaymentCheckout from '../../components/RazorpayPaymentCheckout';
 const Checkout = () => {
   const { user, isAuthenticated } = useAuth();
   const { cartItems, calculateTotals, getPaymentBenefits, clearCart } = useCart();
+  const { instantPaymentDiscount } = useSettings();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -37,7 +39,7 @@ const Checkout = () => {
   const totals = calculateTotals();
   const paymentBenefits = getPaymentBenefits();
   const paymentDiscount = selectedPaymentOption === 'payNow' ? totals.total * paymentBenefits.payNow.discount : 0;
-  
+
   // Calculate coupon discount
   const couponDiscount = appliedCoupon ? (() => {
     if (appliedCoupon.type === 'percentage') {
@@ -46,7 +48,7 @@ const Checkout = () => {
       return appliedCoupon.value; // Fixed amount
     }
   })() : 0;
-  
+
   const totalDiscount = paymentDiscount + couponDiscount;
   const finalTotal = totals.total - totalDiscount;
 
@@ -66,7 +68,7 @@ const Checkout = () => {
   useEffect(() => {
     const fetchAvailableCoupons = async () => {
       if (!isAuthenticated || cartItems.length === 0) return;
-      
+
       setLoadingCoupons(true);
       try {
         const orderTotal = totals.total;
@@ -126,8 +128,8 @@ const Checkout = () => {
                 : (rental.price || 0);
 
               // Get installation charges for AC products
-              const installationCharge = (rental.category === 'AC' && rental.installationCharges && rental.installationCharges.amount) 
-                ? rental.installationCharges.amount 
+              const installationCharge = (rental.category === 'AC' && rental.installationCharges && rental.installationCharges.amount)
+                ? rental.installationCharges.amount
                 : 0;
 
               // Calculate price based on payment type
@@ -354,14 +356,14 @@ const Checkout = () => {
           (item.type !== 'service' && (item.brand || item.model || item.price));
       });
       const response = await apiService.validateCoupon(couponToApply, totals.total, rentals);
-      
+
       if (!response.success) {
         setCouponError(response.message || 'Invalid coupon code');
         return;
       }
 
       const coupon = response.data;
-      
+
       // Check minimum amount if required
       if (coupon.minAmount && totals.total < coupon.minAmount) {
         setCouponError(`Minimum order amount of ₹${coupon.minAmount} required`);
@@ -468,7 +470,7 @@ const Checkout = () => {
                 <span>Apply Coupon Code</span>
                 <span className="text-sm font-normal text-primary-blue bg-primary-blue/10 px-2 py-1 rounded">Save More!</span>
               </h2>
-              
+
               {appliedCoupon ? (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <div className="flex items-center justify-between">
@@ -510,7 +512,7 @@ const Checkout = () => {
                   </button>
                 </div>
               )}
-              
+
               {couponError && (
                 <p className="text-red-600 text-sm mt-2">{couponError}</p>
               )}
@@ -530,7 +532,7 @@ const Checkout = () => {
                       {showAvailableCoupons ? 'Hide' : 'Show'} ({availableCoupons.length})
                     </button>
                   </div>
-                  
+
                   {showAvailableCoupons && (
                     <div className="space-y-3">
                       {loadingCoupons ? (
@@ -555,11 +557,10 @@ const Checkout = () => {
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: index * 0.1 }}
-                              className={`border-2 rounded-lg p-4 transition-all ${
-                                isEligible
+                              className={`border-2 rounded-lg p-4 transition-all ${isEligible
                                   ? 'border-primary-blue/30 bg-gradient-to-r from-primary-blue/5 to-primary-blue-light/5 hover:border-primary-blue/50 cursor-pointer'
                                   : 'border-gray-200 bg-gray-50 opacity-60'
-                              }`}
+                                }`}
                               onClick={() => isEligible && handleApplyCouponFromList(coupon)}
                             >
                               <div className="flex items-start justify-between gap-4">
@@ -580,7 +581,7 @@ const Checkout = () => {
                                   </p>
                                   {coupon.minAmount > 0 && (
                                     <p className={`text-xs ${isEligible ? 'text-green-600' : 'text-orange-600'}`}>
-                                      {isEligible 
+                                      {isEligible
                                         ? `✓ Min. order: ₹${coupon.minAmount.toLocaleString()}`
                                         : `Min. order: ₹${coupon.minAmount.toLocaleString()} required`
                                       }
@@ -744,8 +745,8 @@ const Checkout = () => {
                               const oneMonthCharge = item.monthlyPrice;
                               const securityDeposit = item.securityDeposit || 0;
                               const monthlyTotal = oneMonthCharge + securityDeposit;
-                              const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount) 
-                                ? item.installationCharges.amount 
+                              const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount)
+                                ? item.installationCharges.amount
                                 : 0;
                               return (monthlyTotal + installationCharge).toLocaleString();
                             }
@@ -753,8 +754,8 @@ const Checkout = () => {
                             const price = item.price && typeof item.price === 'object'
                               ? (item.price[selectedDuration] || item.price[3] || 0)
                               : (item.price || 0);
-                            const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount) 
-                              ? item.installationCharges.amount 
+                            const installationCharge = (item.category === 'AC' && item.installationCharges && item.installationCharges.amount)
+                              ? item.installationCharges.amount
                               : 0;
                             return (price + installationCharge).toLocaleString();
                           })()}
@@ -881,7 +882,7 @@ const Checkout = () => {
                 )}
                 {paymentDiscount > 0 && (
                   <div className="flex justify-between text-green-600">
-                    <span>Payment Discount (5%)</span>
+                    <span>Payment Discount ({instantPaymentDiscount}%)</span>
                     <span>-₹{paymentDiscount.toLocaleString()}</span>
                   </div>
                 )}
