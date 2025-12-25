@@ -51,7 +51,8 @@ const Checkout = () => {
     if (appliedCoupon.type === 'percentage') {
       return totals.subtotal * (appliedCoupon.value / 100);
     } else {
-      return appliedCoupon.value; // Fixed amount
+      // For fixed amount, ensure it doesn't exceed subtotal
+      return Math.min(appliedCoupon.value, totals.subtotal);
     }
   })() : 0;
   
@@ -60,7 +61,8 @@ const Checkout = () => {
   
   // Final total = subtotal - payment discount - coupon discount
   // (Product discounts are already applied in subtotal)
-  const finalTotal = totals.subtotal - paymentDiscount - couponDiscount;
+  // Ensure final total doesn't go negative
+  const finalTotal = Math.max(0, totals.subtotal - paymentDiscount - couponDiscount);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -107,15 +109,49 @@ const Checkout = () => {
       return;
     }
 
+    // Validate rentals have delivery address
+    const rentals = cartItems.filter(item => {
+      return item.type === 'rental' ||
+        (item.type !== 'service' && (item.brand || item.model || item.price));
+    });
+    
+    if (rentals.length > 0) {
+      const userAddress = user?.homeAddress || user?.address?.homeAddress || '';
+      if (!userAddress || userAddress.trim() === '') {
+        setError('Please add a delivery address in your profile before placing order for rental products.');
+        showError('Please add a delivery address in your profile before placing order for rental products.');
+        return;
+      }
+    }
+
+    // Validate services have complete booking details
+    const services = cartItems.filter(item => item.type === 'service');
+    for (const service of services) {
+      const bookingDetails = service.bookingDetails || {};
+      if (!bookingDetails.address || bookingDetails.address.trim() === '') {
+        setError(`Service "${service.serviceTitle || 'Service'}" is missing booking address. Please edit the service booking details.`);
+        showError(`Service "${service.serviceTitle || 'Service'}" is missing booking address. Please edit the service booking details.`);
+        return;
+      }
+      if (!bookingDetails.date || !bookingDetails.time) {
+        setError(`Service "${service.serviceTitle || 'Service'}" is missing booking date or time. Please edit the service booking details.`);
+        showError(`Service "${service.serviceTitle || 'Service'}" is missing booking date or time. Please edit the service booking details.`);
+        return;
+      }
+    }
+
+    // Ensure final total is valid
+    if (finalTotal <= 0) {
+      setError('Order total must be greater than zero. Please review your discounts.');
+      showError('Order total must be greater than zero. Please review your discounts.');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
-      const rentals = cartItems.filter(item => {
-        return item.type === 'rental' ||
-          (item.type !== 'service' && (item.brand || item.model || item.price));
-      });
-      const services = cartItems.filter(item => item.type === 'service');
+      // Rentals and services are already filtered above in validation
 
       // Create order for all rentals and services
       if (rentals.length > 0 || services.length > 0) {
