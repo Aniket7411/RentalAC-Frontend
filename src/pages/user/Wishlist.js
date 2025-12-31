@@ -93,7 +93,7 @@ const Wishlist = () => {
               to="/browse"
               className="inline-block px-6 py-3 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition-all font-semibold"
             >
-              Browse Products
+              Browse Rental Products
             </Link>
           </div>
         ) : (

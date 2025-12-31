@@ -31,13 +31,13 @@ const Footer = () => {
               Your Comfort, Our Priority - Rent & Repair
             </p>
             <div className="flex space-x-3 mt-6">
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-primary-blue transition-all duration-300 hover:scale-110">
+              <a href="https://www.facebook.com/AshEnterprisesMumbai?mibextid=ZbWKwL" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-primary-blue transition-all duration-300 hover:scale-110">
                 <Facebook className="w-5 h-5" />
               </a>
               <a href="#" className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-primary-blue transition-all duration-300 hover:scale-110">
                 <Twitter className="w-5 h-5" />
               </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-primary-blue transition-all duration-300 hover:scale-110">
+              <a href="https://www.facebook.com/AshEnterprisesMumbai?mibextid=ZbWKwL" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-primary-blue transition-all duration-300 hover:scale-110">
                 <Instagram className="w-5 h-5" />
               </a>
               <a href="#" className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-primary-blue transition-all duration-300 hover:scale-110">
@@ -96,7 +96,9 @@ const Footer = () => {
             <ul className="space-y-3 text-sm text-gray-300">
               <li className="flex items-center space-x-2">
                 <Phone className="w-4 h-4" />
-                <span>+91 [Insert Number]</span>
+                <a href="tel:+918169535736" className="hover:text-primary-blue-light transition">
+                  +91 8169535736
+                </a>
               </li>
               <li className="flex items-center space-x-2">
                 <Mail className="w-4 h-4" />
@@ -104,7 +106,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center space-x-2">
                 <MapPin className="w-4 h-4" />
-                <span>[Insert Short Address], Mumbai.</span>
+                <span>Shop No 3 Sai prasad building, hanuman nagar, goregaon west 400104</span>
               </li>
             </ul>
           </div>

@@ -12,9 +12,14 @@ const ServiceCard = ({ service, onAddClick, onView }) => {
   const navigate = useNavigate();
   const [showBookingModal, setShowBookingModal] = useState(false);
   const badgeIcons = {
-    'Visit Within 1 Hour': <User className="w-3 h-3" />,
+    'Visit within 1 hour': <Clock className="w-3 h-3" />,
+    'Visit within 2 hours': <Clock className="w-3 h-3" />,
+    'Visit within 3 hours': <Clock className="w-3 h-3" />,
+    'Same Day Visit': <Clock className="w-3 h-3" />,
     'Most Booked': <ShoppingCart className="w-3 h-3" />,
     'Power Saver': <Zap className="w-3 h-3" />,
+    // Legacy support for old badge names
+    'Visit Within 1 Hour': <Clock className="w-3 h-3" />,
   };
 
   const features = Array.isArray(service.features) ? service.features : [];

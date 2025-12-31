@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom';
 import LoginPromptModal from '../../components/LoginPromptModal';
 import SuccessModal from '../../components/SuccessModal';
 import RazorpayPaymentCheckout from '../../components/RazorpayPaymentCheckout';
+import { roundMoney, calculateDiscount, calculateFinalTotal } from '../../utils/moneyUtils';
 
 const Checkout = () => {
   const { user, isAuthenticated } = useAuth();
@@ -39,30 +40,36 @@ const Checkout = () => {
   const totals = calculateTotals();
   const paymentBenefits = getPaymentBenefits();
   
+  // Round subtotal to avoid floating point errors
+  const roundedSubtotal = roundMoney(totals.subtotal);
+  
   // Payment discount is applied on subtotal (after product discounts)
   // For Pay Now: use instant payment discount
   // For Pay Advance: use advance payment discount (handled separately)
   const paymentDiscount = selectedPaymentOption === 'payNow' 
-    ? totals.subtotal * paymentBenefits.payNow.discount 
+    ? calculateDiscount(roundedSubtotal, instantPaymentDiscount)
     : 0;
 
   // Calculate coupon discount (applied on subtotal after product discounts)
   const couponDiscount = appliedCoupon ? (() => {
     if (appliedCoupon.type === 'percentage') {
-      return totals.subtotal * (appliedCoupon.value / 100);
+      return calculateDiscount(roundedSubtotal, appliedCoupon.value);
     } else {
-      // For fixed amount, ensure it doesn't exceed subtotal
-      return Math.min(appliedCoupon.value, totals.subtotal);
+      // For fixed amount, ensure it doesn't exceed subtotal and round it
+      return roundMoney(Math.min(appliedCoupon.value, roundedSubtotal));
     }
   })() : 0;
   
+  // Round product discount total
+  const roundedProductDiscountTotal = roundMoney(totals.productDiscountTotal || 0);
+  
   // Total discount = product discount + payment discount + coupon discount
-  const totalDiscount = (totals.productDiscountTotal || 0) + paymentDiscount + couponDiscount;
+  const totalDiscount = roundMoney(roundedProductDiscountTotal + paymentDiscount + couponDiscount);
   
   // Final total = subtotal - payment discount - coupon discount
   // (Product discounts are already applied in subtotal)
-  // Ensure final total doesn't go negative
-  const finalTotal = Math.max(0, totals.subtotal - paymentDiscount - couponDiscount);
+  // Use utility function to ensure proper rounding
+  const finalTotal = calculateFinalTotal(roundedSubtotal, paymentDiscount, couponDiscount);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -291,16 +298,17 @@ const Checkout = () => {
             });
 
           // Prepare comprehensive order data
+          // Round all monetary values before sending to backend
           const orderData = {
             orderId: generateOrderId(), // Generate orderId on frontend
             items: orderItems,
-            total: totals.subtotal, // Subtotal after product discounts
-            productDiscount: totals.productDiscountTotal || 0, // Product discount amount
-            discount: totalDiscount, // Total discount (product + payment + coupon)
+            total: roundedSubtotal, // Subtotal after product discounts (rounded)
+            productDiscount: roundedProductDiscountTotal, // Product discount amount (rounded)
+            discount: totalDiscount, // Total discount (product + payment + coupon) (rounded)
             couponCode: appliedCoupon?.code || null,
-            couponDiscount: couponDiscount,
-            paymentDiscount: paymentDiscount,
-            finalTotal: finalTotal,
+            couponDiscount: roundMoney(couponDiscount), // Round coupon discount
+            paymentDiscount: roundMoney(paymentDiscount), // Round payment discount
+            finalTotal: finalTotal, // Already rounded by calculateFinalTotal
             paymentOption: selectedPaymentOption,
             paymentStatus: selectedPaymentOption === 'payNow' ? 'pending' : 'pending', // Will be updated to 'paid' after payment verification
             // Include complete user information for admin reference
@@ -357,8 +365,12 @@ const Checkout = () => {
           // Show prominent success notification (toast)
           showSuccess(`🎉 Order #${createdOrderId} placed successfully!`, 5000);
 
-          // Show success modal immediately
+          // Show success modal immediately for pay later orders
           setShowSuccessModal(true);
+          
+          // Reset error state and loading state
+          setError('');
+          setLoading(false);
         } catch (err) {
           console.error('Error creating order:', err);
           const errorMessage = err.response?.data?.message || err.message || 'Failed to place order';
@@ -942,18 +954,18 @@ const Checkout = () => {
                 {paymentDiscount > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Payment Discount ({instantPaymentDiscount}% Pay Now)</span>
-                    <span>-₹{paymentDiscount.toLocaleString()}</span>
+                    <span>-₹{roundMoney(paymentDiscount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                 )}
                 {couponDiscount > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Coupon Discount ({appliedCoupon?.code})</span>
-                    <span>-₹{couponDiscount.toLocaleString()}</span>
+                    <span>-₹{roundMoney(couponDiscount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                 )}
                 <div className="border-t border-gray-200 pt-3 flex justify-between text-lg font-bold text-text-dark">
                   <span>Total</span>
-                  <span>₹{finalTotal.toLocaleString()}</span>
+                  <span>₹{finalTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               </div>
 

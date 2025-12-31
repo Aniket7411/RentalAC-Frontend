@@ -125,9 +125,9 @@ const Contact = () => {
               <MapPin className="w-8 h-8 text-primary-blue mb-4" />
               <h3 className="text-lg font-semibold text-text-dark mb-2">Address</h3>
               <p className="text-text-light">
-                123 Business Street<br />
-                City, State 12345<br />
-                India
+                Shop No 3 Sai prasad building<br />
+                hanuman nagar<br />
+                goregaon west 400104
               </p>
             </motion.div>
 
@@ -140,8 +140,8 @@ const Contact = () => {
               <Phone className="w-8 h-8 text-primary-blue mb-4" />
               <h3 className="text-lg font-semibold text-text-dark mb-2">Phone</h3>
               <p className="text-text-light">
-                <a href="tel:+919876543210" className="hover:text-primary-blue">
-                  +91 9876543210
+                <a href="tel:+918169535736" className="hover:text-primary-blue">
+                  +91 8169535736
                 </a>
               </p>
             </motion.div>

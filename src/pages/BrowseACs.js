@@ -486,7 +486,7 @@ const BrowseACs = () => {
                 className="mb-4 lg:mb-6 flex-shrink-0"
               >
                 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold bg-gradient-to-r from-primary-blue via-blue-600 to-primary-blue-light bg-clip-text text-transparent mb-1 lg:mb-2">
-                  Browse Products
+                  Browse Rental Products
                 </h1>
                 <p className="text-gray-600 text-sm md:text-base lg:text-base">
                   Discover amazing appliances for your home

@@ -391,12 +391,12 @@ const ServiceRequest = () => {
                 {/* All Services Tab */}
                 <button
                   onClick={() => setSelectedCategory(null)}
-                  className={`px-4 py-2.5 rounded-lg font-semibold text-sm sm:text-base transition-all duration-200 flex items-center gap-2 flex-shrink-0 whitespace-nowrap ${selectedCategory === null
+                  className={`px-3 py-1.5 sm:px-4 sm:py-2.5 rounded-lg font-semibold text-xs sm:text-sm md:text-base transition-all duration-200 flex items-center gap-1.5 sm:gap-2 flex-shrink-0 whitespace-nowrap ${selectedCategory === null
                     ? 'bg-gradient-to-r from-primary-blue to-primary-blue-light text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                 >
-                  <Wrench className="w-4 h-4" />
+                  <Wrench className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>All Services ({services.length})</span>
                 </button>
 
@@ -414,12 +414,12 @@ const ServiceRequest = () => {
                     <button
                       key={category}
                       onClick={() => setSelectedCategory(category)}
-                      className={`px-4 py-2.5 rounded-lg font-semibold text-sm sm:text-base transition-all duration-200 flex items-center gap-2 flex-shrink-0 whitespace-nowrap ${selectedCategory === category
+                      className={`px-3 py-1.5 sm:px-4 sm:py-2.5 rounded-lg font-semibold text-xs sm:text-sm md:text-base transition-all duration-200 flex items-center gap-1.5 sm:gap-2 flex-shrink-0 whitespace-nowrap ${selectedCategory === category
                         ? 'bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-md'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                     >
-                      <Icon className="w-4 h-4" />
+                      <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
                       <span>{category} ({count})</span>
                     </button>
                   );

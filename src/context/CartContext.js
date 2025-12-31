@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { useSettings } from './SettingsContext';
+import { roundMoney } from '../utils/moneyUtils';
 
 const CartContext = createContext();
 
@@ -362,15 +363,15 @@ export const CartProvider = ({ children }) => {
       const productDiscount = item.discount || 0;
       const priceWithInstallation = basePrice + installationCharge;
       const priceAfterProductDiscount = productDiscount > 0
-        ? priceWithInstallation * (1 - productDiscount / 100)
-        : priceWithInstallation;
+        ? roundMoney(priceWithInstallation * (1 - productDiscount / 100))
+        : roundMoney(priceWithInstallation);
       
       return total + priceAfterProductDiscount; // quantity is always 1
     }, 0);
 
     // Services don't have product discounts (they have fixed prices)
     const serviceTotal = services.reduce((total, item) => {
-      return total + (item.servicePrice || 0); // quantity is always 1
+      return total + roundMoney(item.servicePrice || 0); // quantity is always 1
     }, 0);
 
     // Calculate product discount total for display
@@ -398,18 +399,18 @@ export const CartProvider = ({ children }) => {
         : 0;
       
       const priceWithInstallation = basePrice + installationCharge;
-      const discountAmount = priceWithInstallation * (item.discount / 100);
+      const discountAmount = roundMoney(priceWithInstallation * (item.discount / 100));
       return total + discountAmount;
     }, 0);
 
-    const subtotal = rentalTotal + serviceTotal;
+    const subtotal = roundMoney(rentalTotal + serviceTotal);
 
     return {
-      rentalTotal,
-      serviceTotal,
-      subtotal, // Subtotal after product discounts
+      rentalTotal: roundMoney(rentalTotal),
+      serviceTotal: roundMoney(serviceTotal),
+      subtotal, // Subtotal after product discounts (rounded)
       total: subtotal, // Total before payment discounts (payment discounts applied at checkout)
-      productDiscountTotal, // Total product discount amount for display
+      productDiscountTotal: roundMoney(productDiscountTotal), // Total product discount amount for display (rounded)
       rentalCount: rentals.length,
       serviceCount: services.length,
       totalItems: cartItems.length,

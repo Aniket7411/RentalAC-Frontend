@@ -556,7 +556,7 @@ const UserDashboard = () => {
               to="/browse"
               className="px-6 py-2 bg-primary-blue text-white rounded-lg hover:bg-primary-blue-light transition"
             >
-              Browse Products
+              Browse Rental Products
             </Link>
             <Link
               to="/user/cart"

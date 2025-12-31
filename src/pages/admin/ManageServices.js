@@ -319,7 +319,10 @@ const ManageServices = () => {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
                     <option value="">None</option>
-                    <option value="Visit Within 1 Hour">Visit Within 1 Hour</option>
+                    <option value="Visit within 1 hour">Visit within 1 hour</option>
+                    <option value="Visit within 2 hours">Visit within 2 hours</option>
+                    <option value="Visit within 3 hours">Visit within 3 hours</option>
+                    <option value="Same Day Visit">Same Day Visit</option>
                     <option value="Most Booked">Most Booked</option>
                     <option value="Power Saver">Power Saver</option>
                   </select>

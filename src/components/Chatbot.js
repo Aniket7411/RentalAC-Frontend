@@ -14,7 +14,7 @@ const Chatbot = () => {
   const searchInputRef = useRef(null);
 
   // WhatsApp number - should be configurable
-  const whatsappNumber = '919876543210'; // Replace with actual admin WhatsApp number
+  const whatsappNumber = '918169535736'; // Admin WhatsApp number
   const whatsappMessage = encodeURIComponent('Hello, I have a question about your services.');
 
   useEffect(() => {
