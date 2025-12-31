@@ -420,6 +420,7 @@ export const CartProvider = ({ children }) => {
   // Get payment benefits
   const getPaymentBenefits = () => {
     const instantDiscountDecimal = instantPaymentDiscount / 100;
+    const advanceDiscountDecimal = advancePaymentDiscount / 100;
     return {
       payNow: {
         title: 'Pay Now',
@@ -430,6 +431,16 @@ export const CartProvider = ({ children }) => {
           'Faster delivery/booking confirmation',
         ],
         discount: instantDiscountDecimal,
+      },
+      payAdvance: {
+        title: 'Pay Advance (₹999)',
+        benefits: [
+          `${advancePaymentDiscount}% Additional Discount`,
+          'Priority service scheduling',
+          'Pay ₹999 now, remaining after installation',
+          'Faster booking confirmation',
+        ],
+        discount: advanceDiscountDecimal,
       },
       payLater: {
         title: 'Pay Later',

@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useSettings } from '../../context/SettingsContext';
 import { apiService } from '../../services/api';
-import { FiShoppingCart, FiAlertCircle, FiCheckCircle, FiCreditCard, FiClock, FiCalendar, FiMapPin, FiTag } from 'react-icons/fi';
+import { FiShoppingCart, FiAlertCircle, FiCheckCircle, FiCreditCard, FiClock, FiCalendar, FiMapPin, FiTag, FiDollarSign } from 'react-icons/fi';
 import { Loader2, Wrench, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '../../hooks/useToast';
@@ -18,7 +18,7 @@ import { roundMoney, calculateDiscount, calculateFinalTotal } from '../../utils/
 const Checkout = () => {
   const { user, isAuthenticated } = useAuth();
   const { cartItems, calculateTotals, getPaymentBenefits, clearCart } = useCart();
-  const { instantPaymentDiscount } = useSettings();
+  const { instantPaymentDiscount, advancePaymentDiscount } = useSettings();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -45,9 +45,11 @@ const Checkout = () => {
   
   // Payment discount is applied on subtotal (after product discounts)
   // For Pay Now: use instant payment discount
-  // For Pay Advance: use advance payment discount (handled separately)
+  // For Pay Advance: use advance payment discount (5%)
   const paymentDiscount = selectedPaymentOption === 'payNow' 
     ? calculateDiscount(roundedSubtotal, instantPaymentDiscount)
+    : selectedPaymentOption === 'payAdvance'
+    ? calculateDiscount(roundedSubtotal, advancePaymentDiscount)
     : 0;
 
   // Calculate coupon discount (applied on subtotal after product discounts)
@@ -310,7 +312,10 @@ const Checkout = () => {
             paymentDiscount: roundMoney(paymentDiscount), // Round payment discount
             finalTotal: finalTotal, // Already rounded by calculateFinalTotal
             paymentOption: selectedPaymentOption,
-            paymentStatus: selectedPaymentOption === 'payNow' ? 'pending' : 'pending', // Will be updated to 'paid' after payment verification
+            paymentStatus: selectedPaymentOption === 'payNow' || selectedPaymentOption === 'payAdvance' ? 'pending' : 'pending', // Will be updated to 'paid' after payment verification
+            priorityServiceScheduling: selectedPaymentOption === 'payAdvance' ? true : false, // Priority scheduling for advance payment
+            advanceAmount: selectedPaymentOption === 'payAdvance' ? 999 : null, // Advance payment amount
+            remainingAmount: selectedPaymentOption === 'payAdvance' ? roundMoney(Math.max(0, finalTotal - 999)) : null, // Remaining amount for advance payment (min 0)
             // Include complete user information for admin reference
             customerInfo: {
               userId: user.id || user._id,
@@ -351,8 +356,8 @@ const Checkout = () => {
           setOrderId(createdOrderId);
           setCreatedOrder(orderDataResponse);
 
-          // If payNow is selected, show payment checkout instead of completing order
-          if (selectedPaymentOption === 'payNow') {
+          // If payNow or payAdvance is selected, show payment checkout instead of completing order
+          if (selectedPaymentOption === 'payNow' || selectedPaymentOption === 'payAdvance') {
             setShowPaymentCheckout(true);
             setLoading(false);
             return; // Don't clear cart or show success yet - wait for payment
@@ -718,6 +723,48 @@ const Checkout = () => {
                   </div>
                 </label>
 
+                {/* Pay Advance Option */}
+                <label
+                  className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition ${selectedPaymentOption === 'payAdvance'
+                    ? 'border-purple-500 bg-purple-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                >
+                  <input
+                    type="radio"
+                    name="paymentOption"
+                    value="payAdvance"
+                    checked={selectedPaymentOption === 'payAdvance'}
+                    onChange={(e) => setSelectedPaymentOption(e.target.value)}
+                    className="mt-1"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <FiCreditCard className="w-5 h-5 text-purple-600" />
+                        <span className="font-semibold text-text-dark">Pay Advance (₹999)</span>
+                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded">
+                          {advancePaymentDiscount}% OFF
+                        </span>
+                      </div>
+                      {selectedPaymentOption === 'payAdvance' && paymentDiscount > 0 && (
+                        <span className="text-sm font-semibold text-green-600">
+                          Save ₹{paymentDiscount.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-text-light mb-2">Pay ₹999 now, remaining after installation</p>
+                    <ul className="text-xs text-text-light space-y-1">
+                      {paymentBenefits.payAdvance?.benefits.map((benefit, idx) => (
+                        <li key={idx} className="flex items-start space-x-1">
+                          <FiCheckCircle className="w-3 h-3 text-purple-600 mt-0.5 flex-shrink-0" />
+                          <span>{benefit}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </label>
+
                 {/* Pay Later Option */}
                 <label
                   className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition ${selectedPaymentOption === 'payLater'
@@ -953,7 +1000,7 @@ const Checkout = () => {
                 </div>
                 {paymentDiscount > 0 && (
                   <div className="flex justify-between text-green-600">
-                    <span>Payment Discount ({instantPaymentDiscount}% Pay Now)</span>
+                    <span>Payment Discount ({selectedPaymentOption === 'payNow' ? `${instantPaymentDiscount}% Pay Now` : `${advancePaymentDiscount}% Pay Advance`})</span>
                     <span>-₹{roundMoney(paymentDiscount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                 )}
@@ -963,13 +1010,32 @@ const Checkout = () => {
                     <span>-₹{roundMoney(couponDiscount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                 )}
+                {selectedPaymentOption === 'payAdvance' && (
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-3">
+                    <div className="flex justify-between text-sm text-purple-800 mb-2">
+                      <span>Amount to Pay Now:</span>
+                      <span className="font-bold">₹999</span>
+                    </div>
+                    {finalTotal > 999 && (
+                      <div className="flex justify-between text-xs text-purple-600">
+                        <span>Remaining (after installation):</span>
+                        <span>₹{roundMoney(finalTotal - 999).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      </div>
+                    )}
+                    {finalTotal <= 999 && (
+                      <div className="text-xs text-purple-600">
+                        <span className="text-green-600 font-semibold">✓ Full amount covered by advance payment</span>
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div className="border-t border-gray-200 pt-3 flex justify-between text-lg font-bold text-text-dark">
-                  <span>Total</span>
+                  <span>{selectedPaymentOption === 'payAdvance' ? 'Total (with discount)' : 'Total'}</span>
                   <span>₹{finalTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               </div>
 
-              {showPaymentCheckout && createdOrder && selectedPaymentOption === 'payNow' ? (
+              {showPaymentCheckout && createdOrder && (selectedPaymentOption === 'payNow' || selectedPaymentOption === 'payAdvance') ? (
                 <div className="space-y-4">
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <p className="text-sm text-blue-800 mb-3">
@@ -978,7 +1044,7 @@ const Checkout = () => {
                   </div>
                   <RazorpayPaymentCheckout
                     orderId={orderId}
-                    amount={finalTotal}
+                    amount={selectedPaymentOption === 'payAdvance' ? 999 : finalTotal}
                     user={user}
                     onPaymentSuccess={(paymentData) => {
                       // Payment successful - clear cart and show success
@@ -1029,7 +1095,7 @@ const Checkout = () => {
                   </button>
 
                   <p className="text-xs text-text-light text-center mt-4">
-                    {selectedPaymentOption === 'payNow'
+                    {selectedPaymentOption === 'payNow' || selectedPaymentOption === 'payAdvance'
                       ? 'You will be redirected to payment gateway after order creation'
                       : 'You can pay after service completion or on delivery'}
                   </p>
