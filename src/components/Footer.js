@@ -87,6 +87,9 @@ const Footer = () => {
               <li>
                 <Link to="/delivery-service-policy" className="hover:text-primary-blue-light transition">Delivery & Service</Link>
               </li>
+              <li>
+                <Link to="/shipping-policy" className="hover:text-primary-blue-light transition">Shipping Policy</Link>
+              </li>
             </ul>
           </div>
 

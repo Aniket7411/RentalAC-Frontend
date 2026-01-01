@@ -20,6 +20,7 @@ import TermsConditions from './pages/TermsConditions';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import CancellationRefundPolicy from './pages/CancellationRefundPolicy';
 import DeliveryServicePolicy from './pages/DeliveryServicePolicy';
+import ShippingPolicy from './pages/ShippingPolicy';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
@@ -72,6 +73,7 @@ function App() {
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/cancellation-refund-policy" element={<CancellationRefundPolicy />} />
                   <Route path="/delivery-service-policy" element={<DeliveryServicePolicy />} />
+                  <Route path="/shipping-policy" element={<ShippingPolicy />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />

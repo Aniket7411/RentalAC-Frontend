@@ -14,7 +14,8 @@ export const useSettings = () => {
 export const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState({
     instantPaymentDiscount: 10, // Default 10% for Pay Now (instant payment)
-    advancePaymentDiscount: 5, // Default 5% for Pay Advance
+    advancePaymentDiscount: 5, // Default 5% for Book Now
+    advancePaymentAmount: 500, // Default advance payment amount (configurable by admin)
   });
   const [loading, setLoading] = useState(true);
 
@@ -29,6 +30,7 @@ export const SettingsProvider = ({ children }) => {
         setSettings({
           instantPaymentDiscount: response.data.instantPaymentDiscount || 10,
           advancePaymentDiscount: response.data.advancePaymentDiscount || 5,
+          advancePaymentAmount: response.data.advancePaymentAmount || 500,
         });
       }
     } catch (error) {
@@ -49,6 +51,7 @@ export const SettingsProvider = ({ children }) => {
     refreshSettings,
     instantPaymentDiscount: settings.instantPaymentDiscount,
     advancePaymentDiscount: settings.advancePaymentDiscount,
+    advancePaymentAmount: settings.advancePaymentAmount,
   };
 
   return (

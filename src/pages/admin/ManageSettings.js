@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
-import { Settings, Save, Loader2, AlertCircle, Percent } from 'lucide-react';
+import { Settings, Save, Loader2, AlertCircle, Percent, DollarSign } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '../../hooks/useToast';
 import { ToastContainer } from '../../components/Toast';
@@ -8,7 +8,8 @@ import { ToastContainer } from '../../components/Toast';
 const ManageSettings = () => {
   const [settings, setSettings] = useState({
     instantPaymentDiscount: 10, // Default 10% for Pay Now (instant payment)
-    advancePaymentDiscount: 5, // Default 5% for Pay Advance
+    advancePaymentDiscount: 5, // Default 5% for Book Now
+    advancePaymentAmount: 500, // Default advance payment amount (configurable by admin)
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -28,12 +29,14 @@ const ManageSettings = () => {
         setSettings({
           instantPaymentDiscount: response.data?.instantPaymentDiscount || 10,
           advancePaymentDiscount: response.data?.advancePaymentDiscount || 5,
+          advancePaymentAmount: response.data?.advancePaymentAmount || 500,
         });
       } else {
         // If settings don't exist, use defaults
         setSettings({
           instantPaymentDiscount: 10,
           advancePaymentDiscount: 5,
+          advancePaymentAmount: 500,
         });
       }
     } catch (err) {
@@ -48,9 +51,12 @@ const ManageSettings = () => {
   };
 
   const handleChange = (field, value) => {
-    // Ensure value is between 0 and 100
     const numValue = parseFloat(value);
-    if (isNaN(numValue) || numValue < 0 || numValue > 100) {
+    if (isNaN(numValue) || numValue < 0) {
+      return;
+    }
+    // For discount fields, ensure value is between 0 and 100
+    if ((field === 'instantPaymentDiscount' || field === 'advancePaymentDiscount') && numValue > 100) {
       return;
     }
     setSettings(prev => ({
@@ -170,15 +176,66 @@ const ManageSettings = () => {
             </div>
           </div>
 
+          {/* Advance Payment Amount (Book Now) */}
+          <div className="mb-8">
+            <label className="block text-sm font-semibold text-text-dark mb-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <DollarSign className="w-5 h-5 text-purple-600" />
+                <span>Advance Payment Amount (Book Now)</span>
+              </div>
+              <p className="text-sm text-text-light font-normal mt-1">
+                The amount customers pay upfront when they choose "Book Now" option. Remaining amount will be paid after installation.
+                You can change this amount based on your business requirements. Default: ₹500
+              </p>
+            </label>
+            
+            <div className="mt-4">
+              <div className="flex items-center space-x-4">
+                <div className="flex-1 max-w-xs">
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-text-light text-lg font-semibold">
+                      ₹
+                    </span>
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={settings.advancePaymentAmount}
+                      onChange={(e) => handleChange('advancePaymentAmount', e.target.value)}
+                      className="w-full px-4 py-3 pl-8 border-2 border-gray-200 rounded-xl text-text-dark text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300"
+                      placeholder="500"
+                    />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <p className="text-sm text-purple-800">
+                      <span className="font-semibold">Example:</span> If a customer orders ₹10,000 worth of products 
+                      and chooses "Book Now", they will pay ₹{settings.advancePaymentAmount.toLocaleString()} now 
+                      and ₹{(10000 - settings.advancePaymentAmount).toLocaleString()} after installation.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-4 flex items-center space-x-2 text-sm text-text-light">
+                <AlertCircle className="w-4 h-4" />
+                <span>
+                  Current advance amount: <span className="font-semibold text-purple-600">₹{settings.advancePaymentAmount.toLocaleString()}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
           {/* Advance Payment Discount */}
           <div className="mb-8">
             <label className="block text-sm font-semibold text-text-dark mb-4">
               <div className="flex items-center space-x-2 mb-2">
                 <Percent className="w-5 h-5 text-green-600" />
-                <span>Advance Payment Discount (Pay Advance)</span>
+                <span>Book Now Discount</span>
               </div>
               <p className="text-sm text-text-light font-normal mt-1">
-                Discount percentage applied when customers choose "Pay Advance" option (₹999 advance payment). 
+                Discount percentage applied when customers choose "Book Now" option (₹{settings.advancePaymentAmount} advance payment). 
                 This discount is applied to the total order amount. You can change this based on offers or promotions.
               </p>
             </label>
@@ -206,7 +263,7 @@ const ManageSettings = () => {
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                     <p className="text-sm text-green-800">
                       <span className="font-semibold">Example:</span> If a customer orders ₹10,000 worth of products 
-                      and chooses "Pay Advance", they will get a discount of ₹{((10000 * settings.advancePaymentDiscount) / 100).toLocaleString()} 
+                      and chooses "Book Now", they will get a discount of ₹{((10000 * settings.advancePaymentDiscount) / 100).toLocaleString()} 
                       (₹{(10000 - (10000 * settings.advancePaymentDiscount) / 100).toLocaleString()} final amount).
                     </p>
                   </div>
@@ -263,7 +320,7 @@ const ManageSettings = () => {
             </li>
             <li className="flex items-start space-x-2">
               <span className="font-semibold">•</span>
-              <span><strong>Pay Advance Discount:</strong> Applied when customers pay ₹999 advance and remaining after installation.</span>
+              <span><strong>Book Now:</strong> Customers pay ₹{settings.advancePaymentAmount.toLocaleString()} advance (configurable) and remaining after installation. Discount percentage is also configurable.</span>
             </li>
             <li className="flex items-start space-x-2">
               <span className="font-semibold">•</span>

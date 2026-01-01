@@ -5,8 +5,8 @@ import { useCart } from '../../context/CartContext';
 import { useSettings } from '../../context/SettingsContext';
 import { apiService } from '../../services/api';
 import { FiShoppingCart, FiAlertCircle, FiCheckCircle, FiCreditCard, FiClock, FiCalendar, FiMapPin, FiTag, FiDollarSign } from 'react-icons/fi';
-import { Loader2, Wrench, ArrowLeft } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Loader2, Wrench, ArrowLeft, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '../../hooks/useToast';
 import { ToastContainer } from '../../components/Toast';
 import { Link } from 'react-router-dom';
@@ -14,15 +14,16 @@ import LoginPromptModal from '../../components/LoginPromptModal';
 import SuccessModal from '../../components/SuccessModal';
 import RazorpayPaymentCheckout from '../../components/RazorpayPaymentCheckout';
 import { roundMoney, calculateDiscount, calculateFinalTotal } from '../../utils/moneyUtils';
+import { formatPhoneNumber } from '../../utils/phoneFormatter';
 
 const Checkout = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, updateUser } = useAuth();
   const { cartItems, calculateTotals, getPaymentBenefits, clearCart } = useCart();
-  const { instantPaymentDiscount, advancePaymentDiscount } = useSettings();
+  const { instantPaymentDiscount, advancePaymentDiscount, advancePaymentAmount } = useSettings();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [selectedPaymentOption, setSelectedPaymentOption] = useState('payLater');
+  const [selectedPaymentOption, setSelectedPaymentOption] = useState('payNow');
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [orderId, setOrderId] = useState(null);
@@ -36,6 +37,14 @@ const Checkout = () => {
   const [loadingCoupons, setLoadingCoupons] = useState(false);
   const [showAvailableCoupons, setShowAvailableCoupons] = useState(true);
   const { toasts, removeToast, success: showSuccess, error: showError } = useToast();
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [addressData, setAddressData] = useState({
+    homeAddress: '',
+    nearLandmark: '',
+    alternateNumber: '',
+    pincode: '',
+  });
+  const [savingAddress, setSavingAddress] = useState(false);
 
   const totals = calculateTotals();
   const paymentBenefits = getPaymentBenefits();
@@ -85,6 +94,18 @@ const Checkout = () => {
     }
   }, [isAuthenticated, cartItems.length, navigate]);
 
+  // Load address data from user object
+  useEffect(() => {
+    if (user) {
+      setAddressData({
+        homeAddress: user?.homeAddress || user?.address?.homeAddress || '',
+        nearLandmark: user?.address?.nearLandmark || user?.nearLandmark || '',
+        alternateNumber: user?.address?.alternateNumber || user?.alternateNumber || '',
+        pincode: user?.address?.pincode || user?.pincode || '',
+      });
+    }
+  }, [user]);
+
   // Fetch available coupons
   useEffect(() => {
     const fetchAvailableCoupons = async () => {
@@ -127,8 +148,7 @@ const Checkout = () => {
     if (rentals.length > 0) {
       const userAddress = user?.homeAddress || user?.address?.homeAddress || '';
       if (!userAddress || userAddress.trim() === '') {
-        setError('Please add a delivery address in your profile before placing order for rental products.');
-        showError('Please add a delivery address in your profile before placing order for rental products.');
+        setShowAddressModal(true);
         return;
       }
     }
@@ -314,8 +334,8 @@ const Checkout = () => {
             paymentOption: selectedPaymentOption,
             paymentStatus: selectedPaymentOption === 'payNow' || selectedPaymentOption === 'payAdvance' ? 'pending' : 'pending', // Will be updated to 'paid' after payment verification
             priorityServiceScheduling: selectedPaymentOption === 'payAdvance' ? true : false, // Priority scheduling for advance payment
-            advanceAmount: selectedPaymentOption === 'payAdvance' ? 999 : null, // Advance payment amount
-            remainingAmount: selectedPaymentOption === 'payAdvance' ? roundMoney(Math.max(0, finalTotal - 999)) : null, // Remaining amount for advance payment (min 0)
+            advanceAmount: selectedPaymentOption === 'payAdvance' ? advancePaymentAmount : null, // Advance payment amount
+            remainingAmount: selectedPaymentOption === 'payAdvance' ? roundMoney(Math.max(0, finalTotal - advancePaymentAmount)) : null, // Remaining amount for advance payment (min 0)
             // Include complete user information for admin reference
             customerInfo: {
               userId: user.id || user._id,
@@ -356,26 +376,10 @@ const Checkout = () => {
           setOrderId(createdOrderId);
           setCreatedOrder(orderDataResponse);
 
-          // If payNow or payAdvance is selected, show payment checkout instead of completing order
-          if (selectedPaymentOption === 'payNow' || selectedPaymentOption === 'payAdvance') {
-            setShowPaymentCheckout(true);
-            setLoading(false);
-            return; // Don't clear cart or show success yet - wait for payment
-          }
-
-          // For payLater, complete the order flow
-          // Clear cart after successful order placement
-          clearCart();
-
-          // Show prominent success notification (toast)
-          showSuccess(`🎉 Order #${createdOrderId} placed successfully!`, 5000);
-
-          // Show success modal immediately for pay later orders
-          setShowSuccessModal(true);
-          
-          // Reset error state and loading state
-          setError('');
+          // For payNow or payAdvance, show payment checkout instead of completing order
+          setShowPaymentCheckout(true);
           setLoading(false);
+          return; // Don't clear cart or show success yet - wait for payment
         } catch (err) {
           console.error('Error creating order:', err);
           const errorMessage = err.response?.data?.message || err.message || 'Failed to place order';
@@ -453,6 +457,75 @@ const Checkout = () => {
     setAppliedCoupon(null);
     setCouponCode('');
     setCouponError('');
+  };
+
+  const handleSaveAddress = async () => {
+    if (!addressData.homeAddress.trim()) {
+      setError('Home address is required');
+      return;
+    }
+
+    if (addressData.pincode && !/^\d{6}$/.test(addressData.pincode.trim())) {
+      setError('Pincode must be 6 digits');
+      return;
+    }
+
+    if (addressData.alternateNumber && !/^\d{10}$/.test(addressData.alternateNumber.trim())) {
+      setError('Alternate number must be 10 digits');
+      return;
+    }
+
+    setSavingAddress(true);
+    setError('');
+
+    try {
+      const addressUpdate = {
+        homeAddress: addressData.homeAddress.trim(),
+        address: {
+          homeAddress: addressData.homeAddress.trim(),
+          nearLandmark: addressData.nearLandmark.trim() || undefined,
+          alternateNumber: addressData.alternateNumber.trim() || undefined,
+          pincode: addressData.pincode.trim() || undefined,
+        },
+        ...(addressData.nearLandmark.trim() && { nearLandmark: addressData.nearLandmark.trim() }),
+        ...(addressData.alternateNumber.trim() && { alternateNumber: addressData.alternateNumber.trim() }),
+        ...(addressData.pincode.trim() && { pincode: addressData.pincode.trim() }),
+      };
+
+      const response = await apiService.updateUserProfile(addressUpdate);
+
+      if (response?.success) {
+        if (response.data && updateUser) {
+          const updatedUserData = response.data;
+          const mergedUserData = {
+            ...user,
+            ...updatedUserData,
+            address: {
+              ...(user?.address || {}),
+              ...(updatedUserData.address || {}),
+              homeAddress: updatedUserData.address?.homeAddress || updatedUserData.homeAddress || user?.address?.homeAddress || user?.homeAddress,
+              nearLandmark: updatedUserData.address?.nearLandmark || updatedUserData.nearLandmark || user?.address?.nearLandmark || user?.nearLandmark,
+              alternateNumber: updatedUserData.address?.alternateNumber || updatedUserData.alternateNumber || user?.address?.alternateNumber || user?.alternateNumber,
+              pincode: updatedUserData.address?.pincode || updatedUserData.pincode || user?.address?.pincode || user?.pincode,
+            },
+            homeAddress: updatedUserData.address?.homeAddress || updatedUserData.homeAddress || user?.homeAddress || addressData.homeAddress.trim(),
+            nearLandmark: updatedUserData.address?.nearLandmark || updatedUserData.nearLandmark || user?.nearLandmark || addressData.nearLandmark.trim(),
+            alternateNumber: updatedUserData.address?.alternateNumber || updatedUserData.alternateNumber || user?.alternateNumber || addressData.alternateNumber.trim(),
+            pincode: updatedUserData.address?.pincode || updatedUserData.pincode || user?.pincode || addressData.pincode.trim(),
+          };
+          updateUser(mergedUserData);
+        }
+        setShowAddressModal(false);
+        showSuccess('Address saved successfully!');
+      } else {
+        setError(response?.message || 'Failed to update address');
+      }
+    } catch (err) {
+      console.error('Error updating address:', err);
+      setError('Failed to update address. Please try again.');
+    } finally {
+      setSavingAddress(false);
+    }
   };
 
   const rentals = cartItems.filter(item => {
@@ -723,7 +796,7 @@ const Checkout = () => {
                   </div>
                 </label>
 
-                {/* Pay Advance Option */}
+                {/* Book Now Option */}
                 <label
                   className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition ${selectedPaymentOption === 'payAdvance'
                     ? 'border-purple-500 bg-purple-50'
@@ -742,7 +815,7 @@ const Checkout = () => {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
                         <FiCreditCard className="w-5 h-5 text-purple-600" />
-                        <span className="font-semibold text-text-dark">Pay Advance (₹999)</span>
+                        <span className="font-semibold text-text-dark">Book Now (₹{advancePaymentAmount})</span>
                         <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded">
                           {advancePaymentDiscount}% OFF
                         </span>
@@ -753,43 +826,11 @@ const Checkout = () => {
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-text-light mb-2">Pay ₹999 now, remaining after installation</p>
+                    <p className="text-sm text-text-light mb-2">Pay ₹{advancePaymentAmount} now, remaining after installation</p>
                     <ul className="text-xs text-text-light space-y-1">
                       {paymentBenefits.payAdvance?.benefits.map((benefit, idx) => (
                         <li key={idx} className="flex items-start space-x-1">
                           <FiCheckCircle className="w-3 h-3 text-purple-600 mt-0.5 flex-shrink-0" />
-                          <span>{benefit}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </label>
-
-                {/* Pay Later Option */}
-                <label
-                  className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition ${selectedPaymentOption === 'payLater'
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                >
-                  <input
-                    type="radio"
-                    name="paymentOption"
-                    value="payLater"
-                    checked={selectedPaymentOption === 'payLater'}
-                    onChange={(e) => setSelectedPaymentOption(e.target.value)}
-                    className="mt-1"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <FiClock className="w-5 h-5 text-blue-600" />
-                      <span className="font-semibold text-text-dark">Pay Later</span>
-                    </div>
-                    <p className="text-sm text-text-light mb-2">Pay after service completion or on delivery</p>
-                    <ul className="text-xs text-text-light space-y-1">
-                      {paymentBenefits.payLater.benefits.map((benefit, idx) => (
-                        <li key={idx} className="flex items-start space-x-1">
-                          <FiCheckCircle className="w-3 h-3 text-blue-600 mt-0.5 flex-shrink-0" />
                           <span>{benefit}</span>
                         </li>
                       ))}
@@ -1000,7 +1041,7 @@ const Checkout = () => {
                 </div>
                 {paymentDiscount > 0 && (
                   <div className="flex justify-between text-green-600">
-                    <span>Payment Discount ({selectedPaymentOption === 'payNow' ? `${instantPaymentDiscount}% Pay Now` : `${advancePaymentDiscount}% Pay Advance`})</span>
+                    <span>Payment Discount ({selectedPaymentOption === 'payNow' ? `${instantPaymentDiscount}% Pay Now` : `${advancePaymentDiscount}% Book Now`})</span>
                     <span>-₹{roundMoney(paymentDiscount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                 )}
@@ -1014,15 +1055,15 @@ const Checkout = () => {
                   <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-3">
                     <div className="flex justify-between text-sm text-purple-800 mb-2">
                       <span>Amount to Pay Now:</span>
-                      <span className="font-bold">₹999</span>
+                      <span className="font-bold">₹{advancePaymentAmount}</span>
                     </div>
-                    {finalTotal > 999 && (
+                    {finalTotal > advancePaymentAmount && (
                       <div className="flex justify-between text-xs text-purple-600">
                         <span>Remaining (after installation):</span>
-                        <span>₹{roundMoney(finalTotal - 999).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span>₹{roundMoney(finalTotal - advancePaymentAmount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                     )}
-                    {finalTotal <= 999 && (
+                    {finalTotal <= advancePaymentAmount && (
                       <div className="text-xs text-purple-600">
                         <span className="text-green-600 font-semibold">✓ Full amount covered by advance payment</span>
                       </div>
@@ -1044,7 +1085,7 @@ const Checkout = () => {
                   </div>
                   <RazorpayPaymentCheckout
                     orderId={orderId}
-                    amount={selectedPaymentOption === 'payAdvance' ? 999 : finalTotal}
+                    amount={selectedPaymentOption === 'payAdvance' ? advancePaymentAmount : finalTotal}
                     user={user}
                     onPaymentSuccess={(paymentData) => {
                       // Payment successful - clear cart and show success
@@ -1095,9 +1136,7 @@ const Checkout = () => {
                   </button>
 
                   <p className="text-xs text-text-light text-center mt-4">
-                    {selectedPaymentOption === 'payNow' || selectedPaymentOption === 'payAdvance'
-                      ? 'You will be redirected to payment gateway after order creation'
-                      : 'You can pay after service completion or on delivery'}
+                    You will be redirected to payment gateway after order creation
                   </p>
                 </>
               )}
@@ -1126,6 +1165,139 @@ const Checkout = () => {
         confirmText="View My Orders"
         autoRedirectDelay={5000}
       />
+
+      {/* Address Modal */}
+      <AnimatePresence>
+        {showAddressModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998]"
+              onClick={() => setShowAddressModal(false)}
+            />
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 pointer-events-auto max-h-[90vh] overflow-y-auto"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-text-dark flex items-center gap-2">
+                    <FiMapPin className="w-5 h-5 text-primary-blue" />
+                    Add Delivery Address
+                  </h2>
+                  <button
+                    onClick={() => setShowAddressModal(false)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <p className="text-sm text-text-light mb-4">
+                  Please add your delivery address to continue with your rental order.
+                </p>
+
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 flex items-center space-x-2">
+                    <FiAlertCircle className="w-5 h-5 flex-shrink-0" />
+                    <span className="text-sm">{error}</span>
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-text-dark mb-2">
+                      Home Address <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      value={addressData.homeAddress}
+                      onChange={(e) => setAddressData({ ...addressData, homeAddress: e.target.value })}
+                      placeholder="Enter your complete address"
+                      rows={3}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-text-dark mb-2">
+                      Near Landmark (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={addressData.nearLandmark}
+                      onChange={(e) => setAddressData({ ...addressData, nearLandmark: e.target.value })}
+                      placeholder="e.g., Near Metro Station"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-text-dark mb-2">
+                        Pincode (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={addressData.pincode}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                          setAddressData({ ...addressData, pincode: value });
+                        }}
+                        placeholder="6 digits"
+                        maxLength={6}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-text-dark mb-2">
+                        Alternate Number (Optional)
+                      </label>
+                      <input
+                        type="tel"
+                        value={addressData.alternateNumber}
+                        onChange={(e) => {
+                          const formatted = formatPhoneNumber(e.target.value);
+                          setAddressData({ ...addressData, alternateNumber: formatted });
+                        }}
+                        placeholder="10 digits"
+                        maxLength={10}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={() => setShowAddressModal(false)}
+                    className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveAddress}
+                    disabled={savingAddress}
+                    className="flex-1 px-4 py-3 bg-primary-blue text-white rounded-lg font-semibold hover:bg-primary-blue-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  >
+                    {savingAddress ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <span>Save Address</span>
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

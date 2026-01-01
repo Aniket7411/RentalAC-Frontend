@@ -1451,7 +1451,8 @@ export const apiService = {
         success: true,
         data: {
           instantPaymentDiscount: 10, // Default 10% for Pay Now
-          advancePaymentDiscount: 5, // Default 5% for Pay Advance
+          advancePaymentDiscount: 5, // Default 5% for Book Now
+          advancePaymentAmount: 500, // Default advance payment amount
         },
       };
     }

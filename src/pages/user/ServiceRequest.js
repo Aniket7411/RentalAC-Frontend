@@ -441,7 +441,7 @@ const ServiceRequest = () => {
                   {selectedCategory ? `${selectedCategory} Services` : 'Available Services'} ({filteredServices.length})
                 </h2>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+              <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-5 xl:gap-6">
                 {filteredServices
                   .filter(service => service != null) // Filter out any null/undefined services
                   .map((service, index) => {
